@@ -1,11 +1,12 @@
 import React from 'react';
-import Header from './components/header';
+import Header from './components/header/header';
+import Clients from './components/clients/clients';
 
 function App() {
   return (
     <div className="App">
       <Header/>
-      <h1>TFW</h1>
+      <Clients/>
     </div>
   );
 }

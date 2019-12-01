@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+import {AppBar, Toolbar, Typography, Button, IconButton} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
+import { Link } from 'react-router-dom';
 
 const styles = (theme) => ({
     root: {
@@ -33,9 +30,12 @@ class Header extends Component {
                     <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" className={classes.title}>
-                        TFW Mazatlan Combat Club
-                    </Typography>
+                    <Link to="/">
+                        <Typography variant="h6" className={classes.title}>
+                            TFW Mazatlan Combat Club
+                        </Typography>
+                    </Link>
+                    <Link to="/newUser">New Client</Link>
                     <Button color="inherit">Login</Button>
                     </Toolbar>
                 </AppBar>

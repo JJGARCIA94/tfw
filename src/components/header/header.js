@@ -1,55 +1,32 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
 import { Link } from "react-router-dom";
 
-const useStyles = makeStyles({
-  root: {
-    flexGrow: 1
-  },
-  menuButton: {
-    marginRight: 0
-  },
-  title: {
-    flexGrow: 1
-  },
-  header_appbar: {
-    background: "#ffc605",
-    color: "black"
-  }
-});
-
 export default function Header() {
-  const classes = useStyles();
   return (
-    <div className={classes.root}>
-      <AppBar position="static" className={classes.header_appbar}>
-        <Toolbar className={classes.toolbarHeader}>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Link to="/">
-            <Typography variant="h6" className={classes.title}>
-              TFW Mazatlan Combat Club
-            </Typography>
-          </Link>
-          <Link to="/newUser"><Typography variant="h6">New Client</Typography></Link>
-          <Link to="/products"><Typography variant="h6">Products</Typography></Link>
-          <Button color="inherit" className={classes.loginButton}>Login</Button>
-        </Toolbar>
-      </AppBar>
-    </div>
+    
+  <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+  <Link to="/" className="navbar-brand" >TFW Mazatlan Combat Club</Link>
+  <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span className="navbar-toggler-icon"></span>
+  </button>
+
+  <div className="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul className="navbar-nav mr-auto">
+      <li className="nav-item dropdown">
+        <a className="nav-link dropdown-toggle" href="#top" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Users
+        </a>
+        <div className="dropdown-menu" aria-labelledby="navbarDropdown">
+          <Link to="/" className="dropdown-item" >See users</Link>
+          <Link to="/newUser" className="dropdown-item" >Add user</Link>
+        </div>
+      </li>
+    </ul>
+    <form className="form-inline my-2 my-lg-0">
+      <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
+      <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
   );
 }

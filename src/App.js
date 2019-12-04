@@ -7,6 +7,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { HttpLink } from 'apollo-link-http';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Products from './components/products/products';
 
 const client = new ApolloClient({
 	link: new HttpLink({
@@ -27,6 +28,7 @@ function App() {
 					<Switch>
 						<Route exact path="/" component={Users} />
 						<Route exact path="/newUser" component={NewUser} />	
+						<Route exact path="/products" component={Products} />	
 					</Switch>
 				</div>
 			</Router>

@@ -1,14 +1,43 @@
 import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { makeStyles } from "@material-ui/core/styles";
 import { useMutation } from "@apollo/react-hooks";
 import {
-  CircularProgress
+  CircularProgress,
+  Grid,
+  TextField,
+  Typography,
+  Button,
+  Card,
+  Toolbar
 } from "@material-ui/core";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { Query } from "react-apollo";
 import { GET_USER_TYPES } from "../../database/queries";
 import { ADD_USER } from "../../database/mutations";
 
+const useStyles = makeStyles(theme => ({
+  container: {
+    marginTop: theme.spacing(3)
+  },
+  root: {
+    padding: theme.spacing(3, 2)
+  },
+  textFields: {
+    width: "100%"
+  },
+  button: {
+    float: "right",
+    margin: theme.spacing(2, 0),
+    backgroundColor: "#ffc605",
+    "&:hover": {
+      backgroundColor: "#ffff00"
+    }
+  }
+}));
+
 export default function NewUser() {
+  const classes = useStyles();
   const [userState, setUserState] = useState({
     first_name: "",
     last_name: "",
@@ -18,7 +47,6 @@ export default function NewUser() {
     user_type: 0
   });
   const [errorState, setErrorState] = useState(false);
-  const [redirectState, setRedirectState] = useState(false);
   const [
     addUserMutation,
     { loading: loadingAddUserMutation, error: errorAddUserMutation }
@@ -56,11 +84,11 @@ export default function NewUser() {
       user_type
     } = userState;
     if (
-      first_name === "" ||
-      last_name === "" ||
-      address === "" ||
-      phone_number === "" ||
-      email === "" ||
+      first_name.trim() === "" ||
+      last_name.trim() === "" ||
+      address.trim() === "" ||
+      phone_number.trim() === "" ||
+      email.trim() === "" ||
       user_type === 0
     ) {
       setErrorState(true);
@@ -80,139 +108,150 @@ export default function NewUser() {
 
     if (loadingAddUserMutation) return <CircularProgress />;
     if (errorAddUserMutation) return <p>An error occurred</p>;
-    setRedirectState(true);
   };
 
   let response = errorState ? <p>All fields are requireds</p> : <p></p>;
 
   return (
-    <div className="container" style={{background: "#FFFFFF"}}>
-      {response}
-      <h2 className="text-center">Add User</h2>
-      
-        <div className="col-12 col-sm-12 col-md-6 col-xl-6">
-          <div className="form-group">
-            <label htmlFor="first_name">First Name *</label>
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              id="first_name"
-              placeholder="name@example.com"
+    <div>
+      <Card>
+        <Toolbar>
+          <Typography variant="h6">
+            Add user
+            <Link to="/users">
+              <ArrowBackIcon />
+            </Link>
+            </Typography>
+        </Toolbar>
+        <Grid container justify="center" className={classes.root}>
+          <Grid item md={5} xs={10}>
+            <TextField
+              className={classes.textFields}
+              required
+              id="outlined-required"
+              label="First Name"
+              margin="normal"
               value={userState.first_name}
               onChange={e => {
                 setUserState({
                   ...userState,
                   first_name: e.target.value
                 });
+                setErrorState(false);
               }}
             />
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-6 col-xl-6">
-          <div className="form-group">
-            <label htmlFor="last_name">Last Name *</label>
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              id="last_name"
-              placeholder="name@example.com"
+          </Grid>
+          <Grid item md={1}></Grid>
+          <Grid item md={5} xs={10}>
+            <TextField
+              className={classes.textFields}
+              required
+              id="outlined-required"
+              label="Last Name"
+              margin="normal"
               value={userState.last_name}
               onChange={e => {
                 setUserState({
                   ...userState,
                   last_name: e.target.value
                 });
+                setErrorState(false);
               }}
             />
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-8 col-xl-8">
-          <div className="form-group">
-            <label htmlFor="address">Address *</label>
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              id="address"
-              placeholder="name@example.com"
+          </Grid>
+          <Grid item md={5} xs={10}>
+            <TextField
+              className={classes.textFields}
+              required
+              id="outlined-required"
+              label="Address"
+              margin="normal"
               value={userState.address}
               onChange={e => {
                 setUserState({
                   ...userState,
                   address: e.target.value
                 });
+                setErrorState(false);
               }}
             />
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-8 col-xl-8">
-          <div className="form-group">
-            <label htmlFor="phone_number">Phone number *</label>
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              id="phone_number"
-              placeholder="name@example.com"
+          </Grid>
+          <Grid item md={1}></Grid>
+          <Grid item md={5} xs={10}>
+            <TextField
+              className={classes.textFields}
+              required
+              id="outlined-required"
+              label="Phone number"
+              margin="normal"
               value={userState.phone_number}
               onChange={e => {
                 setUserState({
                   ...userState,
                   phone_number: e.target.value
                 });
+                setErrorState(false);
               }}
             />
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-8 col-xl-8">
-          <div className="form-group">
-            <label htmlFor="email">Email *</label>
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              id="email"
-              placeholder="name@example.com"
+          </Grid>
+          <Grid item md={5} xs={10}>
+            <TextField
+              className={classes.textFields}
+              required
+              id="outlined-required"
+              label="Email"
+              margin="normal"
               value={userState.email}
               onChange={e => {
                 setUserState({
                   ...userState,
                   email: e.target.value
                 });
+                setErrorState(false);
               }}
             />
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-8 col-xl-8">
-          <div className="form-group">
-            <label htmlFor="user_type">User Type *</label>
-            <select
-              id="user_type"
-              className="form-control form-control-lg"
+          </Grid>
+          <Grid item md={1}></Grid>
+          <Grid item md={5} xs={10}>
+            <TextField
+              select
+              label="User Type"
+              className={classes.textFields}
+              SelectProps={{
+                native: true
+              }}
+              margin="normal"
               value={userState.user_type}
               onChange={e => {
                 setUserState({
                   ...userState,
                   user_type: e.target.value
                 });
+                setErrorState(false);
               }}
             >
               <option value="0">Select a user type</option>
               {getUserTypes()}
-            </select>
-          </div>
-        </div>
-        <div className="col-12 col-sm-12 col-md-8 col-xl-8">
-        <div className="form-group">
-          <button
-            className="btn btn-primary btn-lg"
-            style={{ float: "right" }}
-            onClick={() => {
-              addUser();
-            }}
-          >
-            Save
-          </button>
-          </div>
-        </div>
-      {redirectState ? <Redirect to="/" /> : null}
+            </TextField>
+          </Grid>
+          <Grid item xs={10} md={11} xl={11}>
+            <Button
+              variant="contained"
+              className={classes.button}
+              onClick={() => {
+                addUser();
+              }}
+            >
+              Save
+            </Button>
+          </Grid>
+          <Grid item xs={10}>
+            <Typography variant="h4" className={classes.tittle}>
+              {response}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Card>
     </div>
   );
 }

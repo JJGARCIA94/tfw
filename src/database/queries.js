@@ -10,18 +10,23 @@ export const GET_USER_TYPES = gql`
 `;
 
 export const GET_USERS = gql`
-    query get_users {
-        users_data {
-            id
-            first_name
-            last_name
-            email
-            adress
-            phone_number
-            R_user_type{
-            id
-            name
-            }
-        }
+    query get_users($search: String) {
+  users_data(where: {
+    _or: [
+      {first_name: {_ilike: $search}},
+      {last_name: {_ilike: $search}}
+    ]
+  }) {
+    id
+    first_name
+    last_name
+    email
+    address
+    phone_number
+    R_user_type {
+      id
+      name
     }
+  }
+}
 `;

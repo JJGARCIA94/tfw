@@ -5,7 +5,7 @@ mutation add_client($first_name: String!, $last_name: String!, $address: String!
     insert_users_data(objects: {
       first_name: $first_name
       last_name: $last_name
-      adress: $address
+      address: $address
       phone_number: $phone_number
       email: $email
       user_type: $user_type

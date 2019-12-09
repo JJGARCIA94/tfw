@@ -11,6 +11,7 @@
     "apollo-link-http": "^1.5.16",
     "graphql-tag": "^2.10.1",
     "graphqurl": "^0.3.3",
+    "mui-layout": "^1.2.9",
     "node-sass": "^4.13.0",
     "react": "^16.11.0",
     "react-apollo": "^3.1.3",

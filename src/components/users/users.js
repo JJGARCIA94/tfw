@@ -159,6 +159,7 @@ export default function Users() {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("id");
   const [page, setPage] = useState(0);
+  const [handlePage, setHandlePage] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
   const { loading: usersLoading, data: usersData } = useQuery(GET_USERS, {
@@ -170,6 +171,9 @@ export default function Users() {
     return <CircularProgress />;
   } else {
     rows = [];
+    if(page !== 0 && !handlePage){
+      setPage(0);
+    }
     usersData.users_data.map((user, index) => {
       return rows.push({
         id: user.id,
@@ -189,6 +193,7 @@ export default function Users() {
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+    setHandlePage(true);
   };
 
   const handleChangeRowsPerPage = event => {
@@ -217,6 +222,7 @@ export default function Users() {
           <SearchInput
             setSearch={setSearch}
             search={search}
+            setHandle={setHandlePage}
             label="Search by name"
           />
         </Toolbar>

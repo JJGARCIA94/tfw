@@ -2,18 +2,21 @@ import React, { useEffect } from "react";
 import { TextField } from "@material-ui/core";
 
 export default function SearchInput(props) {
+  const { label, search, setSearch, setHandle } = props;
+  
   useEffect(() => {
     document.getElementById("textFieldSearch").focus();
   });
 
   return (
     <TextField
-      label={props.label}
+      label={label}
       margin="normal"
       id="textFieldSearch"
-      value={props.search}
+      value={search}
       onChange={e => {
-        props.setSearch(e.target.value);
+        setSearch(e.target.value);
+        setHandle(false);
       }}
     />
   );

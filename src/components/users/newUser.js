@@ -9,7 +9,8 @@ import {
   Typography,
   Button,
   Card,
-  Toolbar
+  Toolbar,
+  Snackbar
 } from "@material-ui/core";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { Query } from "react-apollo";
@@ -46,11 +47,22 @@ export default function NewUser() {
     email: "",
     user_type: 0
   });
-  const [errorState, setErrorState] = useState(false);
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    vertical: 'bottom',
+    horizontal: 'right',
+    text: '',
+    color: ''
+  });
+  const { vertical, horizontal, open, text, color } = snackbarState;
   const [
     addUserMutation,
     { loading: loadingAddUserMutation, error: errorAddUserMutation }
   ] = useMutation(ADD_USER);
+
+  const handleClose = () => {
+    setSnackbarState({ ...snackbarState, open: false });
+  };
 
   const getUserTypes = () => {
     return (
@@ -91,7 +103,12 @@ export default function NewUser() {
       email.trim() === "" ||
       user_type === 0
     ) {
-      setErrorState(true);
+      setSnackbarState({
+        ...snackbarState,
+        open: true,
+        text: 'All fields are requireds',
+        color: '#d32f2f'
+      })
       return;
     }
 
@@ -107,10 +124,32 @@ export default function NewUser() {
     });
 
     if (loadingAddUserMutation) return <CircularProgress />;
-    if (errorAddUserMutation) return <p>An error occurred</p>;
-  };
+    if (errorAddUserMutation){
+      setSnackbarState({
+        ...snackbarState,
+        open: true,
+        text: 'An error occurred',
+        color: '#d32f2f'
+      });
+      return;
+    }
+    
+    setUserState({
+      first_name: '',
+      last_name: '',
+      address: '',
+      phone_number: '',
+      email: '',
+      user_type: 0
+    });
 
-  let response = errorState ? <p>All fields are requireds</p> : <p></p>;
+    setSnackbarState({
+      ...snackbarState,
+      open: true,
+      text: 'User added',
+      color: '#43a047'
+    });
+  };
 
   return (
     <div>
@@ -137,7 +176,6 @@ export default function NewUser() {
                   ...userState,
                   first_name: e.target.value
                 });
-                setErrorState(false);
               }}
             />
           </Grid>
@@ -155,7 +193,6 @@ export default function NewUser() {
                   ...userState,
                   last_name: e.target.value
                 });
-                setErrorState(false);
               }}
             />
           </Grid>
@@ -172,7 +209,6 @@ export default function NewUser() {
                   ...userState,
                   address: e.target.value
                 });
-                setErrorState(false);
               }}
             />
           </Grid>
@@ -190,7 +226,6 @@ export default function NewUser() {
                   ...userState,
                   phone_number: e.target.value
                 });
-                setErrorState(false);
               }}
             />
           </Grid>
@@ -207,7 +242,6 @@ export default function NewUser() {
                   ...userState,
                   email: e.target.value
                 });
-                setErrorState(false);
               }}
             />
           </Grid>
@@ -227,7 +261,6 @@ export default function NewUser() {
                   ...userState,
                   user_type: e.target.value
                 });
-                setErrorState(false);
               }}
             >
               <option value="0">Select a user type</option>
@@ -245,13 +278,19 @@ export default function NewUser() {
               Save
             </Button>
           </Grid>
-          <Grid item xs={10}>
-            <Typography variant="h4" className={classes.tittle}>
-              {response}
-            </Typography>
-          </Grid>
         </Grid>
       </Card>
+      <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
+        key={`${vertical},${horizontal}`}
+        open={open}
+        onClose={handleClose}
+        ContentProps={{
+          'aria-describedby': 'message-id',
+          style:{background: color}
+        }}
+        message={<span id="message-id">{text}</span>}
+      />
     </div>
   );
 }

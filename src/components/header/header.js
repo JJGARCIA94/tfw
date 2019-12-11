@@ -16,13 +16,16 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import {
     Home as HomeIcon,
-    Group as GroupIcon
+    Group as GroupIcon,
+    SportsKabaddi as SportsKabaddiIcon
   } from "@material-ui/icons";
 import TFWLogo from "../../assets/images/logo.png";
 import Home from '../home/home';
 import Users from '../users/users';
 import NewUser from '../users/newUser';
+import Lessons from '../lessons/lessons';
 import Products from '../products/products';
+import User from '../users/user';
 
 const drawerWidth = 240;
 
@@ -62,12 +65,19 @@ const useStyles = makeStyles(theme => ({
   },
   navLink: {
       textDecoration: "none",
-      color: "#000000"
+      color: "#000000",
+      '&:hover':{
+        textDecoration: "none",
+        color: "#000000"
+      }
   },
   logo: {
     width: "100%", 
-    height: "150px",
+    height: "200px",
     padding: "10px"
+  },
+  icons: {
+    color: "black"
   }
 }));
 
@@ -89,7 +99,7 @@ export default function Header() {
       <NavLink to="/" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
-            <HomeIcon />
+            <HomeIcon className={classes.icons} />
           </ListItemIcon>
           <ListItemText primary="Home"></ListItemText>
         </ListItem>
@@ -97,9 +107,17 @@ export default function Header() {
       <NavLink to="/users" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
-            <GroupIcon />
+            <GroupIcon className={classes.icons} />
           </ListItemIcon>
           <ListItemText primary="Users" />
+        </ListItem>
+      </NavLink>
+      <NavLink to="/lessons" className={classes.navLink}>
+        <ListItem button>
+          <ListItemIcon>
+            <SportsKabaddiIcon className={classes.icons} />
+          </ListItemIcon>
+          <ListItemText primary="Classes" />
         </ListItem>
       </NavLink>
       </List>
@@ -160,7 +178,9 @@ export default function Header() {
         <Switch>
             <Route exact path="/" component={Home} />
             <Route exact path="/users" component={Users} />
-            <Route exact path="/newUser" component={NewUser} />	
+            <Route exact path="/newUser" component={NewUser} />
+            <Route exact path="/user/:userId" component={User} />	
+            <Route exact path="/lessons" component={Lessons} />
             <Route exact path="/products" component={Products} />	
         </Switch>
       </main>

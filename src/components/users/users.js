@@ -13,9 +13,15 @@ import {
   Toolbar,
   Typography,
   Paper,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from "@material-ui/core";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
+import {
+  AddCircle as AddCircleIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  RestoreFromTrash as RestoreFromTrashIcon
+} from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
 import { useQuery } from "@apollo/react-hooks";
 import { GET_USERS } from "../../database/queries";
@@ -58,7 +64,13 @@ const headCells = [
     label: "Phone number"
   },
   { id: "email", numeric: false, disablePadding: false, label: "Email" },
-  { id: "user_type", numeric: false, disablePadding: false, label: "User type" }
+  {
+    id: "user_type",
+    numeric: false,
+    disablePadding: false,
+    label: "User type"
+  },
+  { id: "actions", numeric: false, disablePadding: false, label: "Actions" }
 ];
 
 function EnhancedTableHead(props) {
@@ -150,6 +162,9 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     top: 20,
     width: 1
+  },
+  icons: {
+    color: "black"
   }
 }));
 
@@ -171,7 +186,7 @@ export default function Users() {
     return <CircularProgress />;
   } else {
     rows = [];
-    if(page !== 0 && !handlePage){
+    if (page !== 0 && !handlePage) {
       setPage(0);
     }
     usersData.users_data.map((user, index) => {
@@ -181,7 +196,8 @@ export default function Users() {
         address: user.address,
         phone_number: user.phone_number,
         email: user.email,
-        user_type: user.R_user_type.name
+        user_type: user.R_user_type.name,
+        status: user.status
       });
     });
   }
@@ -261,6 +277,20 @@ export default function Users() {
                       <TableCell align="left">{row.phone_number}</TableCell>
                       <TableCell align="left">{row.email}</TableCell>
                       <TableCell align="left">{row.user_type}</TableCell>
+                      <TableCell align="left">
+                        <Link to={"/user/"+row.id}>
+                          <IconButton>
+                            <VisibilityIcon className={classes.icons} />
+                          </IconButton>
+                        </Link>
+                        <IconButton>
+                          {row.status === 1 ? (
+                            <DeleteIcon className={classes.icons} />
+                          ) : (
+                            <RestoreFromTrashIcon className={classes.icons} />
+                          )}
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   );
                 })}

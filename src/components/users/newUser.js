@@ -151,6 +151,35 @@ export default function NewUser() {
     });
   };
 
+  const keyValidation = (e, tipo)=> {
+		const key = e.keyCode || e.which;
+		const teclado = String.fromCharCode(key).toLowerCase();
+		const letras = 'áéíóúüabcdefghijklmnñopqrstuvwxyz';
+		const numeros = '0123456789';
+    const otros = ' ';
+    const especiales = '@-_.';
+		const validos = tipo === 1 ? letras + otros : tipo === 2 ? numeros : tipo === 3 ? letras + numeros + otros : letras + numeros + otros + especiales;
+		if (validos.indexOf(teclado) === -1) {
+			e.preventDefault();
+		}
+  }
+  
+  const pasteValidation = (e, tipo) => {
+		const value = e.target.value;
+		const letras = 'áéíóúüabcdefghijklmnñopqrstuvwxyz';
+		const numeros = '0123456789';
+    const otros = ' ';
+    const especiales = '@-_.';
+		const validos = tipo === 1 ? letras + otros : tipo === 2 ? numeros : tipo === 3 ? letras + numeros + otros : letras + numeros + otros + especiales;
+		let aprovadas = '';
+		for (let x = 0; x < value.length; x++) {
+			if (validos.indexOf(value[x].toLowerCase()) !== -1) {
+				aprovadas += value[x];
+			}
+		}
+		document.getElementById([ e.target.id ]).value = aprovadas;
+	}
+
   return (
     <div>
       <Card>
@@ -171,7 +200,14 @@ export default function NewUser() {
               label="First Name"
               margin="normal"
               value={userState.first_name}
+              inputProps={{
+                maxLength: 30
+              }}
+              onKeyPress={e => {
+                keyValidation(e,1);
+              }}
               onChange={e => {
+                pasteValidation(e,1);
                 setUserState({
                   ...userState,
                   first_name: e.target.value
@@ -188,7 +224,14 @@ export default function NewUser() {
               label="Last Name"
               margin="normal"
               value={userState.last_name}
+              inputProps={{
+                maxLength: 30
+              }}
+              onKeyPress={e => {
+                keyValidation(e,1);
+              }}
               onChange={e => {
+                pasteValidation(e,1);
                 setUserState({
                   ...userState,
                   last_name: e.target.value
@@ -204,7 +247,14 @@ export default function NewUser() {
               label="Address"
               margin="normal"
               value={userState.address}
+              inputProps={{
+                maxLength: 50
+              }}
+              onKeyPress={e => {
+                keyValidation(e,3);
+              }}
               onChange={e => {
+                pasteValidation(e,3);
                 setUserState({
                   ...userState,
                   address: e.target.value
@@ -221,7 +271,14 @@ export default function NewUser() {
               label="Phone number"
               margin="normal"
               value={userState.phone_number}
+              inputProps={{
+                maxLength: 15
+              }}
+              onKeyPress={e => {
+                keyValidation(e,2);
+              }}
               onChange={e => {
+                pasteValidation(e,2);
                 setUserState({
                   ...userState,
                   phone_number: e.target.value
@@ -237,7 +294,14 @@ export default function NewUser() {
               label="Email"
               margin="normal"
               value={userState.email}
+              inputProps={{
+                maxLength: 50
+              }}
+              onKeyPress={e => {
+                keyValidation(e,4);
+              }}
               onChange={e => {
+                pasteValidation(e,4);
                 setUserState({
                   ...userState,
                   email: e.target.value

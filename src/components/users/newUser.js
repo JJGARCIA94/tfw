@@ -48,20 +48,20 @@ export default function NewUser() {
     user_type: 0
   });
   const [snackbarState, setSnackbarState] = useState({
-    open: false,
+    openSnackbar: false,
     vertical: 'bottom',
     horizontal: 'right',
-    text: '',
-    color: ''
+    snackBarText: '',
+    snackbarColor: ''
   });
-  const { vertical, horizontal, open, text, color } = snackbarState;
+  const { vertical, horizontal, openSnackbar, snackBarText, snackbarColor } = snackbarState;
   const [
     addUserMutation,
     { loading: loadingAddUserMutation, error: errorAddUserMutation }
   ] = useMutation(ADD_USER);
 
   const handleClose = () => {
-    setSnackbarState({ ...snackbarState, open: false });
+    setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
 
   const getUserTypes = () => {
@@ -105,9 +105,9 @@ export default function NewUser() {
     ) {
       setSnackbarState({
         ...snackbarState,
-        open: true,
-        text: 'All fields are requireds',
-        color: '#d32f2f'
+        openSnackbar: true,
+        snackBarText: 'All fields are requireds',
+        snackbarColor: '#d32f2f'
       })
       return;
     }
@@ -127,9 +127,9 @@ export default function NewUser() {
     if (errorAddUserMutation){
       setSnackbarState({
         ...snackbarState,
-        open: true,
-        text: 'An error occurred',
-        color: '#d32f2f'
+        openSnackbar: true,
+        snackBarText: 'An error occurred',
+        snackbarColor: '#d32f2f'
       });
       return;
     }
@@ -145,9 +145,9 @@ export default function NewUser() {
 
     setSnackbarState({
       ...snackbarState,
-      open: true,
-      text: 'User added',
-      color: '#43a047'
+      openSnackbar: true,
+      snackBarText: 'User added',
+      snackbarColor: '#43a047'
     });
   };
 
@@ -347,13 +347,13 @@ export default function NewUser() {
       <Snackbar
         anchorOrigin={{ vertical, horizontal }}
         key={`${vertical},${horizontal}`}
-        open={open}
+        open={openSnackbar}
         onClose={handleClose}
         ContentProps={{
           'aria-describedby': 'message-id',
-          style:{background: color}
+          style:{background: snackbarColor}
         }}
-        message={<span id="message-id">{text}</span>}
+        message={<span id="message-id">{snackBarText}</span>}
       />
     </div>
   );

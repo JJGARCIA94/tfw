@@ -10,7 +10,7 @@ export const GET_USER_TYPES = gql`
 `;
 
 export const GET_USERS = gql`
-    query get_users($search: String) {
+    subscription get_users($search: String) {
   users_data(where: {
     _or: [
       {first_name: {_ilike: $search}},

@@ -14,7 +14,14 @@ import {
   Typography,
   Paper,
   CircularProgress,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  Snackbar
 } from "@material-ui/core";
 import {
   AddCircle as AddCircleIcon,
@@ -23,8 +30,9 @@ import {
   RestoreFromTrash as RestoreFromTrashIcon
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
-import { useQuery } from "@apollo/react-hooks";
+import { useSubscription, useMutation } from "@apollo/react-hooks";
 import { GET_USERS } from "../../database/queries";
+import { UPDATE_USER_STATUS } from "../../database/mutations";
 
 let rows = [];
 
@@ -177,7 +185,39 @@ export default function Users() {
   const [handlePage, setHandlePage] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
-  const { loading: usersLoading, data: usersData } = useQuery(GET_USERS, {
+  const [dialog, setDialog] = useState({
+    openDialog: false,
+    tittleDialog: "",
+    textDialog: "",
+    idDialog: 0,
+    statusDialog: 0
+  });
+  const [snackbarState, setSnackbarState] = useState({
+    openSnackBar: false,
+    vertical: "bottom",
+    horizontal: "right",
+    snackbarText: "",
+    snackbarColor: ""
+  });
+  const {
+    openDialog,
+    tittleDialog,
+    textDialog,
+    idDialog,
+    statusDialog
+  } = dialog;
+  const {
+    vertical,
+    horizontal,
+    openSnackBar,
+    snackbarText,
+    snackbarColor
+  } = snackbarState;
+  const [
+    updateUserStatusMutation,
+    { loading: loadingUpdateUserStatus, error: errorUpdateUserStatus }
+  ] = useMutation(UPDATE_USER_STATUS);
+  const { loading: usersLoading, data: usersData } = useSubscription(GET_USERS, {
     variables: {
       search: `%${search}%`
     }
@@ -217,6 +257,64 @@ export default function Users() {
     setPage(0);
   };
 
+  const handleOpenDialog = (idUsuario, newStatus) => {
+    setDialog({
+      openDialog: true,
+      tittleDialog:
+        newStatus === 0
+          ? "Do you want to delete this user?"
+          : "Do you want to restore this user?",
+      textDialog:
+        newStatus === 0
+          ? "Once deleted, this user will not be able to enter the platform."
+          : "Once restored, this user will be able to enter the platform.",
+      idDialog: idUsuario,
+      statusDialog: newStatus
+    });
+  };
+
+  const handleCloseDialog = agree => {
+    if (agree) {
+      updateUserStatusMutation({
+        variables: {
+          id: idDialog,
+          newStatus: statusDialog
+        }
+      });
+      if (loadingUpdateUserStatus) return <CircularProgress />;
+      if (errorUpdateUserStatus) {
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText: "An error occurred",
+          snackbarColor: "#d32f2f"
+        });
+        return;
+      }
+      setSnackbarState({
+        ...snackbarState,
+        openSnackBar: true,
+        snackbarText: statusDialog === 1 ? "User restored" : "User deleted",
+        snackbarColor: "#43a047"
+      });
+    }
+    setDialog({
+      openDialog: false,
+      tittleDialog: "",
+      textDialog: "",
+      idDialog: 0,
+      statusDialog: 0
+    });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarState({
+      ...snackbarState,
+      openSnackBar: false,
+      snackbarText: '',
+      snackbarColor: ''
+    });
+  };
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -278,12 +376,17 @@ export default function Users() {
                       <TableCell align="left">{row.email}</TableCell>
                       <TableCell align="left">{row.user_type}</TableCell>
                       <TableCell align="left">
-                        <Link to={"/user/"+row.id}>
+                        <Link to={"/user/" + row.id}>
                           <IconButton>
                             <VisibilityIcon className={classes.icons} />
                           </IconButton>
                         </Link>
-                        <IconButton>
+                        <IconButton
+                          onClick={() => {
+                            const newStatus = row.status === 1 ? 0 : 1;
+                            handleOpenDialog(row.id, newStatus);
+                          }}
+                        >
                           {row.status === 1 ? (
                             <DeleteIcon className={classes.icons} />
                           ) : (
@@ -312,6 +415,49 @@ export default function Users() {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{tittleDialog}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {textDialog}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleCloseDialog(false);
+            }}
+            color="primary"
+          >
+            Disagree
+          </Button>
+          <Button
+            onClick={() => {
+              handleCloseDialog(true);
+            }}
+            color="primary"
+            autoFocus
+          >
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
+        key={`${vertical},${horizontal}`}
+        open={openSnackBar}
+        onClose={handleCloseSnackbar}
+        ContentProps={{
+          "aria-describedby": "message-id",
+          style: { background: snackbarColor }
+        }}
+        message={<span id="message-id">{snackbarText}</span>}
+      />
     </div>
   );
 }

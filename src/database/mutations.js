@@ -14,3 +14,13 @@ mutation add_client($first_name: String!, $last_name: String!, $address: String!
     }
   }
 `;
+
+export const UPDATE_USER_STATUS = gql`
+mutation update_user_status($id: Int!, $newStatus: Int!){
+  update_users_data(where: {id: {_eq: $id}}, _set: {
+    status: $newStatus
+  }){
+    affected_rows
+  }
+}
+`;

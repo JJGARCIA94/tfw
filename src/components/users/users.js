@@ -27,11 +27,12 @@ import {
   AddCircle as AddCircleIcon,
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
-  RestoreFromTrash as RestoreFromTrashIcon
+  RestoreFromTrash as RestoreFromTrashIcon,
+  EventAvailable as EventAvailableIcon
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_USERS } from "../../database/queries";
+import { GET_USERS_BY_NAME } from "../../database/queries";
 import { UPDATE_USER_STATUS } from "../../database/mutations";
 
 let rows = [];
@@ -217,7 +218,7 @@ export default function Users() {
     updateUserStatusMutation,
     { loading: loadingUpdateUserStatus, error: errorUpdateUserStatus }
   ] = useMutation(UPDATE_USER_STATUS);
-  const { loading: usersLoading, data: usersData } = useSubscription(GET_USERS, {
+  const { loading: usersLoading, data: usersData } = useSubscription(GET_USERS_BY_NAME, {
     variables: {
       search: `%${search}%`
     }
@@ -237,6 +238,7 @@ export default function Users() {
         phone_number: user.phone_number,
         email: user.email,
         user_type: user.R_user_type.name,
+        user_type_id: user.R_user_type.id,
         status: user.status
       });
     });
@@ -377,11 +379,12 @@ export default function Users() {
                       <TableCell align="left">{row.user_type}</TableCell>
                       <TableCell align="left">
                         <Link to={"/user/" + row.id}>
-                          <IconButton>
+                          <IconButton title="See user">
                             <VisibilityIcon className={classes.icons} />
                           </IconButton>
                         </Link>
                         <IconButton
+                        title={row.status === 1 ? "Delete user" : "Restore user"}
                           onClick={() => {
                             const newStatus = row.status === 1 ? 0 : 1;
                             handleOpenDialog(row.id, newStatus);
@@ -393,6 +396,11 @@ export default function Users() {
                             <RestoreFromTrashIcon className={classes.icons} />
                           )}
                         </IconButton>
+                        {row.user_type_id === 2 ? <Link to={"/assists/" + row.id}>
+                          <IconButton title="Check assists">
+                            <EventAvailableIcon className={classes.icons} />
+                          </IconButton>
+                        </Link> : null }
                       </TableCell>
                     </TableRow>
                   );

@@ -1,0 +1,6 @@
+@import '~@fullcalendar/core/main.css';
+@import '~@fullcalendar/daygrid/main.css';
+
+.fc-today {
+    background: #ffc605 !important;
+}

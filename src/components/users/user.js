@@ -16,6 +16,7 @@ import { useQuery, useMutation } from "@apollo/react-hooks";
 import { Query } from "react-apollo";
 import { GET_USER_BY_ID, GET_USER_TYPES } from "../../database/queries";
 import { UPDATE_USER } from "../../database/mutations";
+import NotFound from "../notFound/notFound";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -74,20 +75,20 @@ export default function User(props) {
   });
   const [
     updateUserMutation,
-    { loading: loadingUpdateUserMutation, error: errorUpdateUserMutation }
+    { loading: updateUserMutationLoading, error: updateUserMutationError }
   ] = useMutation(UPDATE_USER);
 
   if (userLoading) {
     return <CircularProgress />;
   }
-  if(userError) {
-    setSnackbarState({
+  if(userError || !userData.users_data.length) {
+    /*setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
       snackBarText: "An error occurred",
       snackbarColor: "#d32f2f"
-    });
-    return;
+    });*/
+    return <NotFound />;
   }
 
   const getData = userData => {
@@ -123,7 +124,7 @@ export default function User(props) {
             ));
           } else {
             return (
-              <option value="0">No hay tipos de usuarios para mostrar</option>
+              <option value="0">There are no user types to display</option>
             );
           }
         }}
@@ -170,8 +171,8 @@ export default function User(props) {
       }
     });
 
-    if (loadingUpdateUserMutation) return <CircularProgress />;
-    if (errorUpdateUserMutation) {
+    if (updateUserMutationLoading) return <CircularProgress />;
+    if (updateUserMutationError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,

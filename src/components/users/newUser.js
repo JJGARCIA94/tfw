@@ -18,9 +18,6 @@ import { GET_USER_TYPES } from "../../database/queries";
 import { ADD_USER } from "../../database/mutations";
 
 const useStyles = makeStyles(theme => ({
-  container: {
-    marginTop: theme.spacing(3)
-  },
   root: {
     padding: theme.spacing(3, 2)
   },
@@ -57,10 +54,10 @@ export default function NewUser() {
   const { vertical, horizontal, openSnackbar, snackBarText, snackbarColor } = snackbarState;
   const [
     addUserMutation,
-    { loading: loadingAddUserMutation, error: errorAddUserMutation }
+    { loading: addUserMutationLoading, error: addUserMutationError }
   ] = useMutation(ADD_USER);
 
-  const handleClose = () => {
+  const handleCloseSnackbar = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
 
@@ -78,7 +75,7 @@ export default function NewUser() {
             ));
           } else {
             return (
-              <option value="0">No hay tipos de usuarios para mostrar</option>
+              <option value="0">There are no user types to display</option>
             );
           }
         }}
@@ -123,8 +120,8 @@ export default function NewUser() {
       }
     });
 
-    if (loadingAddUserMutation) return <CircularProgress />;
-    if (errorAddUserMutation){
+    if (addUserMutationLoading) return <CircularProgress />;
+    if (addUserMutationError){
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -196,7 +193,7 @@ export default function NewUser() {
             <TextField
               className={classes.textFields}
               required
-              id="outlined-required"
+              id="first_name"
               label="First Name"
               margin="normal"
               value={userState.first_name}
@@ -220,7 +217,7 @@ export default function NewUser() {
             <TextField
               className={classes.textFields}
               required
-              id="outlined-required"
+              id="last_name"
               label="Last Name"
               margin="normal"
               value={userState.last_name}
@@ -243,7 +240,7 @@ export default function NewUser() {
             <TextField
               className={classes.textFields}
               required
-              id="outlined-required"
+              id="address"
               label="Address"
               margin="normal"
               value={userState.address}
@@ -267,7 +264,7 @@ export default function NewUser() {
             <TextField
               className={classes.textFields}
               required
-              id="outlined-required"
+              id="phone_number"
               label="Phone number"
               margin="normal"
               value={userState.phone_number}
@@ -290,7 +287,7 @@ export default function NewUser() {
             <TextField
               className={classes.textFields}
               required
-              id="outlined-required"
+              id="email"
               label="Email"
               margin="normal"
               value={userState.email}
@@ -331,7 +328,7 @@ export default function NewUser() {
               {getUserTypes()}
             </TextField>
           </Grid>
-          <Grid item xs={10} md={11} xl={11}>
+          <Grid item xs={10} md={11}>
             <Button
               variant="contained"
               className={classes.button}
@@ -348,7 +345,7 @@ export default function NewUser() {
         anchorOrigin={{ vertical, horizontal }}
         key={`${vertical},${horizontal}`}
         open={openSnackbar}
-        onClose={handleClose}
+        onClose={handleCloseSnackbar}
         ContentProps={{
           'aria-describedby': 'message-id',
           style:{background: snackbarColor}

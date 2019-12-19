@@ -72,3 +72,13 @@ export const UPDATE_USER_STATUS = gql`
     }
   }
 `;
+
+export const ADD_CLASS = gql`
+  mutation add_class($name: String!, $description: String!, $idCoach: Int!) {
+    insert_classes(
+      objects: { name: $name, description: $description, user_id: $idCoach }
+    ) {
+      affected_rows
+    }
+  }
+`;

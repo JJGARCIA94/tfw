@@ -27,6 +27,8 @@ import Lessons from '../lessons/lessons';
 import Products from '../products/products';
 import User from '../users/user';
 import Assists from '../assists/assists';
+import NotFound from '../notFound/notFound';
+import NewLesson from '../lessons/newLesson';
 
 const drawerWidth = 240;
 
@@ -182,8 +184,10 @@ export default function Header() {
             <Route exact path="/newUser" component={NewUser} />
             <Route exact path="/user/:userId" component={User} />	
             <Route exact path="/lessons" component={Lessons} />
+            <Route exact path="/newLesson" component={NewLesson} />
             <Route exact path="/assists/:userId" component={Assists} />
             <Route exact path="/products" component={Products} />	
+            <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>
     </div>

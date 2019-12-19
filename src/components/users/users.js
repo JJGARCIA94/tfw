@@ -216,13 +216,16 @@ export default function Users() {
   } = snackbarState;
   const [
     updateUserStatusMutation,
-    { loading: loadingUpdateUserStatus, error: errorUpdateUserStatus }
+    { loading: updateUserStatusLoading, error: updateUserStatusError }
   ] = useMutation(UPDATE_USER_STATUS);
-  const { loading: usersLoading, data: usersData } = useSubscription(GET_USERS_BY_NAME, {
-    variables: {
-      search: `%${search}%`
+  const { loading: usersLoading, data: usersData } = useSubscription(
+    GET_USERS_BY_NAME,
+    {
+      variables: {
+        search: `%${search}%`
+      }
     }
-  });
+  );
   if (usersLoading) {
     return <CircularProgress />;
   } else {
@@ -283,8 +286,8 @@ export default function Users() {
           newStatus: statusDialog
         }
       });
-      if (loadingUpdateUserStatus) return <CircularProgress />;
-      if (errorUpdateUserStatus) {
+      if (updateUserStatusLoading) return <CircularProgress />;
+      if (updateUserStatusError) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
@@ -313,8 +316,8 @@ export default function Users() {
     setSnackbarState({
       ...snackbarState,
       openSnackBar: false,
-      snackbarText: '',
-      snackbarColor: ''
+      snackbarText: "",
+      snackbarColor: ""
     });
   };
   const emptyRows =
@@ -348,6 +351,7 @@ export default function Users() {
             aria-labelledby="tableTitle"
             size={"medium"}
             aria-label="enhanced table"
+            style={{ overflowX: "scroll" }}
           >
             <EnhancedTableHead
               classes={classes}
@@ -384,7 +388,9 @@ export default function Users() {
                           </IconButton>
                         </Link>
                         <IconButton
-                        title={row.status === 1 ? "Delete user" : "Restore user"}
+                          title={
+                            row.status === 1 ? "Delete user" : "Restore user"
+                          }
                           onClick={() => {
                             const newStatus = row.status === 1 ? 0 : 1;
                             handleOpenDialog(row.id, newStatus);
@@ -396,11 +402,13 @@ export default function Users() {
                             <RestoreFromTrashIcon className={classes.icons} />
                           )}
                         </IconButton>
-                        {row.user_type_id === 2 ? <Link to={"/assists/" + row.id}>
-                          <IconButton title="Check assists">
-                            <EventAvailableIcon className={classes.icons} />
-                          </IconButton>
-                        </Link> : null }
+                        {row.user_type_id === 2 ? (
+                          <Link to={"/assists/" + row.id}>
+                            <IconButton title="Check assists">
+                              <EventAvailableIcon className={classes.icons} />
+                            </IconButton>
+                          </Link>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   );
@@ -425,7 +433,9 @@ export default function Users() {
       </Paper>
       <Dialog
         open={openDialog}
-        onClose={handleCloseDialog}
+        onClose={() => {
+          handleCloseDialog(false);
+        }}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >

@@ -73,19 +73,55 @@ export const GET_USER_BY_ID = gql`
 
 export const GET_ASSISTS_BY_USER = gql`
   query get_assists_by_user($userId: Int!) {
-    users_data(where: {id: {_eq: $userId}}) {
-    first_name
-    last_name
-    user_type
-    R_user_assists_aggregate{
-      aggregate{
-        count
-      }
-      nodes{
-        id
-      entry
+    users_data(where: { id: { _eq: $userId } }) {
+      first_name
+      last_name
+      user_type
+      R_user_assists_aggregate {
+        aggregate {
+          count
+        }
+        nodes {
+          id
+          entry
+        }
       }
     }
   }
-}
+`;
+
+export const GET_CLASSES = gql`
+  query get_classes {
+    classes {
+      id
+      name
+      description
+      status
+      R_users_data {
+        id
+        first_name
+        last_name
+        address
+        phone_number
+        email
+        R_user_type {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+export const GET_COACHES = gql`
+  query get_coaches {
+    users_data(where: { user_type: { _eq: 3 }, _and: { status: { _eq: 1 } } }) {
+      id
+      first_name
+      last_name
+      address
+      phone_number
+      email
+    }
+  }
 `;

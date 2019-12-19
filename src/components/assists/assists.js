@@ -18,13 +18,11 @@ import {
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useQuery } from "@apollo/react-hooks";
 import { GET_ASSISTS_BY_USER } from "../../database/queries";
+import NotFound from "../notFound/notFound";
 
 import "../../assets/css/calendarStyle.css";
 
 const useStyles = makeStyles(theme => ({
-  container: {
-    marginTop: theme.spacing(3)
-  },
   root: {
     padding: theme.spacing(3, 2)
   },
@@ -61,13 +59,13 @@ export default function Assists(props) {
     return <CircularProgress />;
   }
   if (userAssistsError) {
-    return "error";
+    return <NotFound />;
   }
   if (!userAssistsData.users_data.length) {
-    return "This user doesn´t exist.";
+    return <NotFound />;
   }
   if (userAssistsData.users_data[0].user_type !== 2) {
-    return "This user doesn´t is a client.";
+    return <NotFound />;
   }
 
   let events = [];

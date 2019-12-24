@@ -17,18 +17,22 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import {
     Home as HomeIcon,
     Group as GroupIcon,
-    SportsKabaddi as SportsKabaddiIcon
+    AccountBox as AccountBoxIcon,
+    SportsKabaddi as SportsKabaddiIcon,
+    MonetizationOn as MonetizationOnIcon
   } from "@material-ui/icons";
 import TFWLogo from "../../assets/images/logo.png";
 import Home from '../home/home';
 import Users from '../users/users';
 import NewUser from '../users/newUser';
+import UserTypes from '../userTypes/userTypes';
 import Lessons from '../lessons/lessons';
 import Products from '../products/products';
 import User from '../users/user';
 import Assists from '../assists/assists';
 import NotFound from '../notFound/notFound';
 import NewLesson from '../lessons/newLesson';
+import Lesson from '../lessons/lesson';
 
 const drawerWidth = 240;
 
@@ -63,6 +67,7 @@ const useStyles = makeStyles(theme => ({
     color: "#000000"
   },
   content: {
+    maxWidth: "100%",
     flexGrow: 1,
     padding: theme.spacing(3),
   },
@@ -115,12 +120,28 @@ export default function Header() {
           <ListItemText primary="Users" />
         </ListItem>
       </NavLink>
+      <NavLink to="/userTypes" className={classes.navLink}>
+        <ListItem button>
+          <ListItemIcon>
+            <AccountBoxIcon className={classes.icons} />
+          </ListItemIcon>
+          <ListItemText primary="Users type" />
+        </ListItem>
+      </NavLink>
       <NavLink to="/lessons" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
             <SportsKabaddiIcon className={classes.icons} />
           </ListItemIcon>
           <ListItemText primary="Classes" />
+        </ListItem>
+      </NavLink>
+      <NavLink to="/lessons" className={classes.navLink}>
+        <ListItem button>
+          <ListItemIcon>
+            <MonetizationOnIcon className={classes.icons} />
+          </ListItemIcon>
+          <ListItemText primary="Packages" />
         </ListItem>
       </NavLink>
       </List>
@@ -182,9 +203,11 @@ export default function Header() {
             <Route exact path="/" component={Home} />
             <Route exact path="/users" component={Users} />
             <Route exact path="/newUser" component={NewUser} />
-            <Route exact path="/user/:userId" component={User} />	
+            <Route exact path="/user/:userId" component={User} />
+            <Route exact path="/userTypes" component={UserTypes} />
             <Route exact path="/lessons" component={Lessons} />
             <Route exact path="/newLesson" component={NewLesson} />
+            <Route exact path="/lesson/:classId" component={Lesson} />
             <Route exact path="/assists/:userId" component={Assists} />
             <Route exact path="/products" component={Products} />	
             <Route exact path="*" component={NotFound}></Route>

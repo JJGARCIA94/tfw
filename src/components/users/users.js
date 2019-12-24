@@ -21,7 +21,9 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-  Snackbar
+  Snackbar,
+  TextField,
+  Grid
 } from "@material-ui/core";
 import {
   AddCircle as AddCircleIcon,
@@ -32,7 +34,7 @@ import {
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_USERS_BY_NAME } from "../../database/queries";
+import { GET_USERS_BY_NAME, GET_USER_TYPES } from "../../database/queries";
 import { UPDATE_USER_STATUS } from "../../database/mutations";
 
 let rows = [];
@@ -143,13 +145,14 @@ const useToolbarStyles = makeStyles(theme => ({
           backgroundColor: theme.palette.secondary.dark
         },
   title: {
-    flex: "1 1 100%"
+    //flex: "1 1 100%"
+    marginTop: theme.spacing(1)
   }
 }));
 
 const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%"
+    maxWidth: "100%"
   },
   paper: {
     width: "100%",
@@ -186,6 +189,7 @@ export default function Users() {
   const [handlePage, setHandlePage] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState("");
+  const [userType, setUserType] = useState("0");
   const [dialog, setDialog] = useState({
     openDialog: false,
     tittleDialog: "",
@@ -222,11 +226,13 @@ export default function Users() {
     GET_USERS_BY_NAME,
     {
       variables: {
-        search: `%${search}%`
+        search: `%${search}%`,
+        userType: userType !== "0" ? userType : null
       }
     }
   );
-  if (usersLoading) {
+  const { loading: userTypesLoading, data: userTypesData } = useSubscription(GET_USER_TYPES)
+  if (usersLoading || userTypesLoading) {
     return <CircularProgress />;
   } else {
     rows = [];
@@ -246,6 +252,17 @@ export default function Users() {
       });
     });
   }
+
+  const getUserTypes = () => {
+    return(
+      userTypesData.users_type.map(userType => {
+        return (
+          <option key={userType.id} value={userType.id}>{userType.name}</option>
+        );
+      })
+    );
+  }
+
   const handleRequestSort = (event, property) => {
     const isDesc = orderBy === property && order === "desc";
     setOrder(isDesc ? "asc" : "desc");
@@ -327,23 +344,51 @@ export default function Users() {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Toolbar>
-          <Typography
-            className={toolbarClasses.title}
-            variant="h6"
-            id="tableTitle"
-          >
-            Users
-            <Link to="/newUser">
-              <AddCircleIcon />
-            </Link>
-          </Typography>
-
-          <SearchInput
-            setSearch={setSearch}
-            search={search}
-            setHandle={setHandlePage}
-            label="Search by name"
-          />
+          <Grid container>
+            <Grid item md={8} xs={6}>
+              <Typography
+                className={toolbarClasses.title}
+                variant="h6"
+                id="tableTitle"
+              >
+                Users
+                <Link to="/newUser">
+                  <AddCircleIcon />
+                </Link>
+              </Typography>
+            </Grid>
+            <Grid item md={2} xs={6}>
+              <SearchInput
+                setSearch={setSearch}
+                search={search}
+                setHandle={setHandlePage}
+                label="Search by name"
+              />
+            </Grid>
+            <Grid item md={2} xs={12}>
+              <TextField
+                className={classes.textFields}
+                required
+                select
+                SelectProps={{
+                  native: true
+                }}
+                style={{
+                  width: "100%"
+                }}
+                id="user_type"
+                label="Select a user type to search"
+                margin="normal"
+                value={userType}
+                onChange={(e) => {
+                  setUserType(e.target.value);
+                }}
+              >
+                <option value={0}>All user types</option>
+                {getUserTypes()}
+              </TextField>
+            </Grid>
+          </Grid>
         </Toolbar>
         <div className={classes.tableWrapper}>
           <Table

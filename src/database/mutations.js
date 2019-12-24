@@ -82,3 +82,27 @@ export const ADD_CLASS = gql`
     }
   }
 `;
+
+export const UPDATE_CLASS = gql`
+  mutation update_class(
+    $classId: Int!
+    $name: String!
+    $description: String!
+    $idCoach: Int!
+  ) {
+    update_classes(
+      where: { id: { _eq: $classId } }
+      _set: { name: $name, description: $description, user_id: $idCoach }
+    ) {
+      returning {
+        name
+        description
+        R_users_data {
+          id
+        }
+        created_at
+        updated_at
+      }
+    }
+  }
+`;

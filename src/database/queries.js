@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 
 export const GET_USER_TYPES = gql`
-  query get_user_types {
+  subscription get_user_types {
     users_type(where: { status: { _eq: 1 } }) {
       id
       name
@@ -10,13 +10,14 @@ export const GET_USER_TYPES = gql`
 `;
 
 export const GET_USERS_BY_NAME = gql`
-  subscription get_users($search: String) {
+  subscription get_users($search: String, $userType: Int) {
     users_data(
       where: {
         _or: [
           { first_name: { _ilike: $search } }
           { last_name: { _ilike: $search } }
         ]
+        _and: { user_type: { _eq: $userType } }
       }
     ) {
       id
@@ -24,6 +25,7 @@ export const GET_USERS_BY_NAME = gql`
       last_name
       email
       address
+      user_type
       phone_number
       R_user_type {
         id
@@ -53,7 +55,7 @@ export const GET_USERS = gql`
 `;
 
 export const GET_USER_BY_ID = gql`
-  query get_user_by_id($id: Int!) {
+  subscription get_user_by_id($id: Int!) {
     users_data(where: { id: { _eq: $id } }) {
       first_name
       last_name
@@ -91,8 +93,8 @@ export const GET_ASSISTS_BY_USER = gql`
 `;
 
 export const GET_CLASSES = gql`
-  query get_classes {
-    classes {
+  subscription get_classes {
+    classes(order_by: { id: desc }) {
       id
       name
       description
@@ -109,6 +111,13 @@ export const GET_CLASSES = gql`
           name
         }
       }
+      R_classes_details_aggregate(
+        where: { R_users_data: { status: { _eq: 1 } } }
+      ) {
+        aggregate {
+          count
+        }
+      }
     }
   }
 `;
@@ -122,6 +131,41 @@ export const GET_COACHES = gql`
       address
       phone_number
       email
+    }
+  }
+`;
+
+export const GET_MEMBERS_BY_CLASS = gql`
+  subscription get_members_by_class($classId: Int!) {
+    classes_details(
+      where: {
+        class_id: { _eq: $classId }
+        _and: { R_users_data: { status: { _eq: 1 } } }
+      }
+    ) {
+      id
+      R_users_data {
+        first_name
+        last_name
+        address
+        phone_number
+        email
+      }
+    }
+  }
+`;
+
+export const GET_CLASS = gql`
+  query get_class($classId: Int!) {
+    classes(where: { id: { _eq: $classId } }) {
+      id
+      name
+      description
+      R_users_data {
+        id
+      }
+      created_at
+      updated_at
     }
   }
 `;

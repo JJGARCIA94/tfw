@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, useSubscription } from "@apollo/react-hooks";
 import {
   CircularProgress,
   Grid,
@@ -12,10 +12,11 @@ import {
   Toolbar,
   Snackbar
 } from "@material-ui/core";
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { Query } from "react-apollo";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { GET_USER_TYPES } from "../../database/queries";
 import { ADD_USER } from "../../database/mutations";
+import { keyValidation, pasteValidation } from "../../helpers/helpers";
+import NotFound from "../notFound/notFound";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -44,46 +45,54 @@ export default function NewUser() {
     email: "",
     user_type: 0
   });
+  const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
     openSnackbar: false,
-    vertical: 'bottom',
-    horizontal: 'right',
-    snackBarText: '',
-    snackbarColor: ''
+    vertical: "bottom",
+    horizontal: "right",
+    snackBarText: "",
+    snackbarColor: ""
   });
-  const { vertical, horizontal, openSnackbar, snackBarText, snackbarColor } = snackbarState;
+  const {
+    vertical,
+    horizontal,
+    openSnackbar,
+    snackBarText,
+    snackbarColor
+  } = snackbarState;
   const [
     addUserMutation,
     { loading: addUserMutationLoading, error: addUserMutationError }
   ] = useMutation(ADD_USER);
+  const {
+    loading: userTypesLoading,
+    data: userTypesData,
+    error: userTypesError
+  } = useSubscription(GET_USER_TYPES);
+
+  if(userTypesLoading) {
+    return <CircularProgress />
+  }
+  if(userTypesError) {
+    return <NotFound />
+  }
 
   const handleCloseSnackbar = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
 
   const getUserTypes = () => {
-    return (
-      <Query query={GET_USER_TYPES}>
-        {({ loading, error, data }) => {
-          if (loading) return "Loading...";
-          if (error) return console.log(error);
-          if (data.users_type.length) {
-            return data.users_type.map(({ id, name }) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ));
-          } else {
-            return (
-              <option value="0">There are no user types to display</option>
-            );
-          }
-        }}
-      </Query>
-    );
+    return userTypesData.users_type.map(userType => {
+      return (
+        <option key={userType.id} value={userType.id}>
+          {userType.name}
+        </option>
+      );
+    });
   };
 
   const addUser = async () => {
+    setDisabledButton(true);
     const {
       first_name,
       last_name,
@@ -103,9 +112,10 @@ export default function NewUser() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: 'All fields are requireds',
-        snackbarColor: '#d32f2f'
-      })
+        snackBarText: "All fields are requireds",
+        snackbarColor: "#d32f2f"
+      });
+      setDisabledButton(false);
       return;
     }
 
@@ -121,61 +131,34 @@ export default function NewUser() {
     });
 
     if (addUserMutationLoading) return <CircularProgress />;
-    if (addUserMutationError){
+    if (addUserMutationError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: 'An error occurred',
-        snackbarColor: '#d32f2f'
+        snackBarText: "An error occurred",
+        snackbarColor: "#d32f2f"
       });
+      setDisabledButton(false);
       return;
     }
-    
+
     setUserState({
-      first_name: '',
-      last_name: '',
-      address: '',
-      phone_number: '',
-      email: '',
+      first_name: "",
+      last_name: "",
+      address: "",
+      phone_number: "",
+      email: "",
       user_type: 0
     });
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: 'User added',
-      snackbarColor: '#43a047'
+      snackBarText: "User added",
+      snackbarColor: "#43a047"
     });
+    setDisabledButton(false);
   };
-
-  const keyValidation = (e, tipo)=> {
-		const key = e.keyCode || e.which;
-		const teclado = String.fromCharCode(key).toLowerCase();
-		const letras = 'áéíóúüabcdefghijklmnñopqrstuvwxyz';
-		const numeros = '0123456789';
-    const otros = ' ';
-    const especiales = '@-_.';
-		const validos = tipo === 1 ? letras + otros : tipo === 2 ? numeros : tipo === 3 ? letras + numeros + otros : letras + numeros + otros + especiales;
-		if (validos.indexOf(teclado) === -1) {
-			e.preventDefault();
-		}
-  }
-  
-  const pasteValidation = (e, tipo) => {
-		const value = e.target.value;
-		const letras = 'áéíóúüabcdefghijklmnñopqrstuvwxyz';
-		const numeros = '0123456789';
-    const otros = ' ';
-    const especiales = '@-_.';
-		const validos = tipo === 1 ? letras + otros : tipo === 2 ? numeros : tipo === 3 ? letras + numeros + otros : letras + numeros + otros + especiales;
-		let aprovadas = '';
-		for (let x = 0; x < value.length; x++) {
-			if (validos.indexOf(value[x].toLowerCase()) !== -1) {
-				aprovadas += value[x];
-			}
-		}
-		document.getElementById([ e.target.id ]).value = aprovadas;
-	}
 
   return (
     <div>
@@ -186,7 +169,7 @@ export default function NewUser() {
             <Link to="/users">
               <ArrowBackIcon />
             </Link>
-            </Typography>
+          </Typography>
         </Toolbar>
         <Grid container justify="center" className={classes.root}>
           <Grid item md={5} xs={10}>
@@ -201,10 +184,10 @@ export default function NewUser() {
                 maxLength: 30
               }}
               onKeyPress={e => {
-                keyValidation(e,1);
+                keyValidation(e, 1);
               }}
               onChange={e => {
-                pasteValidation(e,1);
+                pasteValidation(e, 1);
                 setUserState({
                   ...userState,
                   first_name: e.target.value
@@ -225,10 +208,10 @@ export default function NewUser() {
                 maxLength: 30
               }}
               onKeyPress={e => {
-                keyValidation(e,1);
+                keyValidation(e, 1);
               }}
               onChange={e => {
-                pasteValidation(e,1);
+                pasteValidation(e, 1);
                 setUserState({
                   ...userState,
                   last_name: e.target.value
@@ -248,10 +231,10 @@ export default function NewUser() {
                 maxLength: 50
               }}
               onKeyPress={e => {
-                keyValidation(e,3);
+                keyValidation(e, 3);
               }}
               onChange={e => {
-                pasteValidation(e,3);
+                pasteValidation(e, 3);
                 setUserState({
                   ...userState,
                   address: e.target.value
@@ -272,10 +255,10 @@ export default function NewUser() {
                 maxLength: 15
               }}
               onKeyPress={e => {
-                keyValidation(e,2);
+                keyValidation(e, 2);
               }}
               onChange={e => {
-                pasteValidation(e,2);
+                pasteValidation(e, 2);
                 setUserState({
                   ...userState,
                   phone_number: e.target.value
@@ -295,10 +278,10 @@ export default function NewUser() {
                 maxLength: 50
               }}
               onKeyPress={e => {
-                keyValidation(e,4);
+                keyValidation(e, 4);
               }}
               onChange={e => {
-                pasteValidation(e,4);
+                pasteValidation(e, 4);
                 setUserState({
                   ...userState,
                   email: e.target.value
@@ -331,6 +314,7 @@ export default function NewUser() {
           <Grid item xs={10} md={11}>
             <Button
               variant="contained"
+              disabled={disabledButton}
               className={classes.button}
               onClick={() => {
                 addUser();
@@ -347,8 +331,8 @@ export default function NewUser() {
         open={openSnackbar}
         onClose={handleCloseSnackbar}
         ContentProps={{
-          'aria-describedby': 'message-id',
-          style:{background: snackbarColor}
+          "aria-describedby": "message-id",
+          style: { background: snackbarColor }
         }}
         message={<span id="message-id">{snackBarText}</span>}
       />

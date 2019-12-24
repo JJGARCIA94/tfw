@@ -13,8 +13,8 @@ import {
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useQuery, useMutation } from "@apollo/react-hooks";
-import { GET_COACHES } from "../../database/queries";
-import { ADD_CLASS } from "../../database/mutations";
+import { GET_COACHES, GET_CLASS } from "../../database/queries";
+import { UPDATE_CLASS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
@@ -38,12 +38,15 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function NewLesson() {
+export default function Lesson(props) {
+  const classId = props.match.params.classId;
   const classes = useStyles();
   const [classState, setClassState] = useState({
     name: "",
     description: "",
-    coach: 0
+    coach: 0,
+    created_at: "",
+    updated_at: ""
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -61,20 +64,41 @@ export default function NewLesson() {
     snackbarColor
   } = snackbarState;
   const [
-    addClassMutation,
-    { loading: classLoading, error: classError }
-  ] = useMutation(ADD_CLASS);
+    updateClassMutation,
+    { loading: classMutationLoading, error: classMutationError }
+  ] = useMutation(UPDATE_CLASS);
+  const {
+    data: classData,
+    loading: classLoading,
+    error: classError
+  } = useQuery(GET_CLASS, {
+    variables: {
+      classId: classId
+    }
+  });
   const {
     data: coachesData,
     loading: coachesLoading,
     error: coachesError
   } = useQuery(GET_COACHES);
-  if (coachesLoading) {
+  if (classLoading || coachesLoading) {
     return <CircularProgress />;
   }
-  if (coachesError) {
+  if (classError || coachesError) {
     return <NotFound />;
   }
+
+  const getData = classData => {
+    const createAt = new Date(classData.created_at);
+    const updated_at = new Date(classData.updated_at);
+    setClassState({
+      name: classData.name,
+      description: classData.description,
+      coach: classData.R_users_data.id,
+      created_at: createAt.toLocaleString(),
+      updated_at: updated_at.toLocaleString()
+    });
+  };
 
   const getCoaches = () => {
     return coachesData.users_data.map(coach => {
@@ -87,7 +111,7 @@ export default function NewLesson() {
     });
   };
 
-  const addClass = () => {
+  const updateClass = async () => {
     setDisabledButton(true);
     const { name, description, coach } = classState;
 
@@ -102,16 +126,17 @@ export default function NewLesson() {
       return;
     }
 
-    addClassMutation({
+    const resultUpdateClass = await updateClassMutation({
       variables: {
+        classId: classId,
         name: name.trim(),
         description: description.trim(),
         idCoach: coach
       }
     });
 
-    if (classLoading) return <CircularProgress />;
-    if (classError) {
+    if (classMutationLoading) return <CircularProgress />;
+    if (classMutationError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -122,16 +147,13 @@ export default function NewLesson() {
       return;
     }
 
-    setClassState({
-      name: "",
-      description: "",
-      coach: 0
-    });
+    const newClassData = resultUpdateClass.data.update_classes.returning[0];
+    getData(newClassData);
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class added",
+      snackBarText: "Class updated",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -140,18 +162,38 @@ export default function NewLesson() {
   const handleClose = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
-
   return (
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add class
+          Class information
           <Link to="/lessons">
             <ArrowBackIcon />
           </Link>
         </Typography>
       </Toolbar>
       <Grid container className={classes.root}>
+        <Grid item md={5} xs={10}>
+          <TextField
+            className={classes.textFields}
+            id="create_at"
+            label="Created at"
+            margin="normal"
+            value={classState.created_at}
+            disabled
+          />
+        </Grid>
+        <Grid item md={1}></Grid>
+        <Grid item md={5} xs={10}>
+          <TextField
+            className={classes.textFields}
+            id="updated_at"
+            label="Last update"
+            margin="normal"
+            value={classState.updated_at}
+            disabled
+          />
+        </Grid>
         <Grid item md={5} xs={10}>
           <TextField
             className={classes.textFields}
@@ -164,10 +206,10 @@ export default function NewLesson() {
               maxLength: 50
             }}
             onKeyPress={e => {
-              keyValidation(e,3);
+              keyValidation(e, 3);
             }}
             onChange={e => {
-              pasteValidation(e,3);
+              pasteValidation(e, 3);
               setClassState({
                 ...classState,
                 name: e.target.value
@@ -188,10 +230,10 @@ export default function NewLesson() {
               maxLength: 200
             }}
             onKeyPress={e => {
-              keyValidation(e,3);
+              keyValidation(e, 3);
             }}
             onChange={e => {
-              pasteValidation(e,3);
+              pasteValidation(e, 3);
               setClassState({
                 ...classState,
                 description: e.target.value
@@ -211,6 +253,9 @@ export default function NewLesson() {
             label="Coach"
             margin="normal"
             value={classState.coach}
+            onAnimationEnd={() => {
+              getData(classData.classes[0]);
+            }}
             onChange={e => {
               setClassState({
                 ...classState,
@@ -218,7 +263,6 @@ export default function NewLesson() {
               });
             }}
           >
-            <option value="0">Select a coach</option>
             {getCoaches()}
           </TextField>
         </Grid>
@@ -228,7 +272,7 @@ export default function NewLesson() {
             disabled={disabledButton}
             className={classes.button}
             onClick={() => {
-              addClass();
+              updateClass();
             }}
           >
             Save

@@ -12,11 +12,11 @@ import {
   Snackbar
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
-import { useQuery, useMutation } from "@apollo/react-hooks";
-import { Query } from "react-apollo";
+import { useMutation, useSubscription } from "@apollo/react-hooks";
 import { GET_USER_BY_ID, GET_USER_TYPES } from "../../database/queries";
 import { UPDATE_USER } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
+import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -39,7 +39,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function User(props) {
-  //const aleatorio = Math.floor(Math.random() * (999999 - 100000)) + 100000;
   const userId = props.match.params.userId;
   const classes = useStyles();
   const [userState, setUserState] = useState({
@@ -67,27 +66,28 @@ export default function User(props) {
     snackBarText,
     snackbarColor
   } = snackbarState;
-  const { loading: userLoading, data: userData, error: userError } = useQuery(GET_USER_BY_ID, {
-    variables: {
-      id: userId
-    },
-    pollInterval: 1000
-  });
+  const { loading: userLoading, data: userData, error: userError } = useSubscription(
+    GET_USER_BY_ID,
+    {
+      variables: {
+        id: userId
+      }
+    }
+  );
+  const {
+    loading: userTypesLoading,
+    data: userTypesData,
+    error: userTypesError
+  } = useSubscription(GET_USER_TYPES);
   const [
     updateUserMutation,
     { loading: updateUserMutationLoading, error: updateUserMutationError }
   ] = useMutation(UPDATE_USER);
 
-  if (userLoading) {
+  if (userLoading || userTypesLoading) {
     return <CircularProgress />;
   }
-  if(userError || !userData.users_data.length) {
-    /*setSnackbarState({
-      ...snackbarState,
-      openSnackbar: true,
-      snackBarText: "An error occurred",
-      snackbarColor: "#d32f2f"
-    });*/
+  if (userError || !userData.users_data.length || userTypesError) {
     return <NotFound />;
   }
 
@@ -111,28 +111,16 @@ export default function User(props) {
   };
 
   const getUserTypes = () => {
-    return (
-      <Query query={GET_USER_TYPES}>
-        {({ loading, error, data }) => {
-          if (loading) return "Loading...";
-          if (error) return console.log(error);
-          if (data.users_type.length) {
-            return data.users_type.map(({ id, name }) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ));
-          } else {
-            return (
-              <option value="0">There are no user types to display</option>
-            );
-          }
-        }}
-      </Query>
-    );
+    return userTypesData.users_type.map(userType => {
+      return (
+        <option key={userType.id} value={userType.id}>
+          {userType.name}
+        </option>
+      );
+    });
   };
 
-  const updateUser = async () => {//en vez de agregar que edite
+  const updateUser = async () => {
     setDisabledButton(true);
     const {
       first_name,
@@ -156,6 +144,7 @@ export default function User(props) {
         snackBarText: "All fields are requireds",
         snackbarColor: "#d32f2f"
       });
+      setDisabledButton(false);
       return;
     }
 
@@ -196,51 +185,6 @@ export default function User(props) {
     setDisabledButton(false);
   };
 
-  const keyValidation = (e, tipo) => {
-    const key = e.keyCode || e.which;
-    const teclado = String.fromCharCode(key).toLowerCase();
-    const letras = "áéíóúüabcdefghijklmnñopqrstuvwxyz";
-    const numeros = "0123456789";
-    const otros = " ";
-    const addressEspecial = "#.,"
-    const emailEspecial = "@-_.";
-    const validos =
-      tipo === 1
-        ? letras + otros
-        : tipo === 2
-        ? numeros
-        : tipo === 3
-        ? letras + numeros + otros + addressEspecial
-        : letras + numeros + otros + emailEspecial;
-    if (validos.indexOf(teclado) === -1) {
-      e.preventDefault();
-    }
-  };
-
-  const pasteValidation = (e, tipo) => {
-    const value = e.target.value;
-    const letras = "áéíóúüabcdefghijklmnñopqrstuvwxyz";
-    const numeros = "0123456789";
-    const otros = " ";
-    const addressEspecial = "#.,"
-    const emailEspecial = "@-_.";
-    const validos =
-      tipo === 1
-        ? letras + otros
-        : tipo === 2
-        ? numeros
-        : tipo === 3
-        ? letras + numeros + otros + addressEspecial
-        : letras + numeros + otros + emailEspecial;
-    let aprovadas = "";
-    for (let x = 0; x < value.length; x++) {
-      if (validos.indexOf(value[x].toLowerCase()) !== -1) {
-        aprovadas += value[x];
-      }
-    }
-    document.getElementById([e.target.id]).value = aprovadas;
-  };
-
   return (
     <div>
       <Card>
@@ -253,7 +197,7 @@ export default function User(props) {
           </Typography>
         </Toolbar>
         <Grid container justify="center" className={classes.root}>
-        <Grid item md={5} xs={10}>
+          <Grid item md={5} xs={10}>
             <TextField
               className={classes.textFields}
               id="create_at"
@@ -403,17 +347,16 @@ export default function User(props) {
               }}
               margin="normal"
               value={userState.user_type}
+              onAnimationEnd={() => {
+                getData(userData.users_data[0]);
+              }}
               onChange={e => {
                 setUserState({
                   ...userState,
                   user_type: e.target.value
                 });
               }}
-              onAnimationEnd={e => {
-                getData(userData.users_data[0]);
-              }}
             >
-             {/* <option value="0">Select a user type</option>*/}
               {getUserTypes()}
             </TextField>
           </Grid>

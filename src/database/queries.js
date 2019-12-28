@@ -16,6 +16,9 @@ export const GET_USERS_BY_NAME = gql`
         _or: [
           { first_name: { _ilike: $search } }
           { last_name: { _ilike: $search } }
+          { address: { _ilike: $search } }
+          { phone_number: { _ilike: $search } }
+          { email: { _ilike: $search } }
         ]
         _and: { user_type: { _eq: $userType } }
       }
@@ -73,6 +76,16 @@ export const GET_USER_BY_ID = gql`
   }
 `;
 
+export const GET_USER_BY_USER_TYPE = gql`
+  query get_user_by_user_type($userTypeId: Int!) {
+    users_data_aggregate(where: { user_type: { _eq: $userTypeId } }) {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
+
 export const GET_ASSISTS_BY_USER = gql`
   query get_assists_by_user($userId: Int!) {
     users_data(where: { id: { _eq: $userId } }) {
@@ -88,6 +101,27 @@ export const GET_ASSISTS_BY_USER = gql`
           entry
         }
       }
+    }
+  }
+`;
+
+export const GET_USER_TYPES_ALL = gql`
+  subscription get_user_types {
+    users_type {
+      id
+      name
+      status
+    }
+  }
+`;
+
+export const GET_USER_TYPE_BY_ID = gql`
+  query get_user_type_by_id($userTypeId: Int!) {
+    users_type(where: { id: { _eq: $userTypeId } }) {
+      id
+      name
+      created_at
+      updated_at
     }
   }
 `;
@@ -112,7 +146,10 @@ export const GET_CLASSES = gql`
         }
       }
       R_classes_details_aggregate(
-        where: { R_users_data: { status: { _eq: 1 } } }
+        where: {
+          R_users_data: { status: { _eq: 1 } }
+          _and: { status: { _eq: 1 } }
+        }
       ) {
         aggregate {
           count
@@ -123,7 +160,7 @@ export const GET_CLASSES = gql`
 `;
 
 export const GET_COACHES = gql`
-  query get_coaches {
+  subscription get_coaches {
     users_data(where: { user_type: { _eq: 3 }, _and: { status: { _eq: 1 } } }) {
       id
       first_name
@@ -140,8 +177,25 @@ export const GET_MEMBERS_BY_CLASS = gql`
     classes_details(
       where: {
         class_id: { _eq: $classId }
-        _and: { R_users_data: { status: { _eq: 1 } } }
+        _and: { R_users_data: { status: { _eq: 1 } }, status: { _eq: 1 } }
       }
+    ) {
+      id
+      R_users_data {
+        first_name
+        last_name
+        address
+        phone_number
+        email
+      }
+    }
+  }
+`;
+
+export const GET_MEMBERS_BY_CLASS_HISTORY = gql`
+  subscription get_members_by_class($classId: Int!) {
+    classes_details(
+      where: { class_id: { _eq: $classId }, _and: { status: { _eq: 0 } } }
     ) {
       id
       R_users_data {

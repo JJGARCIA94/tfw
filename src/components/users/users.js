@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { lighten, makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Table,
   TableBody,
@@ -129,27 +129,6 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired
 };
 
-const useToolbarStyles = makeStyles(theme => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1)
-  },
-  highlight:
-    theme.palette.type === "light"
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark
-        },
-  title: {
-    //flex: "1 1 100%"
-    marginTop: theme.spacing(1)
-  }
-}));
-
 const useStyles = makeStyles(theme => ({
   root: {
     maxWidth: "100%"
@@ -177,12 +156,14 @@ const useStyles = makeStyles(theme => ({
   },
   icons: {
     color: "black"
+  },
+  toolbartitle: {
+    marginTop: theme.spacing(1)
   }
 }));
 
 export default function Users() {
   const classes = useStyles();
-  const toolbarClasses = useToolbarStyles();
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("id");
   const [page, setPage] = useState(0);
@@ -347,7 +328,7 @@ export default function Users() {
           <Grid container>
             <Grid item md={8} xs={6}>
               <Typography
-                className={toolbarClasses.title}
+                className={classes.toolbartitle}
                 variant="h6"
                 id="tableTitle"
               >
@@ -362,7 +343,7 @@ export default function Users() {
                 setSearch={setSearch}
                 search={search}
                 setHandle={setHandlePage}
-                label="Search by name"
+                label="Search by any field"
               />
             </Grid>
             <Grid item md={2} xs={12}>

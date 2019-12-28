@@ -30,9 +30,12 @@ import Lessons from '../lessons/lessons';
 import Products from '../products/products';
 import User from '../users/user';
 import Assists from '../assists/assists';
+import NewUserType from '../userTypes/newUserType';
+import UserType from '../userTypes/userType';
 import NotFound from '../notFound/notFound';
 import NewLesson from '../lessons/newLesson';
 import Lesson from '../lessons/lesson';
+import Packages from '../classPackages/packages';
 
 const drawerWidth = 240;
 
@@ -136,7 +139,7 @@ export default function Header() {
           <ListItemText primary="Classes" />
         </ListItem>
       </NavLink>
-      <NavLink to="/lessons" className={classes.navLink}>
+      <NavLink to="/packages" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
             <MonetizationOnIcon className={classes.icons} />
@@ -205,11 +208,14 @@ export default function Header() {
             <Route exact path="/newUser" component={NewUser} />
             <Route exact path="/user/:userId" component={User} />
             <Route exact path="/userTypes" component={UserTypes} />
+            <Route exact path="/newUserType" component={NewUserType} />
+            <Route exact path="/userType/:userTypeId" component={UserType} />
             <Route exact path="/lessons" component={Lessons} />
             <Route exact path="/newLesson" component={NewLesson} />
             <Route exact path="/lesson/:classId" component={Lesson} />
             <Route exact path="/assists/:userId" component={Assists} />
             <Route exact path="/products" component={Products} />	
+            <Route exact path="/packages" component={Packages} />	
             <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>

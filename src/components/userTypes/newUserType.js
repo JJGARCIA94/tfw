@@ -12,10 +12,8 @@ import {
   Snackbar
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_COACHES } from "../../database/queries";
-import { ADD_CLASS } from "../../database/mutations";
-import NotFound from "../notFound/notFound";
+import { useMutation } from "@apollo/react-hooks";
+import { ADD_USER_TYPE } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
 const useStyles = makeStyles(theme => ({
@@ -38,12 +36,10 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function NewLesson() {
+export default function NewUserType() {
   const classes = useStyles();
-  const [classState, setClassState] = useState({
-    name: "",
-    description: "",
-    coach: 0
+  const [userTypeState, setUserTypeState] = useState({
+    name: ""
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -61,37 +57,15 @@ export default function NewLesson() {
     snackbarColor
   } = snackbarState;
   const [
-    addClassMutation,
-    { loading: classLoading, error: classError }
-  ] = useMutation(ADD_CLASS);
-  const {
-    data: coachesData,
-    loading: coachesLoading,
-    error: coachesError
-  } = useSubscription(GET_COACHES);
-  if (coachesLoading) {
-    return <CircularProgress />;
-  }
-  if (coachesError) {
-    return <NotFound />;
-  }
+    addUserTypeMutation,
+    { loading: userTypeLoading, error: userTypeError }
+  ] = useMutation(ADD_USER_TYPE);
 
-  const getCoaches = () => {
-    return coachesData.users_data.map(coach => {
-      return (
-        <option
-          key={coach.id}
-          value={coach.id}
-        >{`${coach.first_name} ${coach.last_name}`}</option>
-      );
-    });
-  };
-
-  const addClass = () => {
+  const addUserType = () => {
     setDisabledButton(true);
-    const { name, description, coach } = classState;
+    const { name } = userTypeState;
 
-    if (name.trim() === "" || description.trim() === "" || coach === 0) {
+    if (name.trim() === "") {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -102,16 +76,14 @@ export default function NewLesson() {
       return;
     }
 
-    addClassMutation({
+    addUserTypeMutation({
       variables: {
-        name: name.trim(),
-        description: description.trim(),
-        idCoach: coach
+        name: name.trim()
       }
     });
 
-    if (classLoading) return <CircularProgress />;
-    if (classError) {
+    if (userTypeLoading) return <CircularProgress />;
+    if (userTypeError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -122,16 +94,14 @@ export default function NewLesson() {
       return;
     }
 
-    setClassState({
-      name: "",
-      description: "",
-      coach: 0
+    setUserTypeState({
+      name: ""
     });
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class added",
+      snackBarText: "User type added",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -145,82 +115,34 @@ export default function NewLesson() {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add class
-          <Link to="/lessons">
+          Add user type
+          <Link to="/userTypes">
             <ArrowBackIcon />
           </Link>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
-        <Grid item md={5} xs={10}>
+        <Grid item md={6} xs={10}>
           <TextField
             className={classes.textFields}
             required
             id="name"
             label="Name"
             margin="normal"
-            value={classState.name}
+            value={userTypeState.name}
             inputProps={{
               maxLength: 50
             }}
             onKeyPress={e => {
-              keyValidation(e,3);
+              keyValidation(e, 5);
             }}
             onChange={e => {
-              pasteValidation(e,3);
-              setClassState({
-                ...classState,
+              pasteValidation(e, 5);
+              setUserTypeState({
                 name: e.target.value
               });
             }}
           />
-        </Grid>
-        <Grid item md={1}></Grid>
-        <Grid item md={5} xs={10}>
-          <TextField
-            className={classes.textFields}
-            required
-            id="description"
-            label="Description"
-            margin="normal"
-            value={classState.description}
-            inputProps={{
-              maxLength: 200
-            }}
-            onKeyPress={e => {
-              keyValidation(e,3);
-            }}
-            onChange={e => {
-              pasteValidation(e,3);
-              setClassState({
-                ...classState,
-                description: e.target.value
-              });
-            }}
-          />
-        </Grid>
-        <Grid item md={5} xs={10}>
-          <TextField
-            className={classes.textFields}
-            required
-            select
-            SelectProps={{
-              native: true
-            }}
-            id="coach"
-            label="Coach"
-            margin="normal"
-            value={classState.coach}
-            onChange={e => {
-              setClassState({
-                ...classState,
-                coach: e.target.value
-              });
-            }}
-          >
-            <option value="0">Select a coach</option>
-            {getCoaches()}
-          </TextField>
         </Grid>
         <Grid item xs={10} md={11}>
           <Button
@@ -228,7 +150,7 @@ export default function NewLesson() {
             disabled={disabledButton}
             className={classes.button}
             onClick={() => {
-              addClass();
+              addUserType();
             }}
           >
             Save

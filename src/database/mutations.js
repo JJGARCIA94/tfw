@@ -73,6 +73,40 @@ export const UPDATE_USER_STATUS = gql`
   }
 `;
 
+export const UPDATE_USER_TYPE_STATUS = gql`
+  mutation update_user_type_status($id: Int!, $newStatus: Int!) {
+    update_users_type(
+      where: { id: { _eq: $id } }
+      _set: { status: $newStatus }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_USER_TYPE = gql`
+  mutation add_user_type($name: String!) {
+    insert_users_type(objects: { name: $name }) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_USER_TYPE = gql`
+  mutation update_user_type($userTypeId: Int!, $name: String!) {
+    update_users_type(
+      where: { id: { _eq: $userTypeId } }
+      _set: { name: $name }
+    ) {
+      returning {
+        created_at
+        updated_at
+        name
+      }
+    }
+  }
+`;
+
 export const ADD_CLASS = gql`
   mutation add_class($name: String!, $description: String!, $idCoach: Int!) {
     insert_classes(
@@ -103,6 +137,28 @@ export const UPDATE_CLASS = gql`
         created_at
         updated_at
       }
+    }
+  }
+`;
+
+export const CANCEL_CLASS = gql`
+  mutation cancel_class($classId: Int!) {
+    update_classes(where: { id: { _eq: $classId } }, _set: { status: 0 }) {
+      affected_rows
+    }
+    update_classes_details(
+      where: { class_id: { _eq: $classId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const RESTORE_CLASS = gql`
+  mutation restore_class($classId: Int!) {
+    update_classes(where: { id: { _eq: $classId } }, _set: { status: 1 }) {
+      affected_rows
     }
   }
 `;

@@ -18,6 +18,7 @@ import {
     Home as HomeIcon,
     Group as GroupIcon,
     AccountBox as AccountBoxIcon,
+    HourglassEmpty as HourglassEmptyIcon,
     SportsKabaddi as SportsKabaddiIcon,
     MonetizationOn as MonetizationOnIcon
   } from "@material-ui/icons";
@@ -32,10 +33,12 @@ import User from '../users/user';
 import Assists from '../assists/assists';
 import NewUserType from '../userTypes/newUserType';
 import UserType from '../userTypes/userType';
+import PaymentPeriod from '../paymentPeriods/paymentPeriods';
 import NotFound from '../notFound/notFound';
 import NewLesson from '../lessons/newLesson';
 import Lesson from '../lessons/lesson';
-import Packages from '../classPackages/packages';
+import ClassesPrice from '../classesPrice/classesPrice';
+import NewClassPrice from '../classesPrice/newClassPrice';
 
 const drawerWidth = 240;
 
@@ -131,6 +134,14 @@ export default function Header() {
           <ListItemText primary="Users type" />
         </ListItem>
       </NavLink>
+      <NavLink to="/paymentPeriods" className={classes.navLink}>
+        <ListItem button>
+          <ListItemIcon>
+            <HourglassEmptyIcon className={classes.icons} />
+          </ListItemIcon>
+          <ListItemText primary="Payment periods" />
+        </ListItem>
+      </NavLink>
       <NavLink to="/lessons" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
@@ -139,12 +150,12 @@ export default function Header() {
           <ListItemText primary="Classes" />
         </ListItem>
       </NavLink>
-      <NavLink to="/packages" className={classes.navLink}>
+      <NavLink to="/classesPrice" className={classes.navLink}>
         <ListItem button>
           <ListItemIcon>
             <MonetizationOnIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Packages" />
+          <ListItemText primary="Classes price" />
         </ListItem>
       </NavLink>
       </List>
@@ -210,12 +221,14 @@ export default function Header() {
             <Route exact path="/userTypes" component={UserTypes} />
             <Route exact path="/newUserType" component={NewUserType} />
             <Route exact path="/userType/:userTypeId" component={UserType} />
+            <Route exact path="/paymentPeriods" component={PaymentPeriod} />
             <Route exact path="/lessons" component={Lessons} />
             <Route exact path="/newLesson" component={NewLesson} />
             <Route exact path="/lesson/:classId" component={Lesson} />
             <Route exact path="/assists/:userId" component={Assists} />
             <Route exact path="/products" component={Products} />	
-            <Route exact path="/packages" component={Packages} />	
+            <Route exact path="/classesPrice" component={ClassesPrice} />	
+            <Route exact path="/newClassPrice" component={NewClassPrice} />	
             <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>

@@ -6,6 +6,7 @@ export const keyValidation = (e, tipo) => {
   const otros = " ";
   const addressEspecial = "#.,";
   const emailEspecial = "@-_.";
+  const classesEspecial = "/()-&";
   const validos =
     tipo === 1
       ? letras + otros
@@ -15,7 +16,9 @@ export const keyValidation = (e, tipo) => {
       ? letras + numeros + otros + addressEspecial
       : tipo === 4
       ? letras + numeros + otros + emailEspecial
-      : letras + numeros + otros;
+      : tipo === 5
+      ? letras + numeros + otros
+      : letras + numeros + otros + classesEspecial + addressEspecial;
   if (validos.indexOf(teclado) === -1) {
     e.preventDefault();
   }
@@ -28,6 +31,7 @@ export const pasteValidation = (e, tipo) => {
   const otros = " ";
   const addressEspecial = "#.,";
   const emailEspecial = "@-_.";
+  const classesEspecial = "/()-&";
   const validos =
     tipo === 1
       ? letras + otros
@@ -37,7 +41,9 @@ export const pasteValidation = (e, tipo) => {
       ? letras + numeros + otros + addressEspecial
       : tipo === 4
       ? letras + numeros + otros + emailEspecial
-      : letras + numeros + otros;
+      : tipo === 5
+      ? letras + numeros + otros
+      : letras + numeros + otros + classesEspecial + addressEspecial;
   let aprovadas = "";
   for (let x = 0; x < value.length; x++) {
     if (validos.indexOf(value[x].toLowerCase()) !== -1) {

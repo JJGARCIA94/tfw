@@ -164,10 +164,10 @@ export default function NewLesson() {
               maxLength: 50
             }}
             onKeyPress={e => {
-              keyValidation(e,3);
+              keyValidation(e,6);
             }}
             onChange={e => {
-              pasteValidation(e,3);
+              pasteValidation(e,6);
               setClassState({
                 ...classState,
                 name: e.target.value
@@ -188,10 +188,10 @@ export default function NewLesson() {
               maxLength: 200
             }}
             onKeyPress={e => {
-              keyValidation(e,3);
+              keyValidation(e,6);
             }}
             onChange={e => {
-              pasteValidation(e,3);
+              pasteValidation(e,6);
               setClassState({
                 ...classState,
                 description: e.target.value

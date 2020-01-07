@@ -223,3 +223,62 @@ export const GET_CLASS = gql`
     }
   }
 `;
+
+export const GET_CLASSES_PRICE = gql`
+  subscription get_classes_price {
+    classes_price {
+      id
+      name
+      status
+      created_at
+      updated_at
+      R_classes_price_details {
+        id
+        classes_id
+        status
+        created_at
+        updated_at
+        R_classes {
+          name
+        }
+      }
+      R_classes_price_payment_periods {
+        persons
+        total
+        specifications
+        R_payment_period {
+          id
+          period
+        }
+      }
+    }
+  }
+`;
+
+export const GET_PAYMENT_PERIODS = gql`
+  subscription get_payment_periods {
+    payment_periods(where: { status: { _eq: 1 } }) {
+      id
+      period
+    }
+  }
+`;
+
+export const GET_CLASSES_ALL = gql`
+  subscription get_classes_all {
+    classes(where: { status: { _eq: 1 } }) {
+      id
+      name
+    }
+  }
+`;
+
+export const GET_PAYMENT_PERIODS_ALL = gql`
+  subscription get_payment_periods_all {
+    payment_periods {
+      id
+      period
+      status
+    }
+  }
+`;

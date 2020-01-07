@@ -162,3 +162,37 @@ export const RESTORE_CLASS = gql`
     }
   }
 `;
+
+export const ADD_CLASS_PRICE = gql`
+  mutation add_class_price(
+    $specifications: String
+    $total: numeric!
+    $paymentPeriodId: Int!
+    $persons: Int!
+  ) {
+    insert_classes_price(
+      objects: {
+        specifications: $specifications
+        total: $total
+        payment_period_id: $paymentPeriodId
+        persons: $persons
+      }
+    ) {
+      returning {
+        id
+      }
+    }
+  }
+`;
+
+
+export const ADD_CLASS_PRICE_DETAILS = gql`
+mutation add_class_price_details($classesPriceId: Int!, $classesId: Int!){
+  insert_classes_price_details(objects:[{
+    classes_price_id: $classesPriceId,
+    classes_id: $classesId
+  },]){
+    affected_rows
+  }
+}
+`;

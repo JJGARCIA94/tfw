@@ -164,7 +164,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Users() {
   const classes = useStyles();
-  const [order, setOrder] = useState("asc");
+  const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("id");
   const [page, setPage] = useState(0);
   const [handlePage, setHandlePage] = useState(false);

@@ -56,8 +56,13 @@ const useStyles = makeStyles(theme => ({
   cardContent: {
     textAlign: "justify"
   },
+  typografyActions: {
+    background: "#ebebeb",
+    marginBottom: "10px",
+    textAlign: "end"
+  },
   addIcon: {
-    color: "blue",
+    color: "#1976D2",
     fontSize: 100
   },
   editIcon: {
@@ -130,8 +135,7 @@ export default function Lessons() {
         <Grid item xs={12} md={6} lg={4} key={lesson.id}>
           <Card className={classes.cards}>
             <CardContent>
-              <Typography variant="h4" className={classes.cardTittle}>
-                {`${lesson.name} `}
+              <Typography className={classes.typografyActions}>
                 <Link to={"/lesson/" + lesson.id}>
                   <IconButton title="Edit class">
                     <EditIcon className={classes.editIcon} />
@@ -151,8 +155,16 @@ export default function Lessons() {
                   )}
                 </IconButton>
               </Typography>
+              <Typography variant="subtitle1" className={classes.cardTittle}>
+                <strong>Name: </strong>
+                {`${lesson.name} `}
+              </Typography>
               <Typography variant="subtitle1">
+                <strong>Coach: </strong>
                 {`${lesson.R_users_data.first_name} ${lesson.R_users_data.last_name} `}
+              </Typography>
+              <Typography variant="subtitle1">
+                <strong>Members: </strong>
                 <span
                   style={{
                     cursor:
@@ -176,7 +188,7 @@ export default function Lessons() {
                       ? "See members of this class"
                       : null
                   }
-                >{`- ${lesson.R_classes_details_aggregate.aggregate.count} members`}</span>
+                >{`${lesson.R_classes_details_aggregate.aggregate.count} members`}</span>
                 <IconButton
                   title="See members history of this class"
                   onClick={() => {
@@ -186,7 +198,8 @@ export default function Lessons() {
                   <QueryBuilderIcon />
                 </IconButton>
               </Typography>
-              <Typography variant="h6" className={classes.cardContent}>
+              <Typography variant="subtitle1" className={classes.cardContent}>
+                <strong>Description: </strong>
                 {lesson.description}
               </Typography>
             </CardContent>
@@ -278,7 +291,6 @@ export default function Lessons() {
 
   return (
     <Grid container>
-      {getClasses()}
       <Grid item xs={12} md={6} lg={4}>
         <Card className={classes.cardAdd}>
           <CardContent>
@@ -290,6 +302,7 @@ export default function Lessons() {
           </CardContent>
         </Card>
       </Grid>
+      {getClasses()}
       <Dialog
         open={openDialog}
         onClose={() => {

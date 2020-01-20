@@ -12,7 +12,7 @@ import {
   Snackbar
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useSubscription, useMutation } from "@apollo/react-hooks";
 import { GET_USER_TYPE_BY_ID } from "../../database/queries";
 import { UPDATE_USER_TYPE } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
@@ -69,7 +69,7 @@ export default function UserType(props) {
     data: userTypeData,
     loading: userTypeLoading,
     error: userTypeError
-  } = useQuery(GET_USER_TYPE_BY_ID, {
+  } = useSubscription(GET_USER_TYPE_BY_ID, {
     variables: {
       userTypeId: userTypeId
     }

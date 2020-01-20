@@ -19,7 +19,8 @@ import {
   ListItemAvatar,
   ListItemText,
   Avatar,
-  Snackbar
+  Snackbar,
+  Divider
 } from "@material-ui/core";
 import {
   AddCircleOutline as AddCircleOutlineIcon,
@@ -137,7 +138,7 @@ export default function Lessons() {
             <CardContent>
               <Typography className={classes.typografyActions}>
                 <Link to={"/lesson/" + lesson.id}>
-                  <IconButton title="Edit class">
+                  <IconButton title="See class information">
                     <EditIcon className={classes.editIcon} />
                   </IconButton>
                 </Link>
@@ -161,7 +162,11 @@ export default function Lessons() {
               </Typography>
               <Typography variant="subtitle1">
                 <strong>Coach: </strong>
-                {`${lesson.R_users_data.first_name} ${lesson.R_users_data.last_name} `}
+                {lesson.R_users_data.status !== 0 ? (
+                  `${lesson.R_users_data.first_name} ${lesson.R_users_data.last_name} `
+                ) : (
+                  <span style={{ color: "#d32f2f" }}>Sin couch</span>
+                )}
               </Typography>
               <Typography variant="subtitle1">
                 <strong>Members: </strong>
@@ -291,6 +296,10 @@ export default function Lessons() {
 
   return (
     <Grid container>
+      <Grid item xs={12}>
+        <Typography variant="h6">Clases</Typography>
+        <Divider />
+      </Grid>
       <Grid item xs={12} md={6} lg={4}>
         <Card className={classes.cardAdd}>
           <CardContent>

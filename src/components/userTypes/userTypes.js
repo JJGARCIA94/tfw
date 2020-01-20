@@ -28,7 +28,7 @@ import {
   Delete as DeleteIcon,
   RestoreFromTrash as RestoreFromTrashIcon
 } from "@material-ui/icons";
-import { useSubscription, useQuery, useMutation } from "@apollo/react-hooks";
+import { useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_USER_TYPES_ALL,
   GET_USER_BY_USER_TYPE
@@ -84,7 +84,7 @@ export default function UserTypes() {
     loading: userTypesLoading,
     error: userTypesError
   } = useSubscription(GET_USER_TYPES_ALL);
-  const { data: userData, loading: userLoading, error: userError } = useQuery(
+  const { data: userData, loading: userLoading, error: userError } = useSubscription(
     GET_USER_BY_USER_TYPE,
     {
       variables: {
@@ -104,7 +104,7 @@ export default function UserTypes() {
     return <NotFound />;
   }
 
-  const handleOpenDialog = (idUsuario, newStatus) => {
+  const handleOpenDialog = (idTipoUsuario, newStatus) => {
     setDialog({
       openDialog: true,
       tittleDialog:
@@ -115,7 +115,7 @@ export default function UserTypes() {
         newStatus === 0
           ? "Once deleted, this user type will not be available to select when create or update a user."
           : "Once restored, this user type will be available to select when create or update a user.",
-      idDialog: idUsuario,
+      idDialog: idTipoUsuario,
       statusDialog: newStatus
     });
   };

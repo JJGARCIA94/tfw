@@ -30,12 +30,19 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
   RestoreFromTrash as RestoreFromTrashIcon,
-  EventAvailable as EventAvailableIcon
+  EventAvailable as EventAvailableIcon,
+  MonetizationOn as MonetizationOnIcon,
+  FindInPage as FindInPageIcon
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_USERS_BY_NAME, GET_USER_TYPES } from "../../database/queries";
+import {
+  GET_USERS_BY_NAME,
+  GET_USER_TYPES,
+  GET_USER_TYPE_VALIDATION
+} from "../../database/queries";
 import { UPDATE_USER_STATUS } from "../../database/mutations";
+import NotFound from "../notFound/notFound";
 
 let rows = [];
 
@@ -176,6 +183,7 @@ export default function Users() {
     tittleDialog: "",
     textDialog: "",
     idDialog: 0,
+    idUserTypeDialog: 0,
     statusDialog: 0
   });
   const [snackbarState, setSnackbarState] = useState({
@@ -190,6 +198,7 @@ export default function Users() {
     tittleDialog,
     textDialog,
     idDialog,
+    idUserTypeDialog,
     statusDialog
   } = dialog;
   const {
@@ -203,18 +212,34 @@ export default function Users() {
     updateUserStatusMutation,
     { loading: updateUserStatusLoading, error: updateUserStatusError }
   ] = useMutation(UPDATE_USER_STATUS);
-  const { loading: usersLoading, data: usersData } = useSubscription(
-    GET_USERS_BY_NAME,
-    {
-      variables: {
-        search: `%${search}%`,
-        userType: userType !== "0" ? userType : null
-      }
+  const {
+    loading: usersLoading,
+    data: usersData,
+    error: usersError
+  } = useSubscription(GET_USERS_BY_NAME, {
+    variables: {
+      search: `%${search}%`,
+      userType: userType !== "0" ? userType : null
     }
-  );
-  const { loading: userTypesLoading, data: userTypesData } = useSubscription(GET_USER_TYPES)
-  if (usersLoading || userTypesLoading) {
+  });
+  const {
+    loading: userTypesLoading,
+    data: userTypesData,
+    error: userTypesError
+  } = useSubscription(GET_USER_TYPES);
+  const {
+    loading: userTypesValidationLoading,
+    data: userTypesValidationData,
+    userTypesValidationError
+  } = useSubscription(GET_USER_TYPE_VALIDATION, {
+    variables: {
+      userTypeId: idUserTypeDialog
+    }
+  });
+  if (usersLoading || userTypesLoading || userTypesValidationLoading) {
     return <CircularProgress />;
+  } else if (usersError || userTypesError || userTypesValidationError) {
+    return <NotFound />;
   } else {
     rows = [];
     if (page !== 0 && !handlePage) {
@@ -235,14 +260,14 @@ export default function Users() {
   }
 
   const getUserTypes = () => {
-    return(
-      userTypesData.users_type.map(userType => {
-        return (
-          <option key={userType.id} value={userType.id}>{userType.name}</option>
-        );
-      })
-    );
-  }
+    return userTypesData.users_type.map(userType => {
+      return (
+        <option key={userType.id} value={userType.id}>
+          {userType.name}
+        </option>
+      );
+    });
+  };
 
   const handleRequestSort = (event, property) => {
     const isDesc = orderBy === property && order === "desc";
@@ -260,7 +285,7 @@ export default function Users() {
     setPage(0);
   };
 
-  const handleOpenDialog = (idUsuario, newStatus) => {
+  const handleOpenDialog = (idUsuario, idTipoUsuario, newStatus) => {
     setDialog({
       openDialog: true,
       tittleDialog:
@@ -272,40 +297,56 @@ export default function Users() {
           ? "Once deleted, this user will not be able to enter the platform."
           : "Once restored, this user will be able to enter the platform.",
       idDialog: idUsuario,
+      idUserTypeDialog: idTipoUsuario,
       statusDialog: newStatus
     });
   };
 
   const handleCloseDialog = agree => {
     if (agree) {
-      updateUserStatusMutation({
-        variables: {
-          id: idDialog,
-          newStatus: statusDialog
-        }
-      });
-      if (updateUserStatusLoading) return <CircularProgress />;
-      if (updateUserStatusError) {
+      if (
+        userTypesValidationData.users_type_aggregate.aggregate.count === 0 &&
+        statusDialog === 1
+      ) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "An error occurred",
+          snackbarText:
+            "It can´t be restore because the user type of this user doesn´t be active.",
           snackbarColor: "#d32f2f"
         });
         return;
+      } else {
+        updateUserStatusMutation({
+          variables: {
+            id: idDialog,
+            newStatus: statusDialog
+          }
+        });
+        if (updateUserStatusLoading) return <CircularProgress />;
+        if (updateUserStatusError) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "An error occurred",
+            snackbarColor: "#d32f2f"
+          });
+          return;
+        }
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText: statusDialog === 1 ? "User restored" : "User deleted",
+          snackbarColor: "#43a047"
+        });
       }
-      setSnackbarState({
-        ...snackbarState,
-        openSnackBar: true,
-        snackbarText: statusDialog === 1 ? "User restored" : "User deleted",
-        snackbarColor: "#43a047"
-      });
     }
     setDialog({
       openDialog: false,
       tittleDialog: "",
       textDialog: "",
       idDialog: 0,
+      idUserTypeDialog: 0,
       statusDialog: 0
     });
   };
@@ -361,7 +402,7 @@ export default function Users() {
                 label="Select a user type to search"
                 margin="normal"
                 value={userType}
-                onChange={(e) => {
+                onChange={e => {
                   setUserType(e.target.value);
                 }}
               >
@@ -419,7 +460,11 @@ export default function Users() {
                           }
                           onClick={() => {
                             const newStatus = row.status === 1 ? 0 : 1;
-                            handleOpenDialog(row.id, newStatus);
+                            handleOpenDialog(
+                              row.id,
+                              row.user_type_id,
+                              newStatus
+                            );
                           }}
                         >
                           {row.status === 1 ? (
@@ -432,6 +477,20 @@ export default function Users() {
                           <Link to={"/assists/" + row.id}>
                             <IconButton title="Check assists">
                               <EventAvailableIcon className={classes.icons} />
+                            </IconButton>
+                          </Link>
+                        ) : null}
+                        {row.user_type_id === 2 ? (
+                          <Link to={"/newUserPayment/" + row.id}>
+                            <IconButton title="Pagos de cliente">
+                              <MonetizationOnIcon className={classes.icons} />
+                            </IconButton>
+                          </Link>
+                        ) : null}
+                        {row.user_type_id === 2 ? (
+                          <Link to={"/newUserPayment/" + row.id}>
+                            <IconButton title="Ver pagos de cliente">
+                              <FindInPageIcon className={classes.icons} />
                             </IconButton>
                           </Link>
                         ) : null}

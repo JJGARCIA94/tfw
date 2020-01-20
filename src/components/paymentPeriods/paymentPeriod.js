@@ -13,10 +13,10 @@ import {
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_COACHES, GET_CLASS } from "../../database/queries";
-import { UPDATE_CLASS } from "../../database/mutations";
-import NotFound from "../notFound/notFound";
+import { GET_PAYMENT_PERIOD_BY_ID } from "../../database/queries";
+import { UPDATE_PAYMENT_PERIOD } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
+import NotFound from "../notFound/notFound";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -38,13 +38,12 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Lesson(props) {
-  const classId = props.match.params.classId;
+export default function PaymentPeriod(props) {
+  const paymentPeriodId = props.match.params.paymentPeriodId;
   const classes = useStyles();
-  const [classState, setClassState] = useState({
-    name: "",
-    description: "",
-    coach: 0,
+  const [paymentPeriodState, setPaymentPeriodState] = useState({
+    period: "",
+    days: "",
     created_at: "",
     updated_at: ""
   });
@@ -63,80 +62,64 @@ export default function Lesson(props) {
     snackBarText,
     snackbarColor
   } = snackbarState;
-  const [
-    updateClassMutation,
-    { loading: classMutationLoading, error: classMutationError }
-  ] = useMutation(UPDATE_CLASS);
   const {
-    data: classData,
-    loading: classLoading,
-    error: classError
-  } = useSubscription(GET_CLASS, {
+    data: paymentPeriodData,
+    loading: paymentPeriodLoading,
+    error: paymentPeriodError
+  } = useSubscription(GET_PAYMENT_PERIOD_BY_ID, {
     variables: {
-      classId: classId
+      paymentPeriodId: paymentPeriodId
     }
   });
-  const {
-    data: coachesData,
-    loading: coachesLoading,
-    error: coachesError
-  } = useSubscription(GET_COACHES);
-  if (classLoading || coachesLoading) {
+  const [
+    updatePaymentPeriodMutation,
+    { loading: paymentPeriodUpdateLoading, error: paymentPeriodUpdateError }
+  ] = useMutation(UPDATE_PAYMENT_PERIOD);
+
+  if (paymentPeriodLoading) {
     return <CircularProgress />;
   }
-  if (classError || coachesError || classData.classes.length === 0) {
+
+  if (paymentPeriodError) {
     return <NotFound />;
   }
 
-  const getData = classData => {
-    const createAt = new Date(classData.created_at);
-    const updated_at = new Date(classData.updated_at);
-    setClassState({
-      name: classData.name,
-      description: classData.description,
-      coach: classData.R_users_data.status !== 0 ? classData.R_users_data.id : 0,
+  const getData = paymentPeriodData => {
+    const createAt = new Date(paymentPeriodData.created_at);
+    const updated_at = new Date(paymentPeriodData.updated_at);
+    setPaymentPeriodState({
+      period: paymentPeriodData.period,
+      days: paymentPeriodData.days,
       created_at: createAt.toLocaleString(),
       updated_at: updated_at.toLocaleString()
     });
   };
 
-  const getCoaches = () => {
-    return coachesData.users_data.map(coach => {
-      return (
-        <option
-          key={coach.id}
-          value={coach.id}
-        >{`${coach.first_name} ${coach.last_name}`}</option>
-      );
-    });
-  };
-
-  const updateClass = async () => {
+  const updatePaymentPeriod = async () => {
     setDisabledButton(true);
-    const { name, description, coach } = classState;
+    const { period, days } = paymentPeriodState;
 
-    if (name.trim() === "" || description.trim() === "" || coach === 0) {
+    if (period.trim() === "" || days === "" || parseInt(days) === 0) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son requeridos (el campo días debe ser mayor a 0)",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
       return;
     }
 
-    const resultUpdateClass = await updateClassMutation({
+    const resultUpdatePaymentPeriod = await updatePaymentPeriodMutation({
       variables: {
-        classId: classId,
-        name: name.trim(),
-        description: description.trim(),
-        idCoach: coach
+        paymentPeriodId: paymentPeriodId,
+        period: period.trim(),
+        days: parseInt(days)
       }
     });
 
-    if (classMutationLoading) return <CircularProgress />;
-    if (classMutationError) {
+    if (paymentPeriodUpdateLoading) return <CircularProgress />;
+    if (paymentPeriodUpdateError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -147,13 +130,14 @@ export default function Lesson(props) {
       return;
     }
 
-    const newClassData = resultUpdateClass.data.update_classes.returning[0];
-    getData(newClassData);
+    const newPaymentPeriod =
+      resultUpdatePaymentPeriod.data.update_payment_periods.returning[0];
+    getData(newPaymentPeriod);
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class updated",
+      snackBarText: "Payment period updated",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -162,12 +146,13 @@ export default function Lesson(props) {
   const handleClose = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
+
   return (
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Class information
-          <Link to="/lessons">
+          Add payment period
+          <Link to="/paymentPeriods">
             <ArrowBackIcon />
           </Link>
         </Typography>
@@ -177,9 +162,9 @@ export default function Lesson(props) {
           <TextField
             className={classes.textFields}
             id="create_at"
-            label="Created at"
+            label="Creado"
             margin="normal"
-            value={classState.created_at}
+            value={paymentPeriodState.created_at}
             disabled
           />
         </Grid>
@@ -188,9 +173,9 @@ export default function Lesson(props) {
           <TextField
             className={classes.textFields}
             id="updated_at"
-            label="Last update"
+            label="Última actualización"
             margin="normal"
-            value={classState.updated_at}
+            value={paymentPeriodState.updated_at}
             disabled
           />
         </Grid>
@@ -198,74 +183,51 @@ export default function Lesson(props) {
           <TextField
             className={classes.textFields}
             required
-            id="name"
-            label="Name"
+            id="period"
+            label="Periodo"
             margin="normal"
-            value={classState.name}
+            value={paymentPeriodState.period}
             inputProps={{
               maxLength: 50
             }}
             onKeyPress={e => {
-              keyValidation(e, 6);
+              keyValidation(e, 5);
             }}
             onChange={e => {
-              pasteValidation(e, 6);
-              setClassState({
-                ...classState,
-                name: e.target.value
+              pasteValidation(e, 5);
+              setPaymentPeriodState({
+                ...paymentPeriodState,
+                period: e.target.value
               });
             }}
           />
         </Grid>
-        <Grid item md={1}></Grid>
+        <Grid item md={1} />
         <Grid item md={5} xs={10}>
           <TextField
             className={classes.textFields}
             required
-            id="description"
-            label="Description"
+            id="days"
+            label="Días del periodo"
             margin="normal"
-            value={classState.description}
+            value={paymentPeriodState.days}
             inputProps={{
-              maxLength: 200
+              maxLength: 3
             }}
             onKeyPress={e => {
-              keyValidation(e, 6);
+              keyValidation(e, 2);
             }}
             onChange={e => {
-              pasteValidation(e, 6);
-              setClassState({
-                ...classState,
-                description: e.target.value
+              pasteValidation(e, 2);
+              setPaymentPeriodState({
+                ...paymentPeriodState,
+                days: e.target.value
               });
+            }}
+            onAnimationEnd={() => {
+              getData(paymentPeriodData.payment_periods[0]);
             }}
           />
-        </Grid>
-        <Grid item md={5} xs={10}>
-          <TextField
-            className={classes.textFields}
-            required
-            select
-            SelectProps={{
-              native: true
-            }}
-            id="coach"
-            label="Coach"
-            margin="normal"
-            value={classState.coach}
-            onAnimationEnd={() => {
-              getData(classData.classes[0]);
-            }}
-            onChange={e => {
-              setClassState({
-                ...classState,
-                coach: e.target.value
-              });
-            }}
-          >
-            <option value="0">Select a coach</option>
-            {getCoaches()}
-          </TextField>
         </Grid>
         <Grid item xs={10} md={11}>
           <Button
@@ -273,7 +235,7 @@ export default function Lesson(props) {
             disabled={disabledButton}
             className={classes.button}
             onClick={() => {
-              updateClass();
+              updatePaymentPeriod();
             }}
           >
             Save

@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useMutation } from "@apollo/react-hooks";
-import { ADD_USER_TYPE } from "../../database/mutations";
+import { ADD_PAYMENT_PERIOD } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
 const useStyles = makeStyles(theme => ({
@@ -36,10 +36,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function NewUserType() {
+export default function NewPaymentPeriod() {
   const classes = useStyles();
-  const [userTypeState, setUserTypeState] = useState({
-    name: ""
+  const [paymentPeriodState, setPaymentPeriodState] = useState({
+    period: "",
+    days: ""
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -57,33 +58,34 @@ export default function NewUserType() {
     snackbarColor
   } = snackbarState;
   const [
-    addUserTypeMutation,
-    { loading: userTypeLoading, error: userTypeError }
-  ] = useMutation(ADD_USER_TYPE);
+    addPaymentPeriodMutation,
+    { loading: paymentPeriodLoading, error: paymentPeriodError }
+  ] = useMutation(ADD_PAYMENT_PERIOD);
 
-  const addUserType = () => {
+  const addPaymentPeriod = () => {
     setDisabledButton(true);
-    const { name } = userTypeState;
+    const { period, days } = paymentPeriodState;
 
-    if (name.trim() === "") {
+    if (period.trim() === "" || days.trim() === "" || parseInt(days) === 0) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son requeridos (el campo días debe ser mayor a 0)",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
       return;
     }
 
-    addUserTypeMutation({
+    addPaymentPeriodMutation({
       variables: {
-        name: name.trim()
+        period: period.trim(),
+        days: parseInt(days)
       }
     });
 
-    if (userTypeLoading) return <CircularProgress />;
-    if (userTypeError) {
+    if (paymentPeriodLoading) return <CircularProgress />;
+    if (paymentPeriodError) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
@@ -94,14 +96,15 @@ export default function NewUserType() {
       return;
     }
 
-    setUserTypeState({
-      name: ""
+    setPaymentPeriodState({
+      period: "",
+      days: ""
     });
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "User type added",
+      snackBarText: "Payment period added",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -115,8 +118,8 @@ export default function NewUserType() {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add user type
-          <Link to="/userTypes">
+          Add payment period
+          <Link to="/paymentPeriods">
             <ArrowBackIcon />
           </Link>
         </Typography>
@@ -126,10 +129,10 @@ export default function NewUserType() {
           <TextField
             className={classes.textFields}
             required
-            id="name"
-            label="Name"
+            id="period"
+            label="Periodo"
             margin="normal"
-            value={userTypeState.name}
+            value={paymentPeriodState.period}
             inputProps={{
               maxLength: 50
             }}
@@ -138,8 +141,33 @@ export default function NewUserType() {
             }}
             onChange={e => {
               pasteValidation(e, 5);
-              setUserTypeState({
-                name: e.target.value
+              setPaymentPeriodState({
+                ...paymentPeriodState,
+                period: e.target.value
+              });
+            }}
+          />
+        </Grid>
+        <Grid item md={1}/>
+        <Grid item md={5} xs={10}>
+          <TextField
+            className={classes.textFields}
+            required
+            id="days"
+            label="Días del periodo"
+            margin="normal"
+            value={paymentPeriodState.days}
+            inputProps={{
+              maxLength: 3
+            }}
+            onKeyPress={e => {
+              keyValidation(e, 2);
+            }}
+            onChange={e => {
+              pasteValidation(e, 2);
+              setPaymentPeriodState({
+                ...paymentPeriodState,
+                days: e.target.value
               });
             }}
           />
@@ -150,7 +178,7 @@ export default function NewUserType() {
             disabled={disabledButton}
             className={classes.button}
             onClick={() => {
-              addUserType();
+              addPaymentPeriod();
             }}
           >
             Save

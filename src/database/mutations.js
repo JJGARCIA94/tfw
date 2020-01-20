@@ -70,6 +70,36 @@ export const UPDATE_USER_STATUS = gql`
     ) {
       affected_rows
     }
+    update_lockers_details(
+      where: { user_id: { _eq: $id } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_USER_PAYMENT = gql`
+  mutation add_user_payment(
+    $userId: Int!
+    $classesPricePaymentPeriodId: Int!
+    $discountPercent: numeric!
+    $total: numeric!
+    $paymentStart: date!
+    $paymentEnd: date!
+  ) {
+    insert_users_payments(
+      objects: {
+        user_id: $userId
+        classes_price_payment_period_id: $classesPricePaymentPeriodId
+        discount_percent: $discountPercent
+        total: $total
+        payment_start: $paymentStart
+        payment_end: $paymentEnd
+      }
+    ) {
+      affected_rows
+    }
   }
 `;
 
@@ -103,6 +133,45 @@ export const UPDATE_USER_TYPE = gql`
         updated_at
         name
       }
+    }
+  }
+`;
+
+export const ADD_PAYMENT_PERIOD = gql`
+  mutation add_payment_period($period: String!, $days: Int!) {
+    insert_payment_periods(objects: { period: $period, days: $days }) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT_PERIOD = gql`
+  mutation update_payment_period(
+    $paymentPeriodId: Int!
+    $period: String!
+    $days: Int!
+  ) {
+    update_payment_periods(
+      where: { id: { _eq: $paymentPeriodId } }
+      _set: { period: $period, days: $days }
+    ) {
+      returning {
+        period
+        days
+        created_at
+        updated_at
+      }
+    }
+  }
+`;
+
+export const UPDATE_PAYMENT_PERIOD_STATUS = gql`
+  mutation update_payment_period_status($id: Int!, $newStatus: Int!) {
+    update_payment_periods(
+      where: { id: { _eq: $id } }
+      _set: { status: $newStatus }
+    ) {
+      affected_rows
     }
   }
 `;
@@ -185,14 +254,214 @@ export const ADD_CLASS_PRICE = gql`
   }
 `;
 
+/*export const ADD_CLASS_PRICE_DETAILS = gql`
+  mutation add_class_price_details($classesPriceId: Int!, $classesId: Int!) {
+    insert_classes_price_details(
+      objects: [{ classes_price_id: $classesPriceId, classes_id: $classesId }]
+    ) {
+      affected_rows
+    }
+  }
+`;*/
+
+export const UPDATE_CLASSES_PRICE_STATUS = gql`
+  mutation update_classes_price_status($id: Int!, $newStatus: Int!) {
+    update_classes_price(
+      where: { id: { _eq: $id } }
+      _set: { status: $newStatus }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_CLASSES_PRICE_NAME = gql`
+  mutation update_classes_price_name($classesPriceId: Int!, $name: String!) {
+    update_classes_price(
+      where: { id: { _eq: $classesPriceId } }
+      _set: { name: $name }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_CLASSES_PRICE_DETAILS_STATUS = gql`
+  mutation update_classes_price_details_status($id: Int!, $newStatus: Int!) {
+    update_classes_price_details(
+      where: { id: { _eq: $id } }
+      _set: { status: $newStatus }
+    ) {
+      affected_rows
+    }
+  }
+`;
 
 export const ADD_CLASS_PRICE_DETAILS = gql`
-mutation add_class_price_details($classesPriceId: Int!, $classesId: Int!){
-  insert_classes_price_details(objects:[{
-    classes_price_id: $classesPriceId,
-    classes_id: $classesId
-  },]){
-    affected_rows
+  mutation add_class_price_detail($classPriceId: Int!, $classId: Int!) {
+    insert_classes_price_details(
+      objects: { classes_price_id: $classPriceId, classes_id: $classId }
+    ) {
+      affected_rows
+    }
   }
-}
+`;
+
+export const UPDATE_CLASSES_PRICE_PAYMENT_PERIOD_STATUS = gql`
+  mutation update_classes_price_payment_period_status(
+    $id: Int!
+    $newStatus: Int!
+  ) {
+    update_classes_price_payment_period(
+      where: { id: { _eq: $id } }
+      _set: { status: $newStatus }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_CLASS_PRICE_PAYMENT_PERIOD = gql`
+  mutation add_class_price_payment_period(
+    $classPriceId: Int!
+    $paymentPeriodId: Int!
+    $persons: Int!
+    $total: numeric!
+    $specifications: String!
+  ) {
+    insert_classes_price_payment_period(
+      objects: {
+        classes_price_id: $classPriceId
+        payment_period_id: $paymentPeriodId
+        persons: $persons
+        total: $total
+        specifications: $specifications
+      }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_CLASS_PRICE_PAYMENT_PERIOD = gql`
+  mutation update_class_price_payment_period(
+    $classPricePaymentPeriodId: Int!
+    $paymentPeriodId: Int!
+    $persons: Int!
+    $total: numeric!
+    $specifications: String!
+  ) {
+    update_classes_price_payment_period(
+      where: { id: { _eq: $classPricePaymentPeriodId } }
+      _set: {
+        payment_period_id: $paymentPeriodId
+        persons: $persons
+        total: $total
+        specifications: $specifications
+      }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const DELETE_LOCKET_BY_ID = gql`
+  mutation delete_locker_by_id($lockerId: Int!, $lockerDetailId: bigint!) {
+    update_lockers(where: { id: { _eq: $lockerId } }, _set: { status: 0 }) {
+      affected_rows
+    }
+    update_lockers_details(
+      where: { id: { _eq: $lockerDetailId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const RESTORE_LOCKET_BY_ID = gql`
+  mutation restore_locker_by_id($lockerId: Int!) {
+    update_lockers(where: { id: { _eq: $lockerId } }, _set: { status: 1 }) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_LOCKER = gql`
+  mutation add_locker($number: Int!) {
+    insert_lockers(objects: { number: $number }) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_LOCKER = gql`
+  mutation update_locker($lockerId: Int!, $number: Int!) {
+    update_lockers(
+      where: { id: { _eq: $lockerId } }
+      _set: { number: $number }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_LOCKER_DETAIL = gql`
+  mutation add_locker_detail($lockerId: Int!, $userId: Int!) {
+    insert_lockers_details(
+      objects: { locker_id: $lockerId, user_id: $userId }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_AND_UPDATE_LOCKER_DETAIL = gql`
+  mutation add_and_update_locker_detail(
+    $lockerDetailId: bigint!
+    $lockerId: Int!
+    $userId: Int!
+  ) {
+    update_lockers_details(
+      where: { id: { _eq: $lockerDetailId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+    insert_lockers_details(
+      objects: { locker_id: $lockerId, user_id: $userId }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_LOCKER_DETAIL_STATUS = gql`
+  mutation update_locker_detail_status($lockerDetailId: bigint!) {
+    update_lockers_details(
+      where: { id: { _eq: $lockerDetailId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const ADD_LOCKERS_SETTINGS = gql`
+  mutation add_lockers_settings($price: numeric!) {
+    insert_lockers_settings(objects: { price: $price }) {
+      affected_rows
+    }
+  }
+`;
+
+export const UPDATE_LOCKERS_SETTINGS = gql`
+  mutation update_lockers_settings($lockersSettingsId: Int!, $price: numeric!) {
+    update_lockers_settings(
+      where: { id: { _eq: $lockersSettingsId } }
+      _set: { price: $price }
+    ) {
+      affected_rows
+    }
+  }
 `;

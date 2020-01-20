@@ -20,7 +20,8 @@ import {
     AccountBox as AccountBoxIcon,
     HourglassEmpty as HourglassEmptyIcon,
     SportsKabaddi as SportsKabaddiIcon,
-    MonetizationOn as MonetizationOnIcon
+    MonetizationOn as MonetizationOnIcon,
+    Https as HttpsIcon
   } from "@material-ui/icons";
 import TFWLogo from "../../assets/images/logo.png";
 import Home from '../home/home';
@@ -32,13 +33,20 @@ import Products from '../products/products';
 import User from '../users/user';
 import Assists from '../assists/assists';
 import NewUserType from '../userTypes/newUserType';
+import NewUserPayment from '../usersPayment/newUserPayment';
 import UserType from '../userTypes/userType';
-import PaymentPeriod from '../paymentPeriods/paymentPeriods';
+import PaymentPeriods from '../paymentPeriods/paymentPeriods';
+import NewPaymentPeriod from '../paymentPeriods/newPaymentPeriod';
+import PaymentPeriod from '../paymentPeriods/paymentPeriod';
 import NotFound from '../notFound/notFound';
 import NewLesson from '../lessons/newLesson';
 import Lesson from '../lessons/lesson';
 import ClassesPrice from '../classesPrice/classesPrice';
 import NewClassPrice from '../classesPrice/newClassPrice';
+import ClassesClassPrice from '../classesPrice/classesClassPrice';
+import PaymentsClassPrice from '../classesPrice/paymentsClassPrice';
+import Lockers from '../lockers/lockers';
+import SelectUserToLocker from '../lockers/selectUserToLocker';
 
 const drawerWidth = 240;
 
@@ -123,7 +131,7 @@ export default function Header() {
           <ListItemIcon>
             <GroupIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Users" />
+          <ListItemText primary="Usuarios" />
         </ListItem>
       </NavLink>
       <NavLink to="/userTypes" className={classes.navLink}>
@@ -131,7 +139,7 @@ export default function Header() {
           <ListItemIcon>
             <AccountBoxIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Users type" />
+          <ListItemText primary="Tipos de usuario" />
         </ListItem>
       </NavLink>
       <NavLink to="/paymentPeriods" className={classes.navLink}>
@@ -139,7 +147,7 @@ export default function Header() {
           <ListItemIcon>
             <HourglassEmptyIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Payment periods" />
+          <ListItemText primary="Períodos de pago" />
         </ListItem>
       </NavLink>
       <NavLink to="/lessons" className={classes.navLink}>
@@ -147,7 +155,7 @@ export default function Header() {
           <ListItemIcon>
             <SportsKabaddiIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Classes" />
+          <ListItemText primary="Clases" />
         </ListItem>
       </NavLink>
       <NavLink to="/classesPrice" className={classes.navLink}>
@@ -155,7 +163,15 @@ export default function Header() {
           <ListItemIcon>
             <MonetizationOnIcon className={classes.icons} />
           </ListItemIcon>
-          <ListItemText primary="Classes price" />
+          <ListItemText primary="Precios de clases y paquetes" />
+        </ListItem>
+      </NavLink>
+      <NavLink to="/lockers" className={classes.navLink}>
+        <ListItem button>
+          <ListItemIcon>
+            <HttpsIcon className={classes.icons} />
+          </ListItemIcon>
+          <ListItemText primary="Casilleros" />
         </ListItem>
       </NavLink>
       </List>
@@ -220,8 +236,11 @@ export default function Header() {
             <Route exact path="/user/:userId" component={User} />
             <Route exact path="/userTypes" component={UserTypes} />
             <Route exact path="/newUserType" component={NewUserType} />
+            <Route exact path="/newUserPayment/:userId" component={NewUserPayment} />
             <Route exact path="/userType/:userTypeId" component={UserType} />
-            <Route exact path="/paymentPeriods" component={PaymentPeriod} />
+            <Route exact path="/paymentPeriods" component={PaymentPeriods} />
+            <Route exact path="/newPaymentPeriod" component={NewPaymentPeriod} />
+            <Route exact path="/paymentPeriod/:paymentPeriodId" component={PaymentPeriod} />
             <Route exact path="/lessons" component={Lessons} />
             <Route exact path="/newLesson" component={NewLesson} />
             <Route exact path="/lesson/:classId" component={Lesson} />
@@ -229,6 +248,10 @@ export default function Header() {
             <Route exact path="/products" component={Products} />	
             <Route exact path="/classesPrice" component={ClassesPrice} />	
             <Route exact path="/newClassPrice" component={NewClassPrice} />	
+            <Route exact path="/classesClassPrice/:classPriceId" component={ClassesClassPrice} />	
+            <Route exact path="/paymentsClassPrice/:classPriceId" component={PaymentsClassPrice} />	
+            <Route exact path="/lockers" component={Lockers} />
+            <Route exact path="/selectUserToLocker/:lockerId" component={SelectUserToLocker} />
             <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>

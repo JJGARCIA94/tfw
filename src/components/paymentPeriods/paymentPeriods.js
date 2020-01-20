@@ -28,12 +28,12 @@ import {
   Delete as DeleteIcon,
   RestoreFromTrash as RestoreFromTrashIcon
 } from "@material-ui/icons";
-import { useSubscription, useQuery, useMutation } from "@apollo/react-hooks";
+import { useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_PAYMENT_PERIODS_ALL,
-  GET_USER_BY_USER_TYPE
+  GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD
 } from "../../database/queries";
-import { UPDATE_USER_TYPE_STATUS } from "../../database/mutations";
+import { UPDATE_PAYMENT_PERIOD_STATUS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
 
 const useStyles = makeStyles(theme => ({
@@ -84,38 +84,38 @@ export default function PaymentPeriods() {
     loading: paymentPeriodsLoading,
     error: paymentPeriodsError
   } = useSubscription(GET_PAYMENT_PERIODS_ALL);
-  const { data: userData, loading: userLoading, error: userError } = useQuery(
-    GET_USER_BY_USER_TYPE,
+  const { data: classesPricePaymentPeriodData, loading: classesPricePaymentPeriodLoading, error: classesPricePaymentPeriodError } = useSubscription(
+    GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD,
     {
       variables: {
-        userTypeId: idDialog
+        paymentPeriodId: idDialog
       }
     }
   );
   const [
-    updateUserTypeStatusMutation,
-    { loading: updateUserTypeStatusLoading, error: updateUserTypeStatusError }
-  ] = useMutation(UPDATE_USER_TYPE_STATUS);
+    updatePaymentPeriodStatusMutation,
+    { loading: updatePaymentPeriodStatusLoading, error: updatePaymentPeriodStatusError }
+  ] = useMutation(UPDATE_PAYMENT_PERIOD_STATUS);
 
-  if (userLoading || paymentPeriodsLoading) {
+  if (classesPricePaymentPeriodLoading || paymentPeriodsLoading) {
     return <CircularProgress />;
   }
-  if (userError || paymentPeriodsError) {
+  if (classesPricePaymentPeriodError || paymentPeriodsError) {
     return <NotFound />;
   }
 
-  const handleOpenDialog = (idUsuario, newStatus) => {
+  const handleOpenDialog = (idPaymentPeriod, newStatus) => {
     setDialog({
       openDialog: true,
       tittleDialog:
         newStatus === 0
-          ? "Do you want to delete this user type?"
-          : "Do you want to restore this user type?",
+          ? "Do you want to delete this payment period?"
+          : "Do you want to restore this payment period?",
       textDialog:
         newStatus === 0
-          ? "Once deleted, this user type will not be available to select when create or update a user."
-          : "Once restored, this user type will be available to select when create or update a user.",
-      idDialog: idUsuario,
+          ? "Once deleted, this payment period will not be available to select when create or update a class price."
+          : "Once restored, this payment period will be available to select when create or update a class price.",
+      idDialog: idPaymentPeriod,
       statusDialog: newStatus
     });
   };
@@ -123,26 +123,26 @@ export default function PaymentPeriods() {
   const handleCloseDialog = agree => {
     if (agree) {
       if (
-        userData.users_data_aggregate.aggregate.count > 0 &&
+        classesPricePaymentPeriodData.classes_price_payment_period_aggregate.aggregate.count > 0 &&
         statusDialog === 0
       ) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "It can´t be remove because there are users with this user type.",
+            "It can´t be remove because there are classes price with this payment period.",
           snackbarColor: "#d32f2f"
         });
         return;
       } else {
-        updateUserTypeStatusMutation({
+        updatePaymentPeriodStatusMutation({
           variables: {
             id: idDialog,
             newStatus: statusDialog
           }
         });
-        if (updateUserTypeStatusLoading) return <CircularProgress />;
-        if (updateUserTypeStatusError) {
+        if (updatePaymentPeriodStatusLoading) return <CircularProgress />;
+        if (updatePaymentPeriodStatusError) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
@@ -155,7 +155,7 @@ export default function PaymentPeriods() {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            statusDialog === 1 ? "User type restored" : "User type deleted",
+            statusDialog === 1 ? "Payment period restored" : "Payment period deleted",
           snackbarColor: "#43a047"
         });
       }
@@ -185,7 +185,7 @@ export default function PaymentPeriods() {
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
               Payment periods
-              <Link to="/newUserType">
+              <Link to="/newPaymentPeriod">
                 <AddCircleIcon />
               </Link>
             </Typography>
@@ -195,8 +195,9 @@ export default function PaymentPeriods() {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell align="right">Actions</TableCell>
+            <TableCell>Periodo</TableCell>
+            <TableCell>Días del periodo</TableCell>
+            <TableCell align="right">Acciones</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -205,8 +206,11 @@ export default function PaymentPeriods() {
               <TableCell component="th" scope="row">
                 {row.period}
               </TableCell>
+              <TableCell component="th" scope="row">
+                {row.days}
+              </TableCell>
               <TableCell align="right">
-                <Link to={"/userType/" + row.id}>
+                <Link to={"/paymentPeriod/" + row.id}>
                   <IconButton title="See payment period">
                     <VisibilityIcon className={classes.icons} />
                   </IconButton>

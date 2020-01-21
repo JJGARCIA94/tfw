@@ -34,6 +34,7 @@ import User from '../users/user';
 import Assists from '../assists/assists';
 import NewUserType from '../userTypes/newUserType';
 import NewUserPayment from '../usersPayment/newUserPayment';
+import UserPayments from '../usersPayment/userPayments';
 import UserType from '../userTypes/userType';
 import PaymentPeriods from '../paymentPeriods/paymentPeriods';
 import NewPaymentPeriod from '../paymentPeriods/newPaymentPeriod';
@@ -237,6 +238,7 @@ export default function Header() {
             <Route exact path="/userTypes" component={UserTypes} />
             <Route exact path="/newUserType" component={NewUserType} />
             <Route exact path="/newUserPayment/:userId" component={NewUserPayment} />
+            <Route exact path="/userPayments/:userId" component={UserPayments} />
             <Route exact path="/userType/:userTypeId" component={UserType} />
             <Route exact path="/paymentPeriods" component={PaymentPeriods} />
             <Route exact path="/newPaymentPeriod" component={NewPaymentPeriod} />

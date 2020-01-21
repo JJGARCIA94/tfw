@@ -594,3 +594,36 @@ export const GET_LOCKERS_SETTINGS = gql`
     }
   }
 `;
+
+export const GET_USER_PAYMENTS_BY_USER_ID = gql`
+  subscription get_user_payments_by_user_id($userId: Int!) {
+    users_payments(
+      where: { user_id: { _eq: $userId } }
+      order_by: { payment_end: desc }
+    ) {
+      id
+      discount_percent
+      total
+      status
+      payment_start
+      payment_end
+      R_classes_price_payment_period {
+        id
+        payment_period_id
+        R_payment_period {
+          period
+        }
+        R_classes_price {
+          id
+          R_classes_price_details {
+            id
+            classes_id
+            R_classes {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;

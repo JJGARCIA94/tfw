@@ -31,8 +31,7 @@ import {
   Visibility as VisibilityIcon,
   RestoreFromTrash as RestoreFromTrashIcon,
   EventAvailable as EventAvailableIcon,
-  MonetizationOn as MonetizationOnIcon,
-  FindInPage as FindInPageIcon
+  MonetizationOn as MonetizationOnIcon
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -481,16 +480,9 @@ export default function Users() {
                           </Link>
                         ) : null}
                         {row.user_type_id === 2 ? (
-                          <Link to={"/newUserPayment/" + row.id}>
+                          <Link to={"/userPayments/" + row.id}>
                             <IconButton title="Pagos de cliente">
                               <MonetizationOnIcon className={classes.icons} />
-                            </IconButton>
-                          </Link>
-                        ) : null}
-                        {row.user_type_id === 2 ? (
-                          <Link to={"/newUserPayment/" + row.id}>
-                            <IconButton title="Ver pagos de cliente">
-                              <FindInPageIcon className={classes.icons} />
                             </IconButton>
                           </Link>
                         ) : null}

@@ -212,7 +212,7 @@ export default function NewUserPayment(props) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "An error occurred",
+          snackbarText: "Ha ocurrido un error",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -287,8 +287,8 @@ export default function NewUserPayment(props) {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Pagos de usuario
-          <Link to="/users">
+          Nuevo pago de usuario
+          <Link to={`/userPayments/`+userId}>
             <ArrowBackIcon />
           </Link>
         </Typography>

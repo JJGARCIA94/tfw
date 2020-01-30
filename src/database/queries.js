@@ -1,5 +1,14 @@
 import gql from "graphql-tag";
 
+export const GET_USER = gql`
+  query get_user($user: String!) {
+    users(where: { user: { _eq: $user }, status: { _eq: 1 } }) {
+      id
+      password
+    }
+  }
+`;
+
 export const GET_USER_TYPES = gql`
   subscription get_user_types {
     users_type(where: { status: { _eq: 1 } }) {
@@ -72,6 +81,14 @@ export const GET_USER_BY_ID = gql`
         id
         name
       }
+    }
+  }
+`;
+
+export const GET_USER_BY_ID_AUTH = gql`
+  query get_user_by_id_auth($id: Int!) {
+    users(where: { id: { _eq: $id }, status: { _eq: 1 } }) {
+      id
     }
   }
 `;
@@ -175,10 +192,11 @@ export const GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_CLASSES_PRICE_ID = gql`
 `;
 
 export const GET_USER_NAME_BY_USER_ID = gql`
-  query get_user_name_by_user_id($userid: Int!) {
+  subscription get_user_name_by_user_id($userid: Int!) {
     users_data(where: { id: { _eq: $userid } }) {
       first_name
       last_name
+      status
     }
   }
 `;
@@ -268,6 +286,7 @@ export const GET_CLASSES = gql`
           R_users_data: { status: { _eq: 1 } }
           _and: { status: { _eq: 1 } }
         }
+        distinct_on: user_id
       ) {
         aggregate {
           count
@@ -297,8 +316,10 @@ export const GET_MEMBERS_BY_CLASS = gql`
         class_id: { _eq: $classId }
         _and: { R_users_data: { status: { _eq: 1 } }, status: { _eq: 1 } }
       }
+      distinct_on: user_id
     ) {
       id
+      user_id
       R_users_data {
         first_name
         last_name
@@ -311,9 +332,14 @@ export const GET_MEMBERS_BY_CLASS = gql`
 `;
 
 export const GET_MEMBERS_BY_CLASS_HISTORY = gql`
-  subscription get_members_by_class($classId: Int!) {
+  subscription get_members_by_class($classId: Int!, $activeUsers: [Int!]) {
     classes_details(
-      where: { class_id: { _eq: $classId }, _and: { status: { _eq: 0 } } }
+      where: {
+        class_id: { _eq: $classId }
+        _and: { status: { _eq: 0 } }
+        user_id: { _nin: $activeUsers }
+      }
+      distinct_on: user_id
     ) {
       id
       R_users_data {
@@ -615,7 +641,7 @@ export const GET_USER_PAYMENTS_BY_USER_ID = gql`
         }
         R_classes_price {
           id
-          R_classes_price_details {
+          R_classes_price_details(where: { status: { _eq: 1 } }) {
             id
             classes_id
             R_classes {

@@ -285,6 +285,26 @@ export default function NewClassPrice() {
       }
     }
 
+    let validationClasses = 0;
+    for(let x = 0; x < clasess_id.length; x++) {
+      validationClasses = 0;
+      for(let y = (x+1); y <= clasess_id.length - 1; y++ ){
+        if(clasess_id[x] === clasess_id[y]) {
+          validationClasses++;
+        }
+        if(validationClasses > 0) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackbar: true,
+            snackBarText:"No selecciones la misma clase dos veces",
+            snackbarColor: "#d32f2f"
+          });
+          setDisabledButton(false);
+          return;
+        }
+      }
+    }
+
     for (let x = 0; x < payment_period.length; x++) {
       if (parseInt(payment_period[x]) === 0) {
         setSnackbarState({

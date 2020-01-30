@@ -76,6 +76,12 @@ export const UPDATE_USER_STATUS = gql`
     ) {
       affected_rows
     }
+    update_classes_details(
+      where: { user_id: { _eq: $id } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
   }
 `;
 

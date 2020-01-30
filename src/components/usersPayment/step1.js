@@ -45,6 +45,7 @@ export default function Step1(props) {
   const setClassPriceState = props.setClassPriceState;
   const selectedInformationState = props.selectedInformationState;
   const setSelectedInformationState = props.setSelectedInformationState;
+  const setSelectedClassesState = props.setSelectedClassesState;
   const {
     data: classesPriceData,
     loading: classesPriceLoading,
@@ -57,6 +58,7 @@ export default function Step1(props) {
   if (classesPriceError) {
     return <NotFound />;
   }
+
   const getClassesPrice = () => {
     return classesPriceData.classes_price.map((class_price, index) => {
       return (
@@ -79,6 +81,13 @@ export default function Step1(props) {
                         : "."
                     } `
                 )
+              });
+              let classesId = [];
+              class_price.R_classes_price_details.map(aClass =>
+                classesId.push(aClass.classes_id)
+              );
+              setSelectedClassesState({
+                ids: classesId
               });
             }}
           >

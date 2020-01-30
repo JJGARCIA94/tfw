@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -114,6 +114,8 @@ export default function Lessons() {
     snackbarText,
     snackbarColor
   } = snackbarState;
+  const [idClassState, setIdClassState] = useState(0);
+  const [activeUsersState, setActiveUsersState] = useState([]);
   const [
     updateClassStatusMutation,
     { loading: updateClassStatusLoading, error: updateClassStatusError }
@@ -123,10 +125,30 @@ export default function Lessons() {
     loading: classesLoading,
     error: classesError
   } = useSubscription(GET_CLASSES);
-  if (classesLoading) {
+  const {
+    data: membersData,
+    loading: membersLoading,
+    error: membersError
+  } = useSubscription(GET_MEMBERS_BY_CLASS, {
+    variables: {
+      classId: idClassState
+    }
+  });
+
+  useEffect(() => {
+    if (idClassState !== 0 && membersData) {
+      let activeUsers = [];
+      membersData.classes_details.map(member =>
+        activeUsers.push(member.user_id)
+      );
+      setActiveUsersState(activeUsers);
+    }
+  }, [idClassState, membersData]);
+
+  if (classesLoading || membersLoading) {
     return <CircularProgress />;
   }
-  if (classesError) {
+  if (classesError || membersError) {
     return <NotFound />;
   }
 
@@ -196,7 +218,8 @@ export default function Lessons() {
                 >{`${lesson.R_classes_details_aggregate.aggregate.count} members`}</span>
                 <IconButton
                   title="See members history of this class"
-                  onClick={() => {
+                  onClick={async () => {
+                    await setIdClassState(lesson.id);
                     handleOpenDialog(lesson.id, lesson.name, 0);
                   }}
                 >
@@ -322,7 +345,11 @@ export default function Lessons() {
       >
         <DialogTitle id="alert-dialog-title">{tittleDialog}</DialogTitle>
         <DialogContent dividers>
-          <Members classId={idDialog} status={statusDialog} />
+          <Members
+            classId={idDialog}
+            status={statusDialog}
+            activeUsersState={activeUsersState}
+          />
         </DialogContent>
         <DialogActions>
           <Button
@@ -386,6 +413,7 @@ export default function Lessons() {
 }
 
 function Members(props) {
+  const activeUsersState = props.activeUsersState;
   const {
     data: membersData,
     loading: membersLoading,
@@ -393,8 +421,11 @@ function Members(props) {
   } = useSubscription(
     props.status === 1 ? GET_MEMBERS_BY_CLASS : GET_MEMBERS_BY_CLASS_HISTORY,
     {
-      variables: {
+      variables: props.status === 1 ? {
         classId: props.classId
+      } : {
+        classId: props.classId,
+        activeUsers: activeUsersState
       }
     }
   );

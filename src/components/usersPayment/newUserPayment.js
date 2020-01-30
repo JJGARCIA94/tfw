@@ -22,6 +22,7 @@ import Step4 from "./step4";
 import { useMutation, useSubscription } from "@apollo/react-hooks";
 import { ADD_USER_PAYMENT } from "../../database/mutations";
 import { GET_USER_NAME_BY_USER_ID } from "../../database/queries";
+import gql from "graphql-tag";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -68,6 +69,9 @@ export default function NewUserPayment(props) {
     payment_period: "",
     amount: 0
   });
+  const [selectedClassesState, setSelectedClassesState] = useState({
+    ids: []
+  });
   const [classPriceState, setClassPriceState] = useState(0);
   const [paymentPeriodState, setPaymentPeriodState] = useState({
     id: 0,
@@ -99,6 +103,21 @@ export default function NewUserPayment(props) {
   const [selectedStep2, setSelectedStep2] = useState(-1);
   const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
+  const [classDetails, setClassDetails] = useState("");
+  const ADD_CLASS_DETAIL = gql`
+    mutation add_class_detail {
+      insert_classes_details(objects: [${classDetails}]) {
+        affected_rows
+      }
+    }
+  `;
+  const [
+    addClassDetailsMutation,
+    {
+      loading: addClassDetailsMutationLoading,
+      error: addClassDetailsMutationError
+    }
+  ] = useMutation(ADD_CLASS_DETAIL);
   const [
     addUserPaymentMutation,
     {
@@ -132,6 +151,7 @@ export default function NewUserPayment(props) {
             setSelected={setSelectedStep1}
             selectedInformationState={selectedInformationState}
             setSelectedInformationState={setSelectedInformationState}
+            setSelectedClassesState={setSelectedClassesState}
             setClassPriceState={setClassPriceState}
           />
         );
@@ -173,60 +193,86 @@ export default function NewUserPayment(props) {
 
   const resetValues = () => {
     setSelectedInformationState({
-        package_name: "",
-        classes: "",
-        specifications: "",
-        payment_period: "",
-        amount: 0
+      package_name: "",
+      classes: "",
+      specifications: "",
+      payment_period: "",
+      amount: 0
     });
     setClassPriceState(0);
     setPaymentPeriodState({
-        id: 0,
-        days: 0
+      id: 0,
+      days: 0
     });
     setUserPaymentState({
-        discount_percent: 0,
-        total: 0,
-        payment_start: now.toLocaleDateString("en-US"),
-        payment_end: now.toLocaleDateString("en-US")
+      discount_percent: 0,
+      total: 0,
+      payment_start: now.toLocaleDateString("en-US"),
+      payment_end: now.toLocaleDateString("en-US")
+    });
+    setSelectedClassesState({
+      ids: []
     });
     setOriginalTotalState(0);
     setSelectedStep1(-1);
     setSelectedStep2(-1);
-  }
+  };
 
   const addUserPayment = () => {
+    console.log(paymentPeriodState.id);
     addUserPaymentMutation({
-        variables: {
-          userId: userId,
-          classesPricePaymentPeriodId: paymentPeriodState.id,
-          discountPercent: parseInt(userPaymentState.discount_percent),
-          total: userPaymentState.total,
-          paymentStart: userPaymentState.payment_start,
-          paymentEnd: userPaymentState.payment_end
-        }
-      });
-
-      if (addUserPaymentMutationLoading) return <CircularProgress />;
-      if (addUserPaymentMutationError) {
-        setSnackbarState({
-          ...snackbarState,
-          openSnackBar: true,
-          snackbarText: "Ha ocurrido un error",
-          snackbarColor: "#d32f2f"
-        });
-        return;
+      variables: {
+        userId: userId,
+        classesPricePaymentPeriodId: paymentPeriodState.id,
+        discountPercent: parseInt(userPaymentState.discount_percent),
+        total: userPaymentState.total,
+        paymentStart: userPaymentState.payment_start,
+        paymentEnd: userPaymentState.payment_end
       }
+    });
 
+    if (addUserPaymentMutationLoading) return <CircularProgress />;
+    if (addUserPaymentMutationError) {
       setSnackbarState({
         ...snackbarState,
         openSnackBar: true,
-        snackbarText: "Pago de usuario agregado",
-        snackbarColor: "#43a047"
+        snackbarText: "Ha ocurrido un error",
+        snackbarColor: "#d32f2f"
       });
-  }
+      return;
+    }
 
-  const handleNext = () => {
+    addClassDetailsMutation();
+
+    if (addClassDetailsMutationLoading) return <CircularProgress />;
+    if (addClassDetailsMutationError) {
+      setSnackbarState({
+        ...snackbarState,
+        openSnackBar: true,
+        snackbarText: "Ha ocurrido un error",
+        snackbarColor: "#d32f2f"
+      });
+      return;
+    }
+
+    setSnackbarState({
+      ...snackbarState,
+      openSnackBar: true,
+      snackbarText: "Pago de usuario agregado",
+      snackbarColor: "#43a047"
+    });
+  };
+
+  const addClassDetailsQuery = () => {
+    const { ids } = selectedClassesState;
+    let classDetailsQuery = "";
+    for (let x = 0; x < ids.length; x++) {
+      classDetailsQuery += `{class_id: ${ids[x]},user_id: ${userId}},`;
+    }
+    setClassDetails(classDetailsQuery);
+  };
+
+  const handleNext = async () => {
     if (activeStep === 0 && selectedStep1 === -1) {
       setSnackbarState({
         ...snackbarState,
@@ -241,18 +287,30 @@ export default function NewUserPayment(props) {
         snackbarText: "Selecciona un periodo de pago",
         snackbarColor: "#d32f2f"
       });
-    }
-    else if(activeStep === 2 && (userPaymentState.discount_percent === "" || userPaymentState.discount_percent === null)) {
+    } else if (
+      activeStep === 2 &&
+      (userPaymentState.discount_percent === "" ||
+        userPaymentState.discount_percent === null)
+    ) {
       setSnackbarState({
         ...snackbarState,
         openSnackBar: true,
         snackbarText: "Agrega un descuento",
         snackbarColor: "#d32f2f"
       });
-    }
-    else {
+    } else {
       if (activeStep === 3) {
-        addUserPayment();
+        if (userNameData.users_data[0].status === 0) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "No se puede realizar el pago porque el usuario esta dado de baja",
+            snackbarColor: "#d32f2f"
+          });
+        } else {
+          await addClassDetailsQuery();
+          addUserPayment();
+        }
       }
       setActiveStep(prevActiveStep => prevActiveStep + 1);
     }
@@ -288,7 +346,7 @@ export default function NewUserPayment(props) {
       <Toolbar>
         <Typography variant="h6">
           Nuevo pago de usuario
-          <Link to={`/userPayments/`+userId}>
+          <Link to={`/userPayments/` + userId}>
             <ArrowBackIcon />
           </Link>
         </Typography>

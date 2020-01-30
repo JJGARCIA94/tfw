@@ -84,7 +84,7 @@ export default function UserPayments(props) {
   }
 
   const getUserPayments = () => {
-    return userPaymentsData.users_payments.map(usersPayment => {
+    return userPaymentsData.users_payments.length > 0 ? userPaymentsData.users_payments.map(usersPayment => {
       const paymentEnd = formatDateComparation(usersPayment.payment_end);
       const now = formatDateComparation(Date.now());
       const nowIn7Days = formatDateComparation(Date.now());
@@ -162,7 +162,7 @@ export default function UserPayments(props) {
           </Card>
         </Grid>
       );
-    });
+    }) : <Typography variant="h3">No hay pagos aún</Typography>;
   };
 
   const handleCloseSnackbar = () => {

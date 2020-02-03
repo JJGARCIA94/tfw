@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Card,
@@ -26,14 +26,15 @@ import {
   SportsKabaddi as SportsKabaddiIcon,
   MonetizationOn as MonetizationOnIcon
 } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
-import { GET_CLASSES_PRICE } from "../../database/queries";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
+import { GET_CLASSES_PRICE, GET_USER_BY_ID_AUTH } from "../../database/queries";
 import {
   UPDATE_CLASSES_PRICE_STATUS,
   UPDATE_CLASSES_PRICE_NAME
 } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
   cards: {
@@ -72,7 +73,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function ClassesPrice() {
+export default function ClassesPrice(props) {
   const classes = useStyles();
   const [dialogClassPriceState, setDialogClassPriceState] = useState({
     openClassPriceDialog: false,
@@ -136,11 +137,51 @@ export default function ClassesPrice() {
       error: updateClassesPriceNameError
     }
   ] = useMutation(UPDATE_CLASSES_PRICE_NAME);
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const {
+    data: userAuthData, error: userAuthError
+  } = useQuery(GET_USER_BY_ID_AUTH, {
+    variables: {
+      id: userIdAuth
+    },
+    onCompleted: () => {
+      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
 
   if (classesPriceLoading) {
     return <CircularProgress />;
   }
-  if (classesPriceError) {
+  if (classesPriceError || userAuthError) {
     return <NotFound />;
   }
 
@@ -343,7 +384,7 @@ export default function ClassesPrice() {
     });
   };
 
-  return (
+  return ( userAuth ?
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="h6">Precio de clases y paquetes</Typography>
@@ -465,6 +506,6 @@ export default function ClassesPrice() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </Grid>
+    </Grid> : <Redirect to="/login" />
   );
 }

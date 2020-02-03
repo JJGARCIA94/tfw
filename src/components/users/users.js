@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -34,14 +34,16 @@ import {
   MonetizationOn as MonetizationOnIcon
 } from "@material-ui/icons";
 import SearchInput from "../searchInput/searchInput";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_USERS_BY_NAME,
   GET_USER_TYPES,
-  GET_USER_TYPE_VALIDATION
+  GET_USER_TYPE_VALIDATION,
+  GET_USER_BY_ID_AUTH
 } from "../../database/queries";
 import { UPDATE_USER_STATUS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 let rows = [];
 
@@ -168,7 +170,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Users() {
+export default function Users(props) {
   const classes = useStyles();
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("id");
@@ -235,9 +237,50 @@ export default function Users() {
       userTypeId: idUserTypeDialog
     }
   });
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const {
+    data: userAuthData, error: userAuthError
+  } = useQuery(GET_USER_BY_ID_AUTH, {
+    variables: {
+      id: userIdAuth
+    },
+    onCompleted: () => {
+      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
+
   if (usersLoading || userTypesLoading || userTypesValidationLoading) {
     return <CircularProgress />;
-  } else if (usersError || userTypesError || userTypesValidationError) {
+  } else if (usersError || userTypesError || userTypesValidationError || userAuthError) {
     return <NotFound />;
   } else {
     rows = [];
@@ -361,7 +404,7 @@ export default function Users() {
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
-  return (
+  return ( userAuth ?
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Toolbar>
@@ -553,6 +596,6 @@ export default function Users() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </div>
+    </div> : <Redirect to="/login" />
   );
 }

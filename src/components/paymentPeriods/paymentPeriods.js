@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -28,13 +28,15 @@ import {
   Delete as DeleteIcon,
   RestoreFromTrash as RestoreFromTrashIcon
 } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_PAYMENT_PERIODS_ALL,
-  GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD
+  GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD,
+  GET_USER_BY_ID_AUTH
 } from "../../database/queries";
 import { UPDATE_PAYMENT_PERIOD_STATUS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,7 +51,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function PaymentPeriods() {
+export default function PaymentPeriods(props) {
   const classes = useStyles();
   const [dialog, setDialog] = useState({
     openDialog: false,
@@ -96,11 +98,51 @@ export default function PaymentPeriods() {
     updatePaymentPeriodStatusMutation,
     { loading: updatePaymentPeriodStatusLoading, error: updatePaymentPeriodStatusError }
   ] = useMutation(UPDATE_PAYMENT_PERIOD_STATUS);
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const {
+    data: userAuthData, error: userAuthError
+  } = useQuery(GET_USER_BY_ID_AUTH, {
+    variables: {
+      id: userIdAuth
+    },
+    onCompleted: () => {
+      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
 
   if (classesPricePaymentPeriodLoading || paymentPeriodsLoading) {
     return <CircularProgress />;
   }
-  if (classesPricePaymentPeriodError || paymentPeriodsError) {
+  if (classesPricePaymentPeriodError || paymentPeriodsError || userAuthError) {
     return <NotFound />;
   }
 
@@ -178,7 +220,7 @@ export default function PaymentPeriods() {
     });
   };
 
-  return (
+  return ( userAuth ?
     <TableContainer component={Paper} className={classes.root}>
       <Toolbar>
         <Grid container>
@@ -280,6 +322,6 @@ export default function PaymentPeriods() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </TableContainer>
+    </TableContainer> : <Redirect to="/login" />
   );
 }

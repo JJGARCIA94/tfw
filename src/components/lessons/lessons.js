@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Card,
@@ -29,14 +29,16 @@ import {
   Restore as RestoreIcon,
   QueryBuilder as QueryBuilderIcon
 } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_CLASSES,
   GET_MEMBERS_BY_CLASS,
-  GET_MEMBERS_BY_CLASS_HISTORY
+  GET_MEMBERS_BY_CLASS_HISTORY,
+  GET_USER_BY_ID_AUTH
 } from "../../database/queries";
 import { CANCEL_CLASS, RESTORE_CLASS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
   cards: {
@@ -77,7 +79,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Lessons() {
+export default function Lessons(props) {
   const classes = useStyles();
   const [dialogState, setDialogState] = useState({
     openDialog: false,
@@ -134,6 +136,23 @@ export default function Lessons() {
       classId: idClassState
     }
   });
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const {
+    data: userAuthData, error: userAuthError
+  } = useQuery(GET_USER_BY_ID_AUTH, {
+    variables: {
+      id: userIdAuth
+    },
+    onCompleted: () => {
+      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+  });
 
   useEffect(() => {
     if (idClassState !== 0 && membersData) {
@@ -145,10 +164,33 @@ export default function Lessons() {
     }
   }, [idClassState, membersData]);
 
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
+
   if (classesLoading || membersLoading) {
     return <CircularProgress />;
   }
-  if (classesError || membersError) {
+  if (classesError || membersError || userAuthError) {
     return <NotFound />;
   }
 
@@ -317,7 +359,7 @@ export default function Lessons() {
     });
   };
 
-  return (
+  return ( userAuth ?
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="h6">Clases</Typography>
@@ -408,7 +450,7 @@ export default function Lessons() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </Grid>
+    </Grid> : <Redirect to="/login" />
   );
 }
 

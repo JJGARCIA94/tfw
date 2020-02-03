@@ -231,6 +231,18 @@ export default function Login(props) {
                   password: e.target.value
                 });
               }}
+              onKeyPress={e => {
+                const pressKey = e.keyCode ? e.keyCode : e.which;
+                if (pressKey === 13) {
+                  setDisabledButton(true);
+                  setUserState({
+                    user: temporalUserState.user,
+                    password: temporalUserState.password
+                  });
+                  setClickValidationState(true);
+                  login();
+                }
+              }}
             />
           </CardContent>
           <CardActions>

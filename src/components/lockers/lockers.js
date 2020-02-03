@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Card,
@@ -27,11 +27,12 @@ import {
   Schedule as ScheduleIcon,
   Settings as SettingsIcon
 } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_LOCKERS_ALL,
   GET_LOCKER_HISTORY,
-  GET_LOCKERS_SETTINGS
+  GET_LOCKERS_SETTINGS,
+  GET_USER_BY_ID_AUTH
 } from "../../database/queries";
 import {
   DELETE_LOCKET_BY_ID,
@@ -43,6 +44,7 @@ import {
 } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
   cards: {
@@ -100,7 +102,7 @@ const formatDate = date => {
   return `${correctDay}/${correctMont}/${date.getFullYear()}`;
 };
 
-export default function Lockers() {
+export default function Lockers(props) {
   const classes = useStyles();
   const [lockersPriceState, setLockersPriceState] = useState("");
   const [snackbarState, setSnackbarState] = useState({
@@ -223,10 +225,51 @@ export default function Lockers() {
     updateLockerMutation,
     { loading: updateLockerMutationLoading, error: updateLockerMutationError }
   ] = useMutation(UPDATE_LOCKER);
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const { data: userAuthData, error: userAuthError } = useQuery(
+    GET_USER_BY_ID_AUTH,
+    {
+      variables: {
+        id: userIdAuth
+      },
+      onCompleted: () => {
+        if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+          localStorage.removeItem("token");
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      }
+    }
+  );
+
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
   if (lockersSettingsLoading || lockersLoading || lockerHistoryLoading) {
     return <CircularProgress />;
   }
-  if (lockersSettingsError || lockersError || lockerHistoryError) {
+  if (lockersSettingsError || lockersError || lockerHistoryError || userAuthError) {
     return <NotFound />;
   }
 
@@ -629,7 +672,7 @@ export default function Lockers() {
     });
   };
 
-  return (
+  return ( userAuth ?
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="h6">
@@ -926,6 +969,6 @@ export default function Lockers() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </Grid>
+    </Grid> : <Redirect to="/login" />
   );
 }

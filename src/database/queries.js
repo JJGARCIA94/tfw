@@ -2,7 +2,13 @@ import gql from "graphql-tag";
 
 export const GET_USER = gql`
   query get_user($user: String!) {
-    users(where: { user: { _eq: $user }, status: { _eq: 1 } }) {
+    users(
+      where: {
+        user: { _eq: $user }
+        status: { _eq: 1 }
+        R_users_data: { user_type: { _eq: 1 } }
+      }
+    ) {
       id
       password
     }
@@ -87,7 +93,13 @@ export const GET_USER_BY_ID = gql`
 
 export const GET_USER_BY_ID_AUTH = gql`
   query get_user_by_id_auth($id: Int!) {
-    users(where: { id: { _eq: $id }, status: { _eq: 1 } }) {
+    users(
+      where: {
+        id: { _eq: $id }
+        status: { _eq: 1 }
+        R_users_data: { user_type: { _eq: 1 } }
+      }
+    ) {
       id
     }
   }

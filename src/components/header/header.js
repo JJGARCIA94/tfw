@@ -15,6 +15,13 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
+} from "@material-ui/core";
+import {
   Home as HomeIcon,
   Group as GroupIcon,
   AccountBox as AccountBoxIcon,
@@ -49,7 +56,7 @@ import ClassesClassPrice from "../classesPrice/classesClassPrice";
 import PaymentsClassPrice from "../classesPrice/paymentsClassPrice";
 import Lockers from "../lockers/lockers";
 import SelectUserToLocker from "../lockers/selectUserToLocker";
-import { Button, CircularProgress } from "@material-ui/core";
+import { Button, CircularProgress, Grid } from "@material-ui/core";
 import { useQuery } from "@apollo/react-hooks";
 import { GET_USER_BY_ID_AUTH } from "../../database/queries";
 const jwt = require("jsonwebtoken");
@@ -112,6 +119,16 @@ const useStyles = makeStyles(theme => ({
 export default function Header() {
   const classes = useStyles();
   const theme = useTheme();
+  const [dialogCloseSesionState, setDialogCloseSesionState] = React.useState({
+    openCloseSesionDialog: false,
+    tittleCloseSesionDialog: "",
+    textCloseSesionDialog: ""
+  });
+  const {
+    openCloseSesionDialog,
+    tittleCloseSesionDialog,
+    textCloseSesionDialog
+  } = dialogCloseSesionState;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [userAuth, setUserAuth] = React.useState(true);
   const [userIdAuth, setUserIdAuth] = React.useState(0);
@@ -170,7 +187,13 @@ export default function Header() {
       <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
       <Divider />
       <List>
-        <NavLink to="/" className={classes.navLink}>
+        <NavLink
+          to="/"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <HomeIcon className={classes.icons} />
@@ -178,7 +201,13 @@ export default function Header() {
             <ListItemText primary="Home"></ListItemText>
           </ListItem>
         </NavLink>
-        <NavLink to="/users" className={classes.navLink}>
+        <NavLink
+          to="/users"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <GroupIcon className={classes.icons} />
@@ -186,7 +215,13 @@ export default function Header() {
             <ListItemText primary="Usuarios" />
           </ListItem>
         </NavLink>
-        <NavLink to="/userTypes" className={classes.navLink}>
+        <NavLink
+          to="/userTypes"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <AccountBoxIcon className={classes.icons} />
@@ -194,7 +229,13 @@ export default function Header() {
             <ListItemText primary="Tipos de usuario" />
           </ListItem>
         </NavLink>
-        <NavLink to="/paymentPeriods" className={classes.navLink}>
+        <NavLink
+          to="/paymentPeriods"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <HourglassEmptyIcon className={classes.icons} />
@@ -202,7 +243,13 @@ export default function Header() {
             <ListItemText primary="Períodos de pago" />
           </ListItem>
         </NavLink>
-        <NavLink to="/lessons" className={classes.navLink}>
+        <NavLink
+          to="/lessons"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <SportsKabaddiIcon className={classes.icons} />
@@ -210,7 +257,13 @@ export default function Header() {
             <ListItemText primary="Clases" />
           </ListItem>
         </NavLink>
-        <NavLink to="/classesPrice" className={classes.navLink}>
+        <NavLink
+          to="/classesPrice"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <MonetizationOnIcon className={classes.icons} />
@@ -218,7 +271,13 @@ export default function Header() {
             <ListItemText primary="Precios de clases y paquetes" />
           </ListItem>
         </NavLink>
-        <NavLink to="/lockers" className={classes.navLink}>
+        <NavLink
+          to="/lockers"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
           <ListItem button>
             <ListItemIcon>
               <HttpsIcon className={classes.icons} />
@@ -230,11 +289,26 @@ export default function Header() {
     </div>
   );
 
-  const closeSesion = () => {
-    localStorage.removeItem("token");
-    setUserAuth(false);
+  const handleOpenCloseSesionDialog = () => {
+    setDialogCloseSesionState({
+      openCloseSesionDialog: true,
+      tittleCloseSesionDialog: "¿Desea cerrar sesión?",
+      textCloseSesionDialog:
+        "Al cerrar sesión deberá de ingresar otra vez su usuario y contraseña la próxima vez que desee entrar al sistema."
+    });
   };
 
+  const handleCloseCloseSesionDialog = agree => {
+    if (agree) {
+      localStorage.removeItem("token");
+      setUserAuth(false);
+    }
+    setDialogCloseSesionState({
+      openCloseSesionDialog: false,
+      tittleCloseSesionDialog: "",
+      textCloseSesionDialog: ""
+    });
+  };
   return (
     <div className={classes.root}>
       {userAuth ? (
@@ -251,19 +325,25 @@ export default function Header() {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h6" noWrap>
-                TFW Mazatlan Combat Club
-              </Typography>
-              <Button
-                color="secondary"
-                variant="contained"
-                style={{ float: "right" }}
-                onClick={() => {
-                  closeSesion();
-                }}
-              >
-                Cerrar sesión
-              </Button>
+              <Grid container justify="center">
+                <Grid item xs={11} md={10}>
+                  <Typography variant="h6" noWrap>
+                    TFW Mazatlan Combat Club
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={2}>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    style={{ float: "right" }}
+                    onClick={() => {
+                      handleOpenCloseSesionDialog();
+                    }}
+                  >
+                    Cerrar sesión
+                  </Button>
+                </Grid>
+              </Grid>
             </Toolbar>
           </AppBar>
           <nav className={classes.drawer} aria-label="mailbox folders">
@@ -306,11 +386,17 @@ export default function Header() {
           <Route exact path="/login">
             <Login setUserAuth={setUserAuth} />
           </Route>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/users" component={Users} />
+          <Route exact path="/">
+            <Home setUserAuth={setUserAuth} />
+          </Route>
+          <Route exact path="/users">
+            <Users setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="/newUser" component={NewUser} />
           <Route exact path="/user/:userId" component={User} />
-          <Route exact path="/userTypes" component={UserTypes} />
+          <Route exact path="/userTypes">
+            <UserTypes setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="/newUserType" component={NewUserType} />
           <Route
             exact
@@ -319,19 +405,25 @@ export default function Header() {
           />
           <Route exact path="/userPayments/:userId" component={UserPayments} />
           <Route exact path="/userType/:userTypeId" component={UserType} />
-          <Route exact path="/paymentPeriods" component={PaymentPeriods} />
+          <Route exact path="/paymentPeriods">
+            <PaymentPeriods setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="/newPaymentPeriod" component={NewPaymentPeriod} />
           <Route
             exact
             path="/paymentPeriod/:paymentPeriodId"
             component={PaymentPeriod}
           />
-          <Route exact path="/lessons" component={Lessons} />
+          <Route exact path="/lessons">
+            <Lessons setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="/newLesson" component={NewLesson} />
           <Route exact path="/lesson/:classId" component={Lesson} />
           <Route exact path="/assists/:userId" component={Assists} />
           <Route exact path="/products" component={Products} />
-          <Route exact path="/classesPrice" component={ClassesPrice} />
+          <Route exact path="/classesPrice">
+            <ClassesPrice setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="/newClassPrice" component={NewClassPrice} />
           <Route
             exact
@@ -343,7 +435,9 @@ export default function Header() {
             path="/paymentsClassPrice/:classPriceId"
             component={PaymentsClassPrice}
           />
-          <Route exact path="/lockers" component={Lockers} />
+          <Route exact path="/lockers">
+            <Lockers setUserAuth={setUserAuth} />
+          </Route>
           <Route
             exact
             path="/selectUserToLocker/:lockerId"
@@ -352,6 +446,42 @@ export default function Header() {
           <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>
+      <Dialog
+        open={openCloseSesionDialog}
+        onClose={() => {
+          handleCloseCloseSesionDialog(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {tittleCloseSesionDialog}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {textCloseSesionDialog}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleCloseCloseSesionDialog(false);
+            }}
+            color="primary"
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              handleCloseCloseSesionDialog(true);
+            }}
+            color="primary"
+            autoFocus
+          >
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

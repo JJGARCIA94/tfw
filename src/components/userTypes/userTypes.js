@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Table,
@@ -28,13 +28,15 @@ import {
   Delete as DeleteIcon,
   RestoreFromTrash as RestoreFromTrashIcon
 } from "@material-ui/icons";
-import { useSubscription, useMutation } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_USER_TYPES_ALL,
-  GET_USER_BY_USER_TYPE
+  GET_USER_BY_USER_TYPE,
+  GET_USER_BY_ID_AUTH
 } from "../../database/queries";
 import { UPDATE_USER_TYPE_STATUS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
+const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,7 +51,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function UserTypes() {
+export default function UserTypes(props) {
   const classes = useStyles();
   const [dialog, setDialog] = useState({
     openDialog: false,
@@ -84,23 +86,64 @@ export default function UserTypes() {
     loading: userTypesLoading,
     error: userTypesError
   } = useSubscription(GET_USER_TYPES_ALL);
-  const { data: userData, loading: userLoading, error: userError } = useSubscription(
-    GET_USER_BY_USER_TYPE,
-    {
-      variables: {
-        userTypeId: idDialog
-      }
+  const {
+    data: userData,
+    loading: userLoading,
+    error: userError
+  } = useSubscription(GET_USER_BY_USER_TYPE, {
+    variables: {
+      userTypeId: idDialog
     }
-  );
+  });
   const [
     updateUserTypeStatusMutation,
     { loading: updateUserTypeStatusLoading, error: updateUserTypeStatusError }
   ] = useMutation(UPDATE_USER_TYPE_STATUS);
+  const setUserAuthHeader = props.setUserAuth;
+  const [userAuth, setUserAuth] = useState(true);
+  const [userIdAuth, setUserIdAuth] = useState(0);
+  const {
+    data: userAuthData, error: userAuthError
+  } = useQuery(GET_USER_BY_ID_AUTH, {
+    variables: {
+      id: userIdAuth
+    },
+    onCompleted: () => {
+      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    function isUserAuth() {
+      try {
+        if (localStorage.getItem("token")) {
+          const decodedToken = jwt.verify(
+            localStorage.getItem("token"),
+            "mysecretpassword"
+          );
+          setUserIdAuth(decodedToken.id);
+        } else {
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUserAuth(false);
+        setUserAuthHeader(false);
+      }
+    }
+
+    isUserAuth();
+  });
 
   if (userLoading || userTypesLoading) {
     return <CircularProgress />;
   }
-  if (userError || userTypesError) {
+  if (userError || userTypesError || userAuthError) {
     return <NotFound />;
   }
 
@@ -129,7 +172,8 @@ export default function UserTypes() {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "It can´t be remove because there are users with this user type.",
+          snackbarText:
+            "It can´t be remove because there are users with this user type.",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -177,7 +221,7 @@ export default function UserTypes() {
     });
   };
 
-  return (
+  return ( userAuth ?
     <TableContainer component={Paper} className={classes.root}>
       <Toolbar>
         <Grid container>
@@ -199,35 +243,39 @@ export default function UserTypes() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {userTypesData.users_type.map(row => (
-            <TableRow key={row.id}>
-              <TableCell component="th" scope="row">
-                {row.name}
-              </TableCell>
-              <TableCell align="right">
-                <Link to={"/userType/" + row.id}>
-                  <IconButton title="See user type">
-                    <VisibilityIcon className={classes.icons} />
+          {userTypesData.users_type.map(row =>
+            row.id !== 1 ? (
+              <TableRow key={row.id}>
+                <TableCell component="th" scope="row">
+                  {row.name}
+                </TableCell>
+                <TableCell align="right">
+                  <Link to={"/userType/" + row.id}>
+                    <IconButton title="See user type">
+                      <VisibilityIcon className={classes.icons} />
+                    </IconButton>
+                  </Link>
+                  <IconButton
+                    title={
+                      row.status === 1
+                        ? "Delete user type"
+                        : "Restore user type"
+                    }
+                    onClick={() => {
+                      const newStatus = row.status === 1 ? 0 : 1;
+                      handleOpenDialog(row.id, newStatus);
+                    }}
+                  >
+                    {row.status === 1 ? (
+                      <DeleteIcon className={classes.icons} />
+                    ) : (
+                      <RestoreFromTrashIcon className={classes.icons} />
+                    )}
                   </IconButton>
-                </Link>
-                <IconButton
-                  title={
-                    row.status === 1 ? "Delete user type" : "Restore user type"
-                  }
-                  onClick={() => {
-                    const newStatus = row.status === 1 ? 0 : 1;
-                    handleOpenDialog(row.id, newStatus);
-                  }}
-                >
-                  {row.status === 1 ? (
-                    <DeleteIcon className={classes.icons} />
-                  ) : (
-                    <RestoreFromTrashIcon className={classes.icons} />
-                  )}
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            ) : null
+          )}
         </TableBody>
       </Table>
       <Dialog
@@ -275,6 +323,6 @@ export default function UserTypes() {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </TableContainer>
+    </TableContainer> : <Redirect to="/login" />
   );
 }

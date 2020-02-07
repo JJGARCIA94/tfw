@@ -44,6 +44,11 @@ const formatDate = date => {
   return `${correctDay}/${correctMont}/${date.getFullYear()}`;
 };
 
+const formatDateWhitoutMinutes = date => {
+  date = new Date(date);
+  return date;
+};
+
 const formatDateComparation = date => {
   date = new Date(date);
   date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
@@ -86,8 +91,8 @@ export default function UserPayments(props) {
   const getUserPayments = () => {
     return userPaymentsData.users_payments.length > 0 ? userPaymentsData.users_payments.map(usersPayment => {
       const paymentEnd = formatDateComparation(usersPayment.payment_end);
-      const now = formatDateComparation(Date.now());
-      const nowIn7Days = formatDateComparation(Date.now());
+      const now = formatDateWhitoutMinutes(Date.now());
+      const nowIn7Days = formatDateWhitoutMinutes(Date.now());
       nowIn7Days.setDate(nowIn7Days.getDate() + 7);
       return (
         <Grid item xs={12} md={6} lg={4} key={usersPayment.id}>

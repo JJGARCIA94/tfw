@@ -35,8 +35,17 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const formatDateWhitoutMinutes = date => {
+  date = new Date(date);
+  let correctMont =
+    date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  return `${date.getFullYear()}-${correctMont}-${correctDay}`;
+};
+
 export default function NewUser() {
   const classes = useStyles();
+  const now = Date.now();
   const [userState, setUserState] = useState({
     first_name: "",
     last_name: "",
@@ -118,7 +127,7 @@ export default function NewUser() {
       setDisabledButton(false);
       return;
     }
-
+    console.log(formatDateWhitoutMinutes(now));
     addUserMutation({
       variables: {
         first_name: first_name.trim(),
@@ -126,7 +135,8 @@ export default function NewUser() {
         address: address.trim(),
         phone_number: phone_number.trim(),
         email: email.trim(),
-        user_type: user_type
+        user_type: user_type,
+        created: formatDateWhitoutMinutes(now)
       }
     });
 

@@ -808,10 +808,9 @@ export default function Lockers(props) {
               <Typography key={index} variant="subtitle1">
                 {`${lockerHistory.R_users_data.first_name} ${
                   lockerHistory.R_users_data.last_name
-                } (${formatDate(lockerHistory.created_at)} - ${formatDate(
+                } (${formatDate(lockerHistory.created_at)} - ${lockerHistory.status !== 1 ?formatDate(
                   lockerHistory.updated_at
-                )})`}
-                {lockerHistory.status === 1 ? <strong> Actual</strong> : null}
+                ) : `Actual`})`}
               </Typography>
             ))
           ) : (

@@ -22,6 +22,7 @@ const useStyles = makeStyles(theme => ({
 
 const formatDate = date => {
     date = new Date(date);
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
     let correctMont =
       date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
     let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();

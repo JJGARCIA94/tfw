@@ -29,8 +29,7 @@ const useStyles = makeStyles(theme => ({
     width: "100%"
   },
   logo: {
-    width: "100%",
-    height: "220px",
+    width: "70%",
     padding: "10px"
   }
 }));
@@ -196,7 +195,9 @@ export default function Login(props) {
     <Grid container justify="center" className={classes.container}>
       <Grid item md={3}>
         <Card className={classes.root}>
-          <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
+          <center>
+            <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
+          </center>
           <CardContent>
             <TextField
               className={classes.textFields}
@@ -249,7 +250,7 @@ export default function Login(props) {
             <Grid container justify="center">
               <Button
                 variant="contained"
-                color="default"
+                color="primary"
                 disabled={disabledButton}
                 onClick={() => {
                   setDisabledButton(true);

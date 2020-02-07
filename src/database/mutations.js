@@ -8,6 +8,7 @@ export const ADD_USER = gql`
     $phone_number: String
     $email: String
     $user_type: Int!
+    $created: date!
   ) {
     insert_users_data(
       objects: {
@@ -17,6 +18,7 @@ export const ADD_USER = gql`
         phone_number: $phone_number
         email: $email
         user_type: $user_type
+        created: $created
       }
     ) {
       affected_rows

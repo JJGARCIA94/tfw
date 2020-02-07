@@ -219,7 +219,6 @@ export default function NewUserPayment(props) {
   };
 
   const addUserPayment = () => {
-    console.log(paymentPeriodState.id);
     addUserPaymentMutation({
       variables: {
         userId: userId,

@@ -1,5 +1,70 @@
 import gql from "graphql-tag";
 
+export const GET_USERS_PAYMENTS_EXPIRED = gql`
+  subscription get_user_payments_expired($now: date!) {
+    users_payments(
+      where: { status: { _eq: 1 }, payment_end: { _lte: $now } }
+      order_by: { payment_end: asc }
+    ) {
+      userPaymentId: id
+      payment_end
+      R_users_data {
+        first_name
+        last_name
+      }
+      R_classes_price_payment_period {
+        R_classes_price {
+          R_classes_price_details {
+            R_classes {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_USER_ASSISTS = gql`
+  subscription get_user_assists(
+    $firstWeekDay: date!
+    $currentLastWeekDay: date!
+  ) {
+    user_assists(
+      where: {
+        created: { _gte: $firstWeekDay }
+        _and: { created: { _lte: $currentLastWeekDay } }
+      }
+    ) {
+      id
+      created
+      R_users_data {
+        first_name
+        last_name
+      }
+    }
+  }
+`;
+
+export const GET_NEW_CLIENTS = gql`
+  subscription get_new_clients(
+    $firstWeekDay: date!
+    $currentLastWeekDay: date!
+  ) {
+    users_data(
+      where: {
+        created: { _gte: $firstWeekDay }
+        _and: { created: { _lte: $currentLastWeekDay }, user_type: { _eq: 2 } }
+      }
+    ) {
+      id
+      created
+      first_name
+      last_name
+    }
+  }
+`;
+
 export const GET_USER = gql`
   query get_user($user: String!) {
     users(

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Switch, Route, NavLink, Redirect } from "react-router-dom";
+import { Switch, Route, NavLink, Redirect, Link } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Divider from "@material-ui/core/Divider";
@@ -56,7 +56,12 @@ import ClassesClassPrice from "../classesPrice/classesClassPrice";
 import PaymentsClassPrice from "../classesPrice/paymentsClassPrice";
 import Lockers from "../lockers/lockers";
 import SelectUserToLocker from "../lockers/selectUserToLocker";
-import { Button, CircularProgress, Grid } from "@material-ui/core";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  useMediaQuery
+} from "@material-ui/core";
 import { useQuery } from "@apollo/react-hooks";
 import { GET_USER_BY_ID_AUTH } from "../../database/queries";
 const jwt = require("jsonwebtoken");
@@ -119,6 +124,7 @@ const useStyles = makeStyles(theme => ({
 export default function Header() {
   const classes = useStyles();
   const theme = useTheme();
+  const movilWith = useMediaQuery("(min-width:600px)");
   const [dialogCloseSesionState, setDialogCloseSesionState] = React.useState({
     openCloseSesionDialog: false,
     tittleCloseSesionDialog: "",
@@ -184,7 +190,14 @@ export default function Header() {
   const drawer = (
     <div>
       {/*<div className={classes.toolbar} /> */}
-      <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
+      <Link
+        to="/"
+        onClick={() => {
+          setMobileOpen(false);
+        }}
+      >
+        <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
+      </Link>
       <Divider />
       <List>
         <NavLink
@@ -286,6 +299,21 @@ export default function Header() {
           </ListItem>
         </NavLink>
       </List>
+      {!movilWith ? (
+        <center>
+          <Button
+            color="primary"
+            variant="contained"
+            style={{ textAlign: "center" }}
+            onClick={() => {
+              setMobileOpen(false);
+              handleOpenCloseSesionDialog();
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        </center>
+      ) : null}
     </div>
   );
 
@@ -331,18 +359,20 @@ export default function Header() {
                     TFW Mazatlan Combat Club
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={2}>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    style={{ float: "right" }}
-                    onClick={() => {
-                      handleOpenCloseSesionDialog();
-                    }}
-                  >
-                    Cerrar sesión
-                  </Button>
-                </Grid>
+                {movilWith ? (
+                  <Grid item xs={12} md={2}>
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      style={{ float: "right" }}
+                      onClick={() => {
+                        handleOpenCloseSesionDialog();
+                      }}
+                    >
+                      Cerrar sesión
+                    </Button>
+                  </Grid>
+                ) : null}
               </Grid>
             </Toolbar>
           </AppBar>

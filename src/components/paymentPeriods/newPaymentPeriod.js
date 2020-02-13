@@ -118,7 +118,7 @@ export default function NewPaymentPeriod() {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add payment period
+          Agregar período de pago
           <Link to="/paymentPeriods">
             <ArrowBackIcon />
           </Link>
@@ -130,7 +130,7 @@ export default function NewPaymentPeriod() {
             className={classes.textFields}
             required
             id="period"
-            label="Periodo"
+            label="Período"
             margin="normal"
             value={paymentPeriodState.period}
             inputProps={{
@@ -154,7 +154,7 @@ export default function NewPaymentPeriod() {
             className={classes.textFields}
             required
             id="days"
-            label="Días del periodo"
+            label="Días del período"
             margin="normal"
             value={paymentPeriodState.days}
             inputProps={{

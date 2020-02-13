@@ -25,6 +25,37 @@ export const GET_USERS_PAYMENTS_EXPIRED = gql`
   }
 `;
 
+export const GER_USER_PAYMENTS_ALMOST_EXPIRED = gql`
+  subscription get_user_payments_almost_expired($now: date!, $twoDaysMore: date!) {
+    users_payments(
+      where: {
+        status: { _eq: 1 }
+        payment_end: { _gt: $now }
+        _and: { payment_end: { _lte: $twoDaysMore } }
+      }
+      order_by: { payment_end: asc }
+    ) {
+      userPaymentId: id
+      payment_end
+      R_users_data {
+        first_name
+        last_name
+        phone_number
+        email
+      }
+      R_classes_price_payment_period {
+        R_classes_price {
+          R_classes_price_details {
+            R_classes {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_USER_ASSISTS = gql`
   subscription get_user_assists(
     $firstWeekDay: date!
@@ -61,6 +92,22 @@ export const GET_NEW_CLIENTS = gql`
       created
       first_name
       last_name
+    }
+  }
+`;
+
+export const GET_MEMBERS_CLASSES = gql`
+  subscription get_classes_members {
+    classes {
+      name
+      R_classes_details_aggregate(
+        where: { R_users_data: { status: { _eq: 1 } }, status: { _eq: 1 } }
+        distinct_on: user_id
+      ) {
+        aggregate {
+          count
+        }
+      }
     }
   }
 `;

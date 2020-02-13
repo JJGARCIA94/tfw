@@ -127,7 +127,6 @@ export default function NewUser() {
       setDisabledButton(false);
       return;
     }
-    console.log(formatDateWhitoutMinutes(now));
     addUserMutation({
       variables: {
         first_name: first_name.trim(),

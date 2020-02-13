@@ -20,7 +20,6 @@ import Step2 from "./step2";
 import Step3 from "./step3";
 import Step4 from "./step4";
 import { useMutation, useSubscription } from "@apollo/react-hooks";
-import { ADD_USER_PAYMENT } from "../../database/mutations";
 import { GET_USER_NAME_BY_USER_ID } from "../../database/queries";
 import gql from "graphql-tag";
 
@@ -82,7 +81,8 @@ export default function NewUserPayment(props) {
     discount_percent: 0,
     total: 0,
     payment_start: now.toLocaleDateString("en-US"),
-    payment_end: now.toLocaleDateString("en-US")
+    payment_end: now.toLocaleDateString("en-US"),
+    payment_type: 0
   });
   const [originalTotalState, setOriginalTotalState] = useState(0);
   const [snackbarState, setSnackbarState] = useState({
@@ -104,20 +104,50 @@ export default function NewUserPayment(props) {
   const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
   const [classDetails, setClassDetails] = useState("");
-  const ADD_CLASS_DETAIL = gql`
+  /*const ADD_CLASS_DETAIL = gql`
     mutation add_class_detail {
       insert_classes_details(objects: [${classDetails}]) {
         affected_rows
       }
     }
-  `;
-  const [
+  `;*/
+  const ADD_USER_PAYMENT = gql`
+  mutation add_user_payment(
+    $userId: Int!
+    $classesPricePaymentPeriodId: Int!
+    $discountPercent: numeric!
+    $total: numeric!
+    $paymentStart: date!
+    $paymentEnd: date!
+    $paymentType: Int!
+  ) {
+    insert_users_payments(
+      objects: {
+        user_id: $userId
+        classes_price_payment_period_id: $classesPricePaymentPeriodId
+        discount_percent: $discountPercent
+        total: $total
+        payment_start: $paymentStart
+        payment_end: $paymentEnd
+        payment_type: $paymentType
+        R_classes_details: {
+          data: [${classDetails}]
+        }
+      }
+    ) {
+      returning {
+        id
+      }
+    }
+  }
+`;
+  /*const [
     addClassDetailsMutation,
     {
       loading: addClassDetailsMutationLoading,
       error: addClassDetailsMutationError
     }
-  ] = useMutation(ADD_CLASS_DETAIL);
+  ] = useMutation(ADD_CLASS_DETAIL);*/
   const [
     addUserPaymentMutation,
     {
@@ -208,7 +238,8 @@ export default function NewUserPayment(props) {
       discount_percent: 0,
       total: 0,
       payment_start: now.toLocaleDateString("en-US"),
-      payment_end: now.toLocaleDateString("en-US")
+      payment_end: now.toLocaleDateString("en-US"),
+      payment_type: 0
     });
     setSelectedClassesState({
       ids: []
@@ -218,7 +249,7 @@ export default function NewUserPayment(props) {
     setSelectedStep2(-1);
   };
 
-  const addUserPayment = () => {
+  const addUserPayment = async () => {
     addUserPaymentMutation({
       variables: {
         userId: userId,
@@ -226,7 +257,8 @@ export default function NewUserPayment(props) {
         discountPercent: parseInt(userPaymentState.discount_percent),
         total: userPaymentState.total,
         paymentStart: userPaymentState.payment_start,
-        paymentEnd: userPaymentState.payment_end
+        paymentEnd: userPaymentState.payment_end,
+        paymentType: userPaymentState.payment_type
       }
     });
 
@@ -241,7 +273,7 @@ export default function NewUserPayment(props) {
       return;
     }
 
-    addClassDetailsMutation();
+    /*addClassDetailsMutation();
 
     if (addClassDetailsMutationLoading) return <CircularProgress />;
     if (addClassDetailsMutationError) {
@@ -252,7 +284,7 @@ export default function NewUserPayment(props) {
         snackbarColor: "#d32f2f"
       });
       return;
-    }
+    }*/
 
     setSnackbarState({
       ...snackbarState,
@@ -351,7 +383,7 @@ export default function NewUserPayment(props) {
         </Typography>
       </Toolbar>
       <div className={classes.root}>
-        <Stepper activeStep={activeStep} alternativeLabel>
+        <Stepper activeStep={activeStep} alternativeLabel style={{justifyContent: "center"}}>
           {steps.map(label => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -364,7 +396,7 @@ export default function NewUserPayment(props) {
           ) : (
             <div>
               <Grid container>{getStepContent(activeStep)}</Grid>
-              <div>
+              <div style={{marginTop: "10px"}}>
                 <Button
                   disabled={activeStep === 0}
                   onClick={handleBack}

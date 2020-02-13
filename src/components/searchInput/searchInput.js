@@ -12,6 +12,7 @@ export default function SearchInput(props) {
     <TextField
       label={label}
       margin="normal"
+      style={{width: "100%"}}
       id="textFieldSearch"
       value={search}
       onChange={e => {

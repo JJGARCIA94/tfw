@@ -17,17 +17,22 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
+  Toolbar,
+  Snackbar
 } from "@material-ui/core";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
+import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_USER_BY_ID_AUTH,
   GET_USERS_PAYMENTS_EXPIRED,
+  GER_USER_PAYMENTS_ALMOST_EXPIRED,
   GET_USER_ASSISTS,
-  GET_NEW_CLIENTS
+  GET_NEW_CLIENTS,
+  GET_MEMBERS_CLASSES
 } from "../../database/queries";
+import { UPDATE_USER_PAYMENT_STATUS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
-import { Pie, Bar } from "react-chartjs-2";
+import Chart from "react-apexcharts";
 const jwt = require("jsonwebtoken");
 
 const useStyles = makeStyles(theme => ({
@@ -41,6 +46,13 @@ const useStyles = makeStyles(theme => ({
   table: {
     height: "350px",
     overflowY: "auto"
+  },
+  tableTittle: {
+    fontSize: "25px",
+    color: "#373d3f",
+    textAlign: "center",
+    fontFamily: "Helvetica, Arial, sans-serif",
+    display: "grid"
   }
 }));
 
@@ -55,6 +67,15 @@ const formatDate = date => {
 
 const formatDateWhitoutMinutes = date => {
   date = new Date(date);
+  let correctMont =
+    date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  return `${date.getFullYear()}-${correctMont}-${correctDay}`;
+};
+
+const formatDateWhitoutMinutesMoreDays = (date, days) => {
+  date = new Date(date);
+  date.setDate(date.getDate() + days);
   let correctMont =
     date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
   let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
@@ -99,7 +120,11 @@ const sumDays = (date, days) => {
 export default function Home(props) {
   const classes = useStyles();
   const now = Date.now();
-  const weekDay = dayOfWeek(formatDateWhitoutMinutes(now)) !== 0 ? dayOfWeek(formatDateWhitoutMinutes(now)) : 7;
+  const twoDaysMore = formatDateWhitoutMinutesMoreDays(now, 2);
+  const weekDay =
+    dayOfWeek(formatDateWhitoutMinutes(now)) !== 0
+      ? dayOfWeek(formatDateWhitoutMinutes(now))
+      : 7;
   const mondayDay = subDays(formatDateWhitoutMinutes(now), weekDay - 1);
   const [
     dialogDeleteUserToClassesState,
@@ -116,6 +141,20 @@ export default function Home(props) {
     textDeleteUserToClassesDialog,
     idUserPaymentDialog
   } = dialogDeleteUserToClassesState;
+  const [snackbarState, setSnackbarState] = useState({
+    openSnackbar: false,
+    vertical: "bottom",
+    horizontal: "right",
+    snackBarText: "",
+    snackbarColor: ""
+  });
+  const {
+    vertical,
+    horizontal,
+    openSnackbar,
+    snackBarText,
+    snackbarColor
+  } = snackbarState;
   const setUserAuthHeader = props.setUserAuth;
   const [userAuth, setUserAuth] = useState(true);
   const [userIdAuth, setUserIdAuth] = useState(0);
@@ -144,6 +183,16 @@ export default function Home(props) {
     }
   });
   const {
+    data: userPaymentAEData,
+    loading: userPaymentAELoading,
+    error: userPaymentAEError
+  } = useSubscription(GER_USER_PAYMENTS_ALMOST_EXPIRED, {
+    variables: {
+      now: formatDateWhitoutMinutes(now),
+      twoDaysMore: twoDaysMore
+    }
+  });
+  const {
     data: userAssistsData,
     loading: userAssistsLoading,
     error: userAssistsError
@@ -163,6 +212,15 @@ export default function Home(props) {
       currentLastWeekDay: formatDateWhitoutMinutes(now)
     }
   });
+  const {
+    data: membersClasesData,
+    loading: membersClasesLoading,
+    error: membersClasesError
+  } = useSubscription(GET_MEMBERS_CLASSES);
+  const [
+    updateUserPaymentMutation,
+    { loading: updateUserPaymentMutationLoading, error: updateUserPaymentMutationError }
+  ] = useMutation(UPDATE_USER_PAYMENT_STATUS);
 
   useEffect(() => {
     function isUserAuth() {
@@ -187,18 +245,35 @@ export default function Home(props) {
     isUserAuth();
   });
 
-  if (userPaymentLoading || userAssistsLoading || newClientsLoading) {
+  if (
+    userPaymentLoading ||
+    userAssistsLoading ||
+    userPaymentAELoading ||
+    newClientsLoading ||
+    membersClasesLoading
+  ) {
     return <CircularProgress />;
   }
 
-  if (userAuthError || userPaymentError || userAssistsError || newClientsError) {
-    console.log(userAssistsError);
+  if (
+    userAuthError ||
+    userPaymentError ||
+    userPaymentAEError ||
+    userAssistsError ||
+    newClientsError ||
+    membersClasesError
+  ) {
     return <NotFound />;
   }
+
+  const handleCloseSnackbar = () => {
+    setSnackbarState({ ...snackbarState, openSnackbar: false });
+  };
 
   let currentWeekDays = [];
   let dataWeekDays = [];
   let dataNewClients = [];
+  let dataMembersClases = [];
   for (let x = 0; x < weekDay; x++) {
     currentWeekDays.push(sumDays(mondayDay, x));
   }
@@ -207,6 +282,33 @@ export default function Home(props) {
   }
   for (let x = 0; x < newClientsData.users_data.length; x++) {
     dataNewClients.push(newClientsData.users_data[x].created);
+  }
+  for (let x = 0; x < membersClasesData.classes.length; x++) {
+    dataMembersClases.push({
+      name: membersClasesData.classes[x].name,
+      members:
+        membersClasesData.classes[x].R_classes_details_aggregate.aggregate.count
+    });
+  }
+
+  let dataMembersClasesSort = dataMembersClases.sort(function(a, b) {
+    if (a.members < b.members) {
+      return 1;
+    }
+    if (a.members > b.members) {
+      return -1;
+    }
+    return 0;
+  });
+
+  dataMembersClasesSort = dataMembersClasesSort.splice(0, 3);
+
+  let dataMembersClasesName = [];
+  let dataMembersClasesMembers = [];
+
+  for (let x = 0; x < dataMembersClasesSort.length; x++) {
+    dataMembersClasesName.push(dataMembersClasesSort[x].name);
+    dataMembersClasesMembers.push(dataMembersClasesSort[x].members);
   }
 
   const weekDaysPie = [
@@ -245,6 +347,8 @@ export default function Home(props) {
     "#795548"
   ];
 
+  const backgroundColorsMembersClases = ["#448AFF", "#FFA000", "#757575"];
+
   let currentWeekDaysPie = [];
   let currentDataWeekDaysPie = [];
   let currentDataNewClientsPie = [];
@@ -256,29 +360,6 @@ export default function Home(props) {
     currentDataNewClientsPie.push(dataNewClientsPie[x]);
     currentBackgroundColorsWeekDayPie.push(backgroundColorsWeekDayPie[x]);
   }
-  /*console.log(currentWeekDays);
-  console.log(dataWeekDays);
-  console.log(mondayDay);*/
-
-  const data = {
-    labels: currentWeekDaysPie,
-    datasets: [
-      {
-        data: currentDataWeekDaysPie,
-        backgroundColor: currentBackgroundColorsWeekDayPie
-      }
-    ]
-  };
-
-  const clientsDataPie = {
-    labels: currentWeekDaysPie,
-    datasets: [
-      {
-        data: currentDataNewClientsPie,
-        backgroundColor: currentBackgroundColorsWeekDayPie
-      }
-    ]
-  };
 
   const handleOpenDeleteUserToClassesDialog = userPaymentId => {
     setDialogDeleteUserToClassesState({
@@ -293,7 +374,29 @@ export default function Home(props) {
 
   const handleCloseDeleteUserToClassesDialog = agree => {
     if (agree) {
-      console.log("se eliminara el id " + idUserPaymentDialog);
+      updateUserPaymentMutation({
+        variables: {
+          userPaymentId: idUserPaymentDialog,
+        }
+      });
+  
+      if (updateUserPaymentMutationLoading) return <CircularProgress />;
+      if (updateUserPaymentMutationError) {
+        setSnackbarState({
+          ...snackbarState,
+          openSnackbar: true,
+          snackBarText: "An error occurred",
+          snackbarColor: "#d32f2f"
+        });
+        return;
+      }
+
+      setSnackbarState({
+        ...snackbarState,
+        openSnackbar: true,
+        snackBarText: "Cliente dado de baja de clases(s)",
+        snackbarColor: "#43a047"
+      });
     }
     setDialogDeleteUserToClassesState({
       openDeleteUserToClassesDialog: false,
@@ -303,22 +406,127 @@ export default function Home(props) {
     });
   };
 
+  const optionsChartBar = {
+    chart: {
+      id: "basic-bar"
+    },
+    plotOptions: {
+      bar: {
+        barHeight: "100%",
+        distributed: true,
+        dataLabels: {
+          position: "bottom"
+        }
+      }
+    },
+    colors: ["#f44336", "#2196f3", "#4caf50"],
+    xaxis: {
+      categories: dataMembersClasesName,
+      labels: {
+        show: false
+      }
+    },
+    title: {
+      text: "3 clases con mas miembros",
+      align: "center",
+      margin: 20,
+      style: {
+        fontSize: "25px"
+      }
+    }
+  };
+
+  const seriesChartBar = [
+    {
+      name: "Miembros",
+      data: dataMembersClasesMembers
+    }
+  ];
+
+  const optionsChartRadar = {
+    chart: {
+      id: "basic-bar",
+      zoom: {
+        enabled: false
+      }
+    },
+    plotOptions: {
+      bar: {
+        barHeight: "100%",
+        distributed: true,
+        dataLabels: {
+          position: "bottom"
+        }
+      }
+    },
+    colors: backgroundColorsMembersClases,
+    xaxis: {
+      categories: currentWeekDaysPie
+    },
+    title: {
+      text: "Visitas",
+      align: "center",
+      margin: 20,
+      style: {
+        fontSize: "25px"
+      }
+    }
+  };
+
+  const seriesChartRadar = [
+    {
+      name: "Visitas",
+      data: currentDataWeekDaysPie
+    }
+  ];
+
+  const optionsChartRadar2 = {
+    chart: {
+      id: "basic-bar",
+      zoom: {
+        enabled: false
+      }
+    },
+    colors: backgroundColorsMembersClases,
+    labels: currentWeekDaysPie,
+    legend: {
+      position: "bottom"
+    },
+    title: {
+      text: "Clientes nuevos",
+      align: "center",
+      margin: 20,
+      style: {
+        fontSize: "25px"
+      }
+    }
+  };
+
+  const seriesChartRadar2 = [
+    {
+      name: "Clientes nuevos",
+      data: currentDataNewClientsPie
+    }
+  ];
+
   return userAuth ? (
     <Grid container justify="center">
-      <Grid item xs={12} md={7} className={classes.items}>
-        <Typography variant="h6">Clientes con pago vencido</Typography>
+      <Grid item xs={12} md={12} lg={7} className={classes.items}>
         <TableContainer component={Card} className={classes.table}>
+          <Toolbar className={classes.tableTittle}>
+            <strong>Clientes con pago vencido</strong>
+          </Toolbar>
           <Table className={classes.table} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>Cliente</TableCell>
-                <TableCell align="right">Clase(s)</TableCell>
-                <TableCell align="right">Vencimiento</TableCell>
-                <TableCell align="right">Acciones</TableCell>
+                <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Clase(s)</TableCell>
+                <TableCell align="center">Vencimiento</TableCell>
+                <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {userPaymentData.users_payments.map(row => (
+              {userPaymentData.users_payments.length > 0 ? userPaymentData.users_payments.map(row => (
                 <TableRow key={row.userPaymentId}>
                   <TableCell component="th" scope="row">
                     {`${row.R_users_data.first_name} ${row.R_users_data.last_name}`}
@@ -354,29 +562,106 @@ export default function Home(props) {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Typography variant="h5" style={{textAlign: "center"}}>No hay clientes con pago vencido</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Grid>
       <Grid item md={1} />
-      <Grid item xs={12} md={4} className={classes.items}>
-        <Typography variant="h6">Visitas en la semana</Typography>
+      <Grid item xs={12} md={12} lg={4} className={classes.items}>
         <Card className={classes.cards} style={{ height: "350px" }}>
-          <Pie data={data} options={{ maintainAspectRatio: false }} />
+          <Chart
+            options={optionsChartRadar}
+            series={seriesChartRadar}
+            type="area"
+            height="300"
+          />
         </Card>
       </Grid>
-      <Grid item xs={12} md={7} className={classes.items}>
-        <Typography variant="h6">3 clases con mas miembros</Typography>
-        <Card className={classes.cards} style={{ height: "350px" }}>
-          <Bar data={data} options={{ maintainAspectRatio: false }} />
-        </Card>
+      <Grid item xs={12} md={12} lg={7} className={classes.items}>
+        <TableContainer component={Card} className={classes.table}>
+          <Toolbar className={classes.tableTittle}>
+            <strong>Clientes con pago casi vencido</strong>
+          </Toolbar>
+          <Table className={classes.table} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">Cliente</TableCell>
+                <TableCell align="center">Número telefónico</TableCell>
+                <TableCell align="center">Email</TableCell>
+                <TableCell align="center">Clase(s)</TableCell>
+                <TableCell align="center">Vencimiento</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {userPaymentAEData.users_payments.length > 0 ? (
+                userPaymentAEData.users_payments.map(row => (
+                  <TableRow key={row.userPaymentId}>
+                    <TableCell component="th" scope="row">
+                      {`${row.R_users_data.first_name} ${row.R_users_data.last_name}`}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {`${row.R_users_data.phone_number}`}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {`${row.R_users_data.email}`}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row.R_classes_price_payment_period.R_classes_price.R_classes_price_details.map(
+                        (aClass, index) => (
+                          <Typography key={index} variant="subtitle1">{`${
+                            aClass.R_classes.name
+                          }${
+                            row.R_classes_price_payment_period.R_classes_price
+                              .R_classes_price_details.length ===
+                            index + 1
+                              ? "."
+                              : ","
+                          } `}</Typography>
+                        )
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      {formatDateExpired(row.payment_end)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Typography variant="h5" style={{textAlign: "center"}}>No hay clientes con pago casi vencido</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Grid>
       <Grid item md={1} />
-      <Grid item xs={12} md={4} className={classes.items}>
-        <Typography variant="h6">Clientes nuevos en la semana</Typography>
+      <Grid item xs={12} md={12} lg={4} className={classes.items}>
         <Card className={classes.cards} style={{ height: "350px" }}>
-          <Pie data={clientsDataPie} options={{ maintainAspectRatio: false }} />
+          <Chart
+            options={optionsChartRadar2}
+            series={seriesChartRadar2}
+            type="area"
+            height="300"
+          />
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={12} lg={7} className={classes.items}>
+        <Card className={classes.cards} style={{ height: "350px" }}>
+          <Chart
+            options={optionsChartBar}
+            series={seriesChartBar}
+            type="bar"
+            height="300"
+          />
         </Card>
       </Grid>
       <Dialog
@@ -415,6 +700,17 @@ export default function Home(props) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
+        key={`${vertical},${horizontal}`}
+        open={openSnackbar}
+        onClose={handleCloseSnackbar}
+        ContentProps={{
+          "aria-describedby": "message-id",
+          style: { background: snackbarColor }
+        }}
+        message={<span id="message-id">{snackBarText}</span>}
+      />
     </Grid>
   ) : (
     <Redirect to="/login" />

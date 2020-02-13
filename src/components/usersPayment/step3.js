@@ -54,11 +54,11 @@ export default function Step3(props) {
           }}
           onChange={e => {
             pasteValidation(e, 2);
-            if(parseInt(e.target.value) > 100) {
+            if (parseInt(e.target.value) > 100) {
               e.target.value = 100;
             }
             const porciento = e.target.value / 100;
-            const total =  originalTotal - (originalTotal * porciento);
+            const total = originalTotal - originalTotal * porciento;
             setUserPaymentState({
               ...userPaymentState,
               discount_percent: e.target.value,
@@ -122,6 +122,29 @@ export default function Step3(props) {
             }}
           />
         </MuiPickersUtilsProvider>
+      </Grid>
+      <Grid item md={5} xs={10}>
+        <TextField
+          className={classes.textFields}
+          select
+          SelectProps={{
+            native: true
+          }}
+          required
+          id="tipo_pago"
+          label="Tipo de pago"
+          margin="normal"
+          value={userPaymentState.payment_type}
+          onChange={(e) => {
+            setUserPaymentState({
+              ...userPaymentState,
+              payment_type: e.target.value
+            });
+          }}
+        >
+          <option value={0}>Contado</option>
+          <option value={1}>Crédito</option>
+        </TextField>
       </Grid>
     </Grid>
   );

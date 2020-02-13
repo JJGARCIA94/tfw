@@ -226,7 +226,7 @@ export default function PaymentPeriods(props) {
         <Grid container>
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
-              Payment periods
+              Períodos de pago
               <Link to="/newPaymentPeriod">
                 <AddCircleIcon />
               </Link>
@@ -237,8 +237,8 @@ export default function PaymentPeriods(props) {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Periodo</TableCell>
-            <TableCell>Días del periodo</TableCell>
+            <TableCell>Período</TableCell>
+            <TableCell>Días del período</TableCell>
             <TableCell align="right">Acciones</TableCell>
           </TableRow>
         </TableHead>

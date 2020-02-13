@@ -408,8 +408,8 @@ export default function Users(props) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <Toolbar>
-          <Grid container>
-            <Grid item md={8} xs={6}>
+          <Grid container spacing={3}>
+            <Grid item md={6} xs={6} style={{alignSelf: "center"}}>
               <Typography
                 className={classes.toolbartitle}
                 variant="h6"
@@ -421,7 +421,7 @@ export default function Users(props) {
                 </Link>
               </Typography>
             </Grid>
-            <Grid item md={2} xs={6}>
+            <Grid item md={3} xs={6}>
               <SearchInput
                 setSearch={setSearch}
                 search={search}
@@ -429,7 +429,7 @@ export default function Users(props) {
                 label="Search by any field"
               />
             </Grid>
-            <Grid item md={2} xs={12}>
+            <Grid item md={3} xs={12}>
               <TextField
                 className={classes.textFields}
                 required

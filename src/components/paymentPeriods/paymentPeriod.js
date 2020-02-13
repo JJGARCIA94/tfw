@@ -151,7 +151,7 @@ export default function PaymentPeriod(props) {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add payment period
+          Información de período de pago
           <Link to="/paymentPeriods">
             <ArrowBackIcon />
           </Link>
@@ -184,7 +184,7 @@ export default function PaymentPeriod(props) {
             className={classes.textFields}
             required
             id="period"
-            label="Periodo"
+            label="Período"
             margin="normal"
             value={paymentPeriodState.period}
             inputProps={{
@@ -208,7 +208,7 @@ export default function PaymentPeriod(props) {
             className={classes.textFields}
             required
             id="days"
-            label="Días del periodo"
+            label="Días del período"
             margin="normal"
             value={paymentPeriodState.days}
             inputProps={{

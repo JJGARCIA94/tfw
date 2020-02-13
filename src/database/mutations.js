@@ -1,5 +1,22 @@
 import gql from "graphql-tag";
 
+export const UPDATE_USER_PAYMENT_STATUS = gql`
+  mutation update_user_payment_status($userPaymentId: bigint!) {
+    update_users_payments(
+      where: { id: { _eq: $userPaymentId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+    update_classes_details(
+      where: { user_payment_id: { _eq: $userPaymentId } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
 export const ADD_USER = gql`
   mutation add_user(
     $first_name: String!
@@ -104,9 +121,18 @@ export const ADD_USER_PAYMENT = gql`
         total: $total
         payment_start: $paymentStart
         payment_end: $paymentEnd
+        R_classes_details: {
+          data: [
+            { class_id: 14, user_id: 96 }
+            { class_id: 15, user_id: 96 }
+            { class_id: 5, user_id: 96 }
+          ]
+        }
       }
     ) {
-      affected_rows
+      returning {
+        id
+      }
     }
   }
 `;

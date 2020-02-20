@@ -20,7 +20,8 @@ import {
   ListItemText,
   Avatar,
   Snackbar,
-  Divider
+  Divider,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircleOutline as AddCircleOutlineIcon,
@@ -201,13 +202,15 @@ export default function Lessons(props) {
           <Card className={classes.cards}>
             <CardContent>
               <Typography className={classes.typografyActions}>
+                <Tooltip title="Ver información">
                 <Link to={"/lesson/" + lesson.id}>
-                  <IconButton title="See class information">
+                  <IconButton>
                     <EditIcon className={classes.editIcon} />
                   </IconButton>
                 </Link>
+                </Tooltip>
+                <Tooltip title={lesson.status === 1 ? "Cancelar" : "Restaurar"}>
                 <IconButton
-                  title={lesson.status === 1 ? "Cancel class" : "Restore class"}
                   onClick={() => {
                     const newStatus = lesson.status === 1 ? 0 : 1;
                     handleOpenClassDialog(lesson.id, newStatus);
@@ -219,9 +222,10 @@ export default function Lessons(props) {
                     <RestoreIcon className={classes.restoreIcon} />
                   )}
                 </IconButton>
+                </Tooltip>
               </Typography>
               <Typography variant="subtitle1" className={classes.cardTittle}>
-                <strong>Name: </strong>
+                <strong>Nombre: </strong>
                 {`${lesson.name} `}
               </Typography>
               <Typography variant="subtitle1">
@@ -233,7 +237,12 @@ export default function Lessons(props) {
                 )}
               </Typography>
               <Typography variant="subtitle1">
-                <strong>Members: </strong>
+                <strong>Miembros: </strong>
+                <Tooltip title={
+                    lesson.R_classes_details_aggregate.aggregate.count > 0
+                      ? "Ver miembros activos"
+                      : "Sin miembros"
+                  }>
                 <span
                   style={{
                     cursor:
@@ -252,14 +261,10 @@ export default function Lessons(props) {
                       handleOpenDialog(lesson.id, lesson.name, 1);
                     }
                   }}
-                  title={
-                    lesson.R_classes_details_aggregate.aggregate.count > 0
-                      ? "See members of this class"
-                      : null
-                  }
-                >{`${lesson.R_classes_details_aggregate.aggregate.count} members`}</span>
+                >{`${lesson.R_classes_details_aggregate.aggregate.count} miembros`}</span>
+                </Tooltip>
+                <Tooltip title="Ver historial de miembros inactivos">
                 <IconButton
-                  title="See members history of this class"
                   onClick={async () => {
                     await setIdClassState(lesson.id);
                     handleOpenDialog(lesson.id, lesson.name, 0);
@@ -267,6 +272,7 @@ export default function Lessons(props) {
                 >
                   <QueryBuilderIcon />
                 </IconButton>
+                </Tooltip>
               </Typography>
               <Typography variant="subtitle1" className={classes.cardContent}>
                 <strong>Description: </strong>
@@ -284,8 +290,8 @@ export default function Lessons(props) {
       openDialog: true,
       tittleDialog:
         status === 1
-          ? `${className} class members`
-          : `${className} class members history`,
+          ? `${className} miembros`
+          : `Historial de miembros de ${className}`,
       idDialog: classId,
       statusDialog: status
     });
@@ -296,12 +302,12 @@ export default function Lessons(props) {
       openClassDialog: true,
       tittleClassDialog:
         status === 0
-          ? "Do you want to cancel this class?"
-          : "Do you want to restore this class?",
+          ? "¿Quieres cancelar esta clase?"
+          : "¿Quieres restaurar esta clase?",
       textClassDialog:
         status === 0
-          ? "If you cancel this class all members  will be eject of this one and the class won't be available to clients."
-          : "If you restore this class will be available to clients.",
+          ? "Si cancelas esta clase todos los miembros pertenecientes serán retirados y esta clase no estará disponible para los clientess."
+          : "Si restauras esta clase estará disponible para los clientes.",
       idClassDialog: classId,
       statusClassDialog: status
     });
@@ -328,7 +334,7 @@ export default function Lessons(props) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "An error occurred",
+          snackbarText: "Ha ocurrido un error",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -337,7 +343,7 @@ export default function Lessons(props) {
         ...snackbarState,
         openSnackBar: true,
         snackbarText:
-          statusClassDialog === 1 ? "Class restored" : "Class canceled",
+          statusClassDialog === 1 ? "Clase restaurada" : "Clase cancelada",
         snackbarColor: "#43a047"
       });
     }
@@ -368,11 +374,13 @@ export default function Lessons(props) {
       <Grid item xs={12} md={6} lg={4}>
         <Card className={classes.cardAdd}>
           <CardContent>
+            <Tooltip title="Agregar clase">
             <Link to="/newLesson">
               <IconButton>
                 <AddCircleOutlineIcon className={classes.addIcon} />
               </IconButton>
             </Link>
+            </Tooltip>
           </CardContent>
         </Card>
       </Grid>
@@ -426,7 +434,7 @@ export default function Lessons(props) {
             }}
             color="primary"
           >
-            Disagree
+            No
           </Button>
           <Button
             onClick={() => {
@@ -435,7 +443,7 @@ export default function Lessons(props) {
             color="primary"
             autoFocus
           >
-            Agree
+            Sí
           </Button>
         </DialogActions>
       </Dialog>
@@ -502,6 +510,6 @@ function Members(props) {
   return membersData.classes_details.length ? (
     getMembers()
   ) : (
-    <Typography variant="subtitle1">No members</Typography>
+    <Typography variant="subtitle1">Sin miembros</Typography>
   );
 }

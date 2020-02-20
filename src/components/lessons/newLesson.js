@@ -9,7 +9,8 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -95,7 +96,7 @@ export default function NewLesson() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son obligatorios",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -115,7 +116,7 @@ export default function NewLesson() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -131,7 +132,7 @@ export default function NewLesson() {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class added",
+      snackBarText: "Clase agregada",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -145,10 +146,12 @@ export default function NewLesson() {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add class
+          Agregar clase
+          <Tooltip title="Regresar">
           <Link to="/lessons">
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -157,7 +160,7 @@ export default function NewLesson() {
             className={classes.textFields}
             required
             id="name"
-            label="Name"
+            label="Nombre"
             margin="normal"
             value={classState.name}
             inputProps={{
@@ -181,7 +184,7 @@ export default function NewLesson() {
             className={classes.textFields}
             required
             id="description"
-            label="Description"
+            label="Descripción"
             margin="normal"
             value={classState.description}
             inputProps={{
@@ -218,7 +221,7 @@ export default function NewLesson() {
               });
             }}
           >
-            <option value="0">Select a coach</option>
+            <option value="0">Selecciona un coach</option>
             {getCoaches()}
           </TextField>
         </Grid>
@@ -231,7 +234,7 @@ export default function NewLesson() {
               addClass();
             }}
           >
-            Save
+            Guardar
           </Button>
         </Grid>
       </Grid>

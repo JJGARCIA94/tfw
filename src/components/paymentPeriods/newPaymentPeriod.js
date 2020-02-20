@@ -9,7 +9,8 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useMutation } from "@apollo/react-hooks";
@@ -89,7 +90,7 @@ export default function NewPaymentPeriod() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -104,7 +105,7 @@ export default function NewPaymentPeriod() {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Payment period added",
+      snackBarText: "Período de pago agregado",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -119,9 +120,11 @@ export default function NewPaymentPeriod() {
       <Toolbar>
         <Typography variant="h6">
           Agregar período de pago
+          <Tooltip title="Regresar">
           <Link to="/paymentPeriods">
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -181,7 +184,7 @@ export default function NewPaymentPeriod() {
               addPaymentPeriod();
             }}
           >
-            Save
+            Guardar
           </Button>
         </Grid>
       </Grid>

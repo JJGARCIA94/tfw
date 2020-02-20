@@ -11,7 +11,8 @@ import {
   Button,
   Grid,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import Step1 from "./step1";
@@ -104,13 +105,6 @@ export default function NewUserPayment(props) {
   const [activeStep, setActiveStep] = useState(0);
   const steps = getSteps();
   const [classDetails, setClassDetails] = useState("");
-  /*const ADD_CLASS_DETAIL = gql`
-    mutation add_class_detail {
-      insert_classes_details(objects: [${classDetails}]) {
-        affected_rows
-      }
-    }
-  `;*/
   const ADD_USER_PAYMENT = gql`
   mutation add_user_payment(
     $userId: Int!
@@ -141,13 +135,6 @@ export default function NewUserPayment(props) {
     }
   }
 `;
-  /*const [
-    addClassDetailsMutation,
-    {
-      loading: addClassDetailsMutationLoading,
-      error: addClassDetailsMutationError
-    }
-  ] = useMutation(ADD_CLASS_DETAIL);*/
   const [
     addUserPaymentMutation,
     {
@@ -273,19 +260,6 @@ export default function NewUserPayment(props) {
       return;
     }
 
-    /*addClassDetailsMutation();
-
-    if (addClassDetailsMutationLoading) return <CircularProgress />;
-    if (addClassDetailsMutationError) {
-      setSnackbarState({
-        ...snackbarState,
-        openSnackBar: true,
-        snackbarText: "Ha ocurrido un error",
-        snackbarColor: "#d32f2f"
-      });
-      return;
-    }*/
-
     setSnackbarState({
       ...snackbarState,
       openSnackBar: true,
@@ -335,7 +309,8 @@ export default function NewUserPayment(props) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
-            snackbarText: "No se puede realizar el pago porque el usuario esta dado de baja",
+            snackbarText:
+              "No se puede realizar el pago porque el usuario esta dado de baja",
             snackbarColor: "#d32f2f"
           });
         } else {
@@ -377,13 +352,19 @@ export default function NewUserPayment(props) {
       <Toolbar>
         <Typography variant="h6">
           Nuevo pago de usuario
-          <Link to={`/userPayments/` + userId}>
-            <ArrowBackIcon />
-          </Link>
+          <Tooltip title="Regresar">
+            <Link to={`/userPayments/` + userId}>
+              <ArrowBackIcon />
+            </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <div className={classes.root}>
-        <Stepper activeStep={activeStep} alternativeLabel style={{justifyContent: "center"}}>
+        <Stepper
+          activeStep={activeStep}
+          alternativeLabel
+          style={{ justifyContent: "center" }}
+        >
           {steps.map(label => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -396,7 +377,7 @@ export default function NewUserPayment(props) {
           ) : (
             <div>
               <Grid container>{getStepContent(activeStep)}</Grid>
-              <div style={{marginTop: "10px"}}>
+              <div style={{ marginTop: "10px" }}>
                 <Button
                   disabled={activeStep === 0}
                   onClick={handleBack}

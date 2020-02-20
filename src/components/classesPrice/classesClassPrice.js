@@ -21,7 +21,8 @@ import {
   DialogActions,
   Button,
   Snackbar,
-  TextField
+  TextField,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as ArrowBackIcon,
@@ -248,6 +249,12 @@ export default function ClassesClassPrice(props) {
           });
           return;
         }
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText: "Clase agregada",
+          snackbarColor: "#43a047"
+        });
       }
     }
     setDialogAddClass({
@@ -287,10 +294,13 @@ export default function ClassesClassPrice(props) {
         <Grid container>
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
+              <Tooltip title="Regresar">
               <Link to={"/classesPrice"}>
                 <ArrowBackIcon />
               </Link>
+              </Tooltip>
               <span style={{ marginLeft: "10px" }}>Clase(s)</span>
+              <Tooltip title="Agregar clase">
               <IconButton
                 onClick={() => {
                   handleOpenDialogAddClass();
@@ -298,6 +308,7 @@ export default function ClassesClassPrice(props) {
               >
                 <AddCircleIcon style={{ color: "#007bff" }} />
               </IconButton>
+              </Tooltip>
             </Typography>
           </Grid>
         </Grid>
@@ -316,10 +327,10 @@ export default function ClassesClassPrice(props) {
                 {row.R_classes.name}
               </TableCell>
               <TableCell align="right">
-                <IconButton
-                  title={
+                <Tooltip title={
                     row.status === 1 ? "Eliminar clase" : "Restaurar clase"
-                  }
+                  }>
+                <IconButton
                   onClick={() => {
                     const newStatus = row.status === 1 ? 0 : 1;
                     handleOpenDialog(row.id, newStatus);
@@ -331,6 +342,7 @@ export default function ClassesClassPrice(props) {
                     <RestoreFromTrashIcon className={classes.icons} />
                   )}
                 </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}

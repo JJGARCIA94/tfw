@@ -23,7 +23,8 @@ import {
   Button,
   Snackbar,
   TextField,
-  Grid
+  Grid,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircle as AddCircleIcon,
@@ -74,22 +75,22 @@ function getSorting(order, orderBy) {
 }
 
 const headCells = [
-  { id: "name", numeric: false, disablePadding: true, label: "Name" },
-  { id: "address", numeric: false, disablePadding: false, label: "Addres" },
+  { id: "name", numeric: false, disablePadding: true, label: "Nombre" },
+  { id: "address", numeric: false, disablePadding: false, label: "Dirección" },
   {
     id: "phone_number",
     numeric: false,
     disablePadding: false,
-    label: "Phone number"
+    label: "Teléfono"
   },
   { id: "email", numeric: false, disablePadding: false, label: "Email" },
   {
     id: "user_type",
     numeric: false,
     disablePadding: false,
-    label: "User type"
+    label: "Tipo de usuario"
   },
-  { id: "actions", numeric: false, disablePadding: false, label: "Actions" }
+  { id: "actions", numeric: false, disablePadding: false, label: "Acciones" }
 ];
 
 function EnhancedTableHead(props) {
@@ -332,12 +333,12 @@ export default function Users(props) {
       openDialog: true,
       tittleDialog:
         newStatus === 0
-          ? "Do you want to delete this user?"
-          : "Do you want to restore this user?",
+          ? "¿Quieres eliminar este usuario?"
+          : "¿Quieres restaurar este usuario?",
       textDialog:
         newStatus === 0
-          ? "Once deleted, this user will not be able to enter the platform."
-          : "Once restored, this user will be able to enter the platform.",
+          ? "Una vez eliminado, este usuario no podrá ingresar a la plataforma."
+          : "Una vez restaurado, este usuario podrá ingresar a la plataforma.",
       idDialog: idUsuario,
       idUserTypeDialog: idTipoUsuario,
       statusDialog: newStatus
@@ -354,7 +355,7 @@ export default function Users(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "It can´t be restore because the user type of this user doesn´t be active.",
+            "No se puede restaurar porque el tipo de usuario de este usuario no está activo.",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -370,7 +371,7 @@ export default function Users(props) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
-            snackbarText: "An error occurred",
+            snackbarText: "Ha ocurrido un error",
             snackbarColor: "#d32f2f"
           });
           return;
@@ -378,7 +379,7 @@ export default function Users(props) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: statusDialog === 1 ? "User restored" : "User deleted",
+          snackbarText: statusDialog === 1 ? "Usuario restaurado" : "Usuario eliminado",
           snackbarColor: "#43a047"
         });
       }
@@ -415,10 +416,12 @@ export default function Users(props) {
                 variant="h6"
                 id="tableTitle"
               >
-                Users
+                Usuarios
+                <Tooltip title="Agregar usuario">
                 <Link to="/newUser">
                   <AddCircleIcon />
                 </Link>
+                </Tooltip>
               </Typography>
             </Grid>
             <Grid item md={3} xs={6}>
@@ -426,7 +429,7 @@ export default function Users(props) {
                 setSearch={setSearch}
                 search={search}
                 setHandle={setHandlePage}
-                label="Search by any field"
+                label="Buscar por cualquier campo"
               />
             </Grid>
             <Grid item md={3} xs={12}>
@@ -441,14 +444,14 @@ export default function Users(props) {
                   width: "100%"
                 }}
                 id="user_type"
-                label="Select a user type to search"
+                label="Selecciona un tipo de usuario"
                 margin="normal"
                 value={userType}
                 onChange={e => {
                   setUserType(e.target.value);
                 }}
               >
-                <option value={0}>All user types</option>
+                <option value={0}>Todos los tipos de usuario</option>
                 {getUserTypes()}
               </TextField>
             </Grid>
@@ -491,15 +494,17 @@ export default function Users(props) {
                       <TableCell align="left">{row.email}</TableCell>
                       <TableCell align="left">{row.user_type}</TableCell>
                       <TableCell align="left">
+                        <Tooltip title="Ver información">
                         <Link to={"/user/" + row.id}>
-                          <IconButton title="See user">
+                          <IconButton>
                             <VisibilityIcon className={classes.icons} />
                           </IconButton>
                         </Link>
+                        </Tooltip>
+                        <Tooltip title={
+                            row.status === 1 ? "Eliminar usuario" : "Restaurar usuario"
+                          }>
                         <IconButton
-                          title={
-                            row.status === 1 ? "Delete user" : "Restore user"
-                          }
                           onClick={() => {
                             const newStatus = row.status === 1 ? 0 : 1;
                             handleOpenDialog(
@@ -515,19 +520,24 @@ export default function Users(props) {
                             <RestoreFromTrashIcon className={classes.icons} />
                           )}
                         </IconButton>
+                        </Tooltip>
                         {row.user_type_id === 2 ? (
-                          <Link to={"/assists/" + row.id}>
-                            <IconButton title="Check assists">
+                          <Tooltip title="Ver asistencias">
+                            <Link to={"/assists/" + row.id}>
+                            <IconButton >
                               <EventAvailableIcon className={classes.icons} />
                             </IconButton>
                           </Link>
+                          </Tooltip>
                         ) : null}
                         {row.user_type_id === 2 ? (
-                          <Link to={"/userPayments/" + row.id}>
-                            <IconButton title="Pagos de cliente">
+                          <Tooltip title="Ver pagos">
+                            <Link to={"/userPayments/" + row.id}>
+                            <IconButton >
                               <MonetizationOnIcon className={classes.icons} />
                             </IconButton>
                           </Link>
+                          </Tooltip>
                         ) : null}
                       </TableCell>
                     </TableRow>

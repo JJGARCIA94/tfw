@@ -8,7 +8,8 @@ import {
   Typography,
   CircularProgress,
   Snackbar,
-  Divider
+  Divider,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as ArrowBackIcon,
@@ -183,13 +184,17 @@ export default function UserPayments(props) {
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="h6">
+          <Tooltip title="Regresar">
           <Link to={`/users`}>
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
           Pagos de usuario{" "}
+          <Tooltip title="Agregar pago">
           <Link to={`/newUserPayment/` + userId}>
             <AddCircleIcon />
           </Link>
+          </Tooltip>
         </Typography>
         <Divider />
       </Grid>

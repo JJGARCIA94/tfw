@@ -20,7 +20,8 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircle as AddCircleIcon,
@@ -152,12 +153,12 @@ export default function UserTypes(props) {
       openDialog: true,
       tittleDialog:
         newStatus === 0
-          ? "Do you want to delete this user type?"
-          : "Do you want to restore this user type?",
+          ? "¿Quieres eliminar este tipo de usuario?"
+          : "¿Quieres restaurar este tipo de usuario?",
       textDialog:
         newStatus === 0
-          ? "Once deleted, this user type will not be available to select when create or update a user."
-          : "Once restored, this user type will be available to select when create or update a user.",
+          ? "Una vez eliminado, este tipo de usuario no estará disponible para seleccionar al crear o actualizar un usuario."
+          : "Una vez restaurado, este tipo de usuario estará disponible para seleccionar al crear o actualizar un usuario.",
       idDialog: idTipoUsuario,
       statusDialog: newStatus
     });
@@ -173,7 +174,7 @@ export default function UserTypes(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "It can´t be remove because there are users with this user type.",
+            "No se puede eliminar porque hay usuarios con este tipo de usuario.",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -189,7 +190,7 @@ export default function UserTypes(props) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
-            snackbarText: "An error occurred",
+            snackbarText: "Ha ocurrido un error",
             snackbarColor: "#d32f2f"
           });
           return;
@@ -198,7 +199,7 @@ export default function UserTypes(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            statusDialog === 1 ? "User type restored" : "User type deleted",
+            statusDialog === 1 ? "Tipo de usuario restaurado" : "Tipo de usuario eliminado",
           snackbarColor: "#43a047"
         });
       }
@@ -227,10 +228,12 @@ export default function UserTypes(props) {
         <Grid container>
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
-              User types
+              Tipos de usuario
+              <Tooltip title="Agregar tipo de usuario">
               <Link to="/newUserType">
                 <AddCircleIcon />
               </Link>
+              </Tooltip>
             </Typography>
           </Grid>
         </Grid>
@@ -238,8 +241,8 @@ export default function UserTypes(props) {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell align="right">Actions</TableCell>
+            <TableCell>Nombre</TableCell>
+            <TableCell align="right">Acciones</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -250,17 +253,19 @@ export default function UserTypes(props) {
                   {row.name}
                 </TableCell>
                 <TableCell align="right">
+                  <Tooltip title="Ver información">
                   <Link to={"/userType/" + row.id}>
-                    <IconButton title="See user type">
+                    <IconButton>
                       <VisibilityIcon className={classes.icons} />
                     </IconButton>
                   </Link>
-                  <IconButton
-                    title={
+                  </Tooltip>
+                  <Tooltip title={
                       row.status === 1
-                        ? "Delete user type"
-                        : "Restore user type"
-                    }
+                        ? "Eliminar tipo de usuario"
+                        : "Restaurar tipo de usuario"
+                    }>
+                  <IconButton
                     onClick={() => {
                       const newStatus = row.status === 1 ? 0 : 1;
                       handleOpenDialog(row.id, newStatus);
@@ -272,6 +277,7 @@ export default function UserTypes(props) {
                       <RestoreFromTrashIcon className={classes.icons} />
                     )}
                   </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ) : null
@@ -299,7 +305,7 @@ export default function UserTypes(props) {
             }}
             color="primary"
           >
-            Disagree
+            No
           </Button>
           <Button
             onClick={() => {
@@ -308,7 +314,7 @@ export default function UserTypes(props) {
             color="primary"
             autoFocus
           >
-            Agree
+            Sí
           </Button>
         </DialogActions>
       </Dialog>

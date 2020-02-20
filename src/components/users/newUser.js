@@ -10,7 +10,8 @@ import {
   Button,
   Card,
   Toolbar,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { GET_USER_TYPES } from "../../database/queries";
@@ -121,7 +122,7 @@ export default function NewUser() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son requeridos",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -144,7 +145,7 @@ export default function NewUser() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -163,7 +164,7 @@ export default function NewUser() {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "User added",
+      snackBarText: "Usuario agregado",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -174,10 +175,12 @@ export default function NewUser() {
       <Card>
         <Toolbar>
           <Typography variant="h6">
-            Add user
+            Agregar usuario
+            <Tooltip title="Regresar">
             <Link to="/users">
               <ArrowBackIcon />
             </Link>
+            </Tooltip>
           </Typography>
         </Toolbar>
         <Grid container justify="center" className={classes.root}>
@@ -186,7 +189,7 @@ export default function NewUser() {
               className={classes.textFields}
               required
               id="first_name"
-              label="First Name"
+              label="Nombre"
               margin="normal"
               value={userState.first_name}
               inputProps={{
@@ -210,7 +213,7 @@ export default function NewUser() {
               className={classes.textFields}
               required
               id="last_name"
-              label="Last Name"
+              label="Apellido"
               margin="normal"
               value={userState.last_name}
               inputProps={{
@@ -233,7 +236,7 @@ export default function NewUser() {
               className={classes.textFields}
               required
               id="address"
-              label="Address"
+              label="Dirección"
               margin="normal"
               value={userState.address}
               inputProps={{
@@ -257,7 +260,7 @@ export default function NewUser() {
               className={classes.textFields}
               required
               id="phone_number"
-              label="Phone number"
+              label="Teléfono"
               margin="normal"
               value={userState.phone_number}
               inputProps={{
@@ -302,7 +305,7 @@ export default function NewUser() {
           <Grid item md={5} xs={10}>
             <TextField
               select
-              label="User Type"
+              label="Tipo de usuario"
               className={classes.textFields}
               SelectProps={{
                 native: true
@@ -316,7 +319,7 @@ export default function NewUser() {
                 });
               }}
             >
-              <option value="0">Select a user type</option>
+              <option value="0">Selecciona un tipo de usuario</option>
               {getUserTypes()}
             </TextField>
           </Grid>
@@ -329,7 +332,7 @@ export default function NewUser() {
                 addUser();
               }}
             >
-              Save
+              Guardar
             </Button>
           </Grid>
         </Grid>

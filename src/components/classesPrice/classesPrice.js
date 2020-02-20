@@ -16,7 +16,8 @@ import {
   Snackbar,
   Button,
   TextField,
-  Divider
+  Divider,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircleOutline as AddCircleOutlineIcon,
@@ -293,8 +294,8 @@ export default function ClassesPrice(props) {
                   textAlign: "end"
                 }}
               >
+                <Tooltip title="Ver información">
                 <IconButton
-                  title="Ver información de la clase o paquete"
                   onClick={() => {
                     setDialogClassPriceInformationState({
                       openClassPriceInformationDialog: true,
@@ -307,22 +308,27 @@ export default function ClassesPrice(props) {
                 >
                   <EditIcon style={{ color: "#FFC605" }} />
                 </IconButton>
+                </Tooltip>
+                <Tooltip title="Ver clases">
                 <Link to={`/classesClassPrice/${class_price.id}`}>
-                  <IconButton title="Ver clases de la clase o paquete">
+                  <IconButton>
                     <SportsKabaddiIcon style={{ color: "black" }} />
                   </IconButton>
                 </Link>
+                </Tooltip>
+                <Tooltip title="Ver métodos de pago">
                 <Link to={`/paymentsClassPrice/${class_price.id}`}>
-                  <IconButton title="Ver métodos de pago de la clase o paquete">
+                  <IconButton>
                     <MonetizationOnIcon style={{ color: "#43A047" }} />
                   </IconButton>
                 </Link>
-                <IconButton
-                  title={
+                </Tooltip>
+                <Tooltip title={
                     class_price.status === 1
-                      ? "Eliminar precio de la clase o paquete"
-                      : "Restaurar precio de la clase o paquete"
-                  }
+                      ? "Eliminar precio"
+                      : "Restaurar precio"
+                  }>
+                <IconButton
                   onClick={() => {
                     const newStatus = class_price.status === 1 ? 0 : 1;
                     handleOpenClassPriceDialog(class_price.id, newStatus);
@@ -334,6 +340,7 @@ export default function ClassesPrice(props) {
                     <RestoreIcon style={{ color: "#673AB7" }} />
                   )}
                 </IconButton>
+                </Tooltip>
               </Typography>
               <Typography variant="subtitle1" className={classes.cardContent}>
                 {class_price.name !== null && class_price.name.trim() !== "" ? (
@@ -393,11 +400,13 @@ export default function ClassesPrice(props) {
       <Grid item xs={12} md={6} lg={4}>
         <Card className={classes.cardAdd}>
           <CardContent>
+            <Tooltip title="Agregar precio a clase o paquete">
             <Link to="/newClassPrice">
               <IconButton>
                 <AddCircleOutlineIcon className={classes.addIcon} />
               </IconButton>
             </Link>
+            </Tooltip>
           </CardContent>
         </Card>
       </Grid>

@@ -20,7 +20,8 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircle as AddCircleIcon,
@@ -86,35 +87,40 @@ export default function PaymentPeriods(props) {
     loading: paymentPeriodsLoading,
     error: paymentPeriodsError
   } = useSubscription(GET_PAYMENT_PERIODS_ALL);
-  const { data: classesPricePaymentPeriodData, loading: classesPricePaymentPeriodLoading, error: classesPricePaymentPeriodError } = useSubscription(
-    GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD,
-    {
-      variables: {
-        paymentPeriodId: idDialog
-      }
+  const {
+    data: classesPricePaymentPeriodData,
+    loading: classesPricePaymentPeriodLoading,
+    error: classesPricePaymentPeriodError
+  } = useSubscription(GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_PAYMENT_PERIOD, {
+    variables: {
+      paymentPeriodId: idDialog
     }
-  );
+  });
   const [
     updatePaymentPeriodStatusMutation,
-    { loading: updatePaymentPeriodStatusLoading, error: updatePaymentPeriodStatusError }
+    {
+      loading: updatePaymentPeriodStatusLoading,
+      error: updatePaymentPeriodStatusError
+    }
   ] = useMutation(UPDATE_PAYMENT_PERIOD_STATUS);
   const setUserAuthHeader = props.setUserAuth;
   const [userAuth, setUserAuth] = useState(true);
   const [userIdAuth, setUserIdAuth] = useState(0);
-  const {
-    data: userAuthData, error: userAuthError
-  } = useQuery(GET_USER_BY_ID_AUTH, {
-    variables: {
-      id: userIdAuth
-    },
-    onCompleted: () => {
-      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
-        localStorage.removeItem("token");
-        setUserAuth(false);
-        setUserAuthHeader(false);
+  const { data: userAuthData, error: userAuthError } = useQuery(
+    GET_USER_BY_ID_AUTH,
+    {
+      variables: {
+        id: userIdAuth
+      },
+      onCompleted: () => {
+        if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+          localStorage.removeItem("token");
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
       }
     }
-  });
+  );
 
   useEffect(() => {
     function isUserAuth() {
@@ -151,12 +157,12 @@ export default function PaymentPeriods(props) {
       openDialog: true,
       tittleDialog:
         newStatus === 0
-          ? "Do you want to delete this payment period?"
-          : "Do you want to restore this payment period?",
+          ? "¿Quieres eliminar este período de pago?"
+          : "¿Quieres restaurar este período de pago?",
       textDialog:
         newStatus === 0
-          ? "Once deleted, this payment period will not be available to select when create or update a class price."
-          : "Once restored, this payment period will be available to select when create or update a class price.",
+          ? "Una vez eliminado, este período de pago no estará disponible para seleccionar al crear o actualizar un precio de clase o paquete."
+          : "Una vez restaurado, este período de pago estará disponible para seleccionar al crear o actualizar un precio de clase o paquete.",
       idDialog: idPaymentPeriod,
       statusDialog: newStatus
     });
@@ -165,14 +171,15 @@ export default function PaymentPeriods(props) {
   const handleCloseDialog = agree => {
     if (agree) {
       if (
-        classesPricePaymentPeriodData.classes_price_payment_period_aggregate.aggregate.count > 0 &&
+        classesPricePaymentPeriodData.classes_price_payment_period_aggregate
+          .aggregate.count > 0 &&
         statusDialog === 0
       ) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "It can´t be remove because there are classes price with this payment period.",
+            "No se puede eliminar porque hay precios de clases o paquetes con este período de pago.",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -188,7 +195,7 @@ export default function PaymentPeriods(props) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
-            snackbarText: "An error occurred",
+            snackbarText: "Ha ocurrido un error",
             snackbarColor: "#d32f2f"
           });
           return;
@@ -197,7 +204,9 @@ export default function PaymentPeriods(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            statusDialog === 1 ? "Payment period restored" : "Payment period deleted",
+            statusDialog === 1
+              ? "Período de pago restaurado"
+              : "Período de pago eliminado",
           snackbarColor: "#43a047"
         });
       }
@@ -220,16 +229,18 @@ export default function PaymentPeriods(props) {
     });
   };
 
-  return ( userAuth ?
+  return userAuth ? (
     <TableContainer component={Paper} className={classes.root}>
       <Toolbar>
         <Grid container>
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
               Períodos de pago
+              <Tooltip title="Agregar período de pago">
               <Link to="/newPaymentPeriod">
                 <AddCircleIcon />
               </Link>
+              </Tooltip>
             </Typography>
           </Grid>
         </Grid>
@@ -252,15 +263,19 @@ export default function PaymentPeriods(props) {
                 {row.days}
               </TableCell>
               <TableCell align="right">
+                <Tooltip title="Ver información">
                 <Link to={"/paymentPeriod/" + row.id}>
-                  <IconButton title="See payment period">
+                  <IconButton>
                     <VisibilityIcon className={classes.icons} />
                   </IconButton>
                 </Link>
+                </Tooltip>
+                <Tooltip title={
+                    row.status === 1
+                      ? "Eliminar período de pago"
+                      : "Restaurar período de pago"
+                  }>
                 <IconButton
-                  title={
-                    row.status === 1 ? "Delete payment period" : "Restore payment period"
-                  }
                   onClick={() => {
                     const newStatus = row.status === 1 ? 0 : 1;
                     handleOpenDialog(row.id, newStatus);
@@ -272,6 +287,7 @@ export default function PaymentPeriods(props) {
                     <RestoreFromTrashIcon className={classes.icons} />
                   )}
                 </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}
@@ -298,7 +314,7 @@ export default function PaymentPeriods(props) {
             }}
             color="primary"
           >
-            Disagree
+            No
           </Button>
           <Button
             onClick={() => {
@@ -307,7 +323,7 @@ export default function PaymentPeriods(props) {
             color="primary"
             autoFocus
           >
-            Agree
+            Sí
           </Button>
         </DialogActions>
       </Dialog>
@@ -322,6 +338,8 @@ export default function PaymentPeriods(props) {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </TableContainer> : <Redirect to="/login" />
+    </TableContainer>
+  ) : (
+    <Redirect to="/login" />
   );
 }

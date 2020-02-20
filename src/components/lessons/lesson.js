@@ -9,7 +9,8 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -119,7 +120,7 @@ export default function Lesson(props) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son obligatorios",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -140,7 +141,7 @@ export default function Lesson(props) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -153,7 +154,7 @@ export default function Lesson(props) {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class updated",
+      snackBarText: "Clase actualizada",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -166,10 +167,12 @@ export default function Lesson(props) {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Class information
+          Información de la clase
+          <Tooltip title="Regresar">
           <Link to="/lessons">
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -177,7 +180,7 @@ export default function Lesson(props) {
           <TextField
             className={classes.textFields}
             id="create_at"
-            label="Created at"
+            label="Fecha de creación"
             margin="normal"
             value={classState.created_at}
             disabled
@@ -188,7 +191,7 @@ export default function Lesson(props) {
           <TextField
             className={classes.textFields}
             id="updated_at"
-            label="Last update"
+            label="Última actualización"
             margin="normal"
             value={classState.updated_at}
             disabled
@@ -199,7 +202,7 @@ export default function Lesson(props) {
             className={classes.textFields}
             required
             id="name"
-            label="Name"
+            label="Nombre"
             margin="normal"
             value={classState.name}
             inputProps={{
@@ -223,7 +226,7 @@ export default function Lesson(props) {
             className={classes.textFields}
             required
             id="description"
-            label="Description"
+            label="Descripción"
             margin="normal"
             value={classState.description}
             inputProps={{
@@ -263,7 +266,7 @@ export default function Lesson(props) {
               });
             }}
           >
-            <option value="0">Select a coach</option>
+            <option value="0">Selecciona un coach</option>
             {getCoaches()}
           </TextField>
         </Grid>
@@ -276,7 +279,7 @@ export default function Lesson(props) {
               updateClass();
             }}
           >
-            Save
+            Guardar
           </Button>
         </Grid>
       </Grid>

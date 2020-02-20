@@ -21,7 +21,8 @@ import {
   DialogActions,
   Button,
   Snackbar,
-  TextField
+  TextField,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as ArrowBackIcon,
@@ -200,8 +201,8 @@ export default function PaymentsClassPrice(props) {
       openDialog: true,
       tittleDialog:
         newStatus === 0
-          ? "¿Quieres eliminar este periodo?"
-          : "¿Quieres restaurar este periodo?",
+          ? "¿Quieres eliminar este período?"
+          : "¿Quieres restaurar este período?",
       textDialog:
         newStatus === 0
           ? "Una vez eliminado ya no estará disponible dentro de esta clase o paquete."
@@ -215,7 +216,7 @@ export default function PaymentsClassPrice(props) {
   const handleOpenDialogAddPayment = () => {
     setDialogAddPayment({
       openDialogAddPayment: true,
-      tittleDialogAddPayment: "Agregar periodo de pago"
+      tittleDialogAddPayment: "Agregar período de pago"
     });
   };
 
@@ -228,7 +229,7 @@ export default function PaymentsClassPrice(props) {
   ) => {
     setDialogUpdatePayment({
       openDialogUpdatePayment: true,
-      tittleDialogUpdatePayment: "Editar periodo de pago",
+      tittleDialogUpdatePayment: "Editar período de pago",
       idClassPricePaymentDialogUpdatePayment: classPricePaymentPeriodId,
       paymentPeriodIdDialogUpdatePayment: paymentPeriodId,
       personsDialogUpdatePayment: persons,
@@ -248,7 +249,7 @@ export default function PaymentsClassPrice(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "Tiene que haber por lo menos un periodo de pago activo",
+            "Tiene que haber por lo menos un período de pago activo",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -261,7 +262,7 @@ export default function PaymentsClassPrice(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "No se puede restaurar porque el periodo de pago no está activo.",
+            "No se puede restaurar porque el período de pago no está activo.",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -288,8 +289,8 @@ export default function PaymentsClassPrice(props) {
           openSnackBar: true,
           snackbarText:
             statusDialog === 1
-              ? "Periodo de pago restaurado"
-              : "Periodo de pago eliminado",
+              ? "Período de pago restaurado"
+              : "Período de pago eliminado",
           snackbarColor: "#43a047"
         });
       }
@@ -322,7 +323,7 @@ export default function PaymentsClassPrice(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            "Agrega los campos requeridos (*, el campo personas debe ser mayor a 0)",
+            "Agrega los campos requeridos *(el campo personas debe ser mayor a 0)",
           snackbarColor: "#d32f2f"
         });
         return;
@@ -352,7 +353,7 @@ export default function PaymentsClassPrice(props) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "Periodo de pago agregado",
+          snackbarText: "Período de pago agregado",
           snackbarColor: "#43a047"
         });
       }
@@ -413,7 +414,7 @@ export default function PaymentsClassPrice(props) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "Periodo de pago editado",
+          snackbarText: "Período de pago editado",
           snackbarColor: "#43a047"
         });
       }
@@ -454,17 +455,21 @@ export default function PaymentsClassPrice(props) {
         <Grid container>
           <Grid item md={8} xs={12}>
             <Typography variant="h6" id="tableTitle">
-              <Link to={"/classesPrice"}>
-                <ArrowBackIcon />
-              </Link>
+              <Tooltip title="Regresar">
+                <Link to={"/classesPrice"}>
+                  <ArrowBackIcon />
+                </Link>
+              </Tooltip>
               <span style={{ marginLeft: "10px" }}>Períodos de pago</span>
-              <IconButton
-                onClick={() => {
-                  handleOpenDialogAddPayment();
-                }}
-              >
-                <AddCircleIcon style={{ color: "#007bff" }} />
-              </IconButton>
+              <Tooltip title="Agregar período de pago">
+                <IconButton
+                  onClick={() => {
+                    handleOpenDialogAddPayment();
+                  }}
+                >
+                  <AddCircleIcon style={{ color: "#007bff" }} />
+                </IconButton>
+              </Tooltip>
             </Typography>
           </Grid>
         </Grid>
@@ -472,7 +477,7 @@ export default function PaymentsClassPrice(props) {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Periodo</TableCell>
+            <TableCell>Período</TableCell>
             <TableCell>Personas</TableCell>
             <TableCell>Monto</TableCell>
             <TableCell>Especificaciones</TableCell>
@@ -497,37 +502,45 @@ export default function PaymentsClassPrice(props) {
                   : row.specifications}
               </TableCell>
               <TableCell align="right">
-                <IconButton
-                  title="Editar periodo de pago"
-                  onClick={() => {
-                    handleOpenDialogUpdatePayment(
-                      row.id,
-                      row.payment_period_id,
-                      row.persons,
-                      row.total,
-                      row.specifications
-                    );
-                  }}
-                >
-                  <EditIcon className={classes.icons} />
-                </IconButton>
-                <IconButton
+                <Tooltip title="Editar período de pago">
+                  <IconButton
+                    onClick={() => {
+                      handleOpenDialogUpdatePayment(
+                        row.id,
+                        row.payment_period_id,
+                        row.persons,
+                        row.total,
+                        row.specifications
+                      );
+                    }}
+                  >
+                    <EditIcon className={classes.icons} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
                   title={
                     row.status === 1
-                      ? "Eliminar periodo de pago"
-                      : "Restaurar periodo de pago"
+                      ? "Eliminar período de pago"
+                      : "Restaurar período de pago"
                   }
-                  onClick={() => {
-                    const newStatus = row.status === 1 ? 0 : 1;
-                    handleOpenDialog(row.id, newStatus, row.payment_period_id);
-                  }}
                 >
-                  {row.status === 1 ? (
-                    <DeleteIcon className={classes.icons} />
-                  ) : (
-                    <RestoreFromTrashIcon className={classes.icons} />
-                  )}
-                </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      const newStatus = row.status === 1 ? 0 : 1;
+                      handleOpenDialog(
+                        row.id,
+                        newStatus,
+                        row.payment_period_id
+                      );
+                    }}
+                  >
+                    {row.status === 1 ? (
+                      <DeleteIcon className={classes.icons} />
+                    ) : (
+                      <RestoreFromTrashIcon className={classes.icons} />
+                    )}
+                  </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}
@@ -581,7 +594,7 @@ export default function PaymentsClassPrice(props) {
         <DialogContent>
           <TextField
             select
-            label="Periodo de pago"
+            label="Período de pago"
             required
             className={classes.textFields}
             SelectProps={{
@@ -596,7 +609,7 @@ export default function PaymentsClassPrice(props) {
               });
             }}
           >
-            <option value="0">Selecciona un periodo de pago</option>
+            <option value="0">Selecciona un período de pago</option>
             {getPaymentsPeriods()}
           </TextField>
           <TextField
@@ -696,7 +709,7 @@ export default function PaymentsClassPrice(props) {
         <DialogContent>
           <TextField
             select
-            label="Periodo de pago"
+            label="Período de pago"
             required
             className={classes.textFields}
             SelectProps={{
@@ -711,7 +724,7 @@ export default function PaymentsClassPrice(props) {
               });
             }}
           >
-            <option value="0">Selecciona un periodo de pago</option>
+            <option value="0">Selecciona un período de pago</option>
             {getPaymentsPeriods()}
           </TextField>
           <TextField

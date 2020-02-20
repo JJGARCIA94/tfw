@@ -16,7 +16,8 @@ import {
   Button,
   TextField,
   Snackbar,
-  Divider
+  Divider,
+  Tooltip
 } from "@material-ui/core";
 import {
   AddCircleOutline as AddCircleOutlineIcon,
@@ -280,21 +281,24 @@ export default function Lockers(props) {
           <Card className={classes.cards}>
             <CardContent>
               <Typography className={classes.typografyActions}>
+                <Tooltip title="Ver historial de usuarios">
                 <IconButton
-                  title="Ver historial de usuarios"
                   onClick={() => {
                     handleOpenDialogHistory(locker.id);
                   }}
                 >
                   <ScheduleIcon className={classes.scheduleIcon} />
                 </IconButton>
+                </Tooltip>
+                <Tooltip title="Ver o asignar usuario">
                 <Link to={`/selectUserToLocker/${locker.id}`}>
-                  <IconButton title="Ver o asignar usuario">
+                  <IconButton>
                     <PersonIcon className={classes.personIcon} />
                   </IconButton>
                 </Link>
+                </Tooltip>
+                <Tooltip title="Ver información del casillero">
                 <IconButton
-                  title="Ver información del casillero"
                   onClick={() => {
                     handleOpenDialogUpdateLocker(
                       locker.id,
@@ -306,12 +310,13 @@ export default function Lockers(props) {
                 >
                   <EditIcon className={classes.editIcon} />
                 </IconButton>
-                <IconButton
-                  title={
+                </Tooltip>
+                <Tooltip title={
                     locker.status === 1
                       ? "Eliminar casillero"
                       : "Restaurar casillero"
-                  }
+                  }>
+                <IconButton
                   onClick={() => {
                     const newStatus = locker.status === 1 ? 0 : 1;
                     handleOpenDialog(
@@ -329,6 +334,7 @@ export default function Lockers(props) {
                     <RestoreIcon className={classes.restoreIcon} />
                   )}
                 </IconButton>
+                </Tooltip>
               </Typography>
               <Typography variant="h4">{locker.number}</Typography>
               {locker.status === 1 ? (
@@ -677,20 +683,22 @@ export default function Lockers(props) {
       <Grid item xs={12}>
         <Typography variant="h6">
           Casilleros
+          <Tooltip title="Ver detalles">
           <IconButton
-            title="Ver detalles de casilleros"
             onClick={() => {
               handleOpenDialogLockersPrice();
             }}
           >
             <SettingsIcon />
           </IconButton>
+          </Tooltip>
         </Typography>
         <Divider />
       </Grid>
       <Grid item xs={12} md={6} lg={4}>
         <Card className={classes.cardAdd}>
           <CardContent>
+            <Tooltip title="Agregar casillero">
             <IconButton
               onClick={() => {
                 handleOpenDialogAddLocker();
@@ -698,6 +706,7 @@ export default function Lockers(props) {
             >
               <AddCircleOutlineIcon className={classes.addIcon} />
             </IconButton>
+            </Tooltip>
           </CardContent>
         </Card>
       </Grid>
@@ -900,7 +909,7 @@ export default function Lockers(props) {
                 className={classes.textFields}
                 disabled
                 id="created_at"
-                label="Creado en"
+                label="Fecha de creación"
                 margin="normal"
                 value={createAtUpdateLocker}
               />

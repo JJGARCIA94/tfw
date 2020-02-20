@@ -8,7 +8,8 @@ import {
   Grid,
   CircularProgress,
   Toolbar,
-  Typography
+  Typography,
+  Tooltip
 } from "@material-ui/core";
 import DateFnsUtils from "@date-io/date-fns";
 import {
@@ -90,15 +91,16 @@ export default function Assists(props) {
       <Toolbar>
         <Typography variant="h6" className={classes.title}>
           {userAssistsData.users_data.length
-            ? `${userAssistsData.users_data[0].first_name} ${userAssistsData.users_data[0].last_name}´s`
-            : ""}{" "}
-          assists
+            ? `Asistencias de ${userAssistsData.users_data[0].first_name} ${userAssistsData.users_data[0].last_name}`
+            : ""}
+          <Tooltip title="Regresar">
           <Link to="/users">
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
         </Typography>
         <Typography variant="h6">
-          {`Total assists: ${userAssistsData.users_data[0].R_user_assists_aggregate.aggregate.count}`}
+          {`Total de asistencias: ${userAssistsData.users_data[0].R_user_assists_aggregate.aggregate.count}`}
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -108,7 +110,7 @@ export default function Assists(props) {
               format="dd/MM/yyyy"
               margin="normal"
               id="date-picker-inline"
-              label="Select a day to check assists"
+              label="Seleccione una fecha"
               value={datePickerState}
               onChange={handleDateChange}
               KeyboardButtonProps={{

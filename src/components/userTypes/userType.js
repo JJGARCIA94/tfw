@@ -9,7 +9,8 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -100,7 +101,7 @@ export default function UserType(props) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "All fields are requireds",
+        snackBarText: "Todos los campos son requeridos",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -119,7 +120,7 @@ export default function UserType(props) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -132,7 +133,7 @@ export default function UserType(props) {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "User type updated",
+      snackBarText: "Tipo de usuario actualizado",
       snackbarColor: "#43a047"
     });
     setDisabledButton(false);
@@ -146,10 +147,12 @@ export default function UserType(props) {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add user type
+          Información de tipo de usuario
+          <Tooltip title="Regresar">
           <Link to="/userTypes">
             <ArrowBackIcon />
           </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -157,7 +160,7 @@ export default function UserType(props) {
           <TextField
             className={classes.textFields}
             id="create_at"
-            label="Created at"
+            label="Fecha de creación"
             margin="normal"
             value={userTypeState.created_at}
             disabled
@@ -168,7 +171,7 @@ export default function UserType(props) {
           <TextField
             className={classes.textFields}
             id="updated_at"
-            label="Last update"
+            label="Última actualización"
             margin="normal"
             value={userTypeState.updated_at}
             disabled
@@ -179,7 +182,7 @@ export default function UserType(props) {
             className={classes.textFields}
             required
             id="name"
-            label="Name"
+            label="Nombre"
             margin="normal"
             value={userTypeState.name}
             inputProps={{
@@ -209,7 +212,7 @@ export default function UserType(props) {
               updateUserType();
             }}
           >
-            Save
+            Guardar
           </Button>
         </Grid>
       </Grid>

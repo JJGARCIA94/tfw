@@ -35,17 +35,17 @@ export default function NotFound() {
             <ErrorIcon className={classes.icon} />
           </Grid>
           <Grid item xs={12} className={classes.items}>
-            <Typography variant="h3">Page Not found!</Typography>
+            <Typography variant="h3">¡Pagina no encontrada!</Typography>
           </Grid>
           <Grid item xs={12}>
             <Typography variant="h6">
-              The page you requested was not found.
+            No se encontró la página que solicitó.
             </Typography>
           </Grid>
           <Grid item xs={12} className={classes.items}>
             <Link to="/">
               <Button variant="contained" color="primary" className={classes.button}>
-                Go to home
+                Ir a Home
               </Button>
             </Link>
           </Grid>

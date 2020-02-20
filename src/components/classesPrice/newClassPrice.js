@@ -10,7 +10,8 @@ import {
   Button,
   CircularProgress,
   Snackbar,
-  IconButton
+  IconButton,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as ArrowBackIcon,
@@ -144,7 +145,7 @@ export default function NewClassPrice() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "The limit of aggregate classes is 10",
+        snackBarText: "El límite de clases para agregar es 10",
         snackbarColor: "#d32f2f"
       });
     }
@@ -171,7 +172,7 @@ export default function NewClassPrice() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "The limit of aggregate payments is 10",
+        snackBarText: "El límite de períodos de pago para agregar es 10",
         snackbarColor: "#d32f2f"
       });
     }
@@ -196,7 +197,9 @@ export default function NewClassPrice() {
     );
     const newPersons = persons.filter((person, index) => i !== index);
     const newTotals = totals.filter((total, index) => i !== index);
-    const newSpecifications = specifications.filter((specification, index) => i !== index);
+    const newSpecifications = specifications.filter(
+      (specification, index) => i !== index
+    );
     setClassPriceState({
       ...classPriceState,
       payment_period: newPaymentPeriods,
@@ -215,7 +218,11 @@ export default function NewClassPrice() {
       dataQueryDetails += `{classes_id: ${classPriceState.clasess_id[x]}},`;
     }
     for (let x = 0; x < payment_period.length; x++) {
-      dataQueryPayments += `{payment_period_id: ${classPriceState.payment_period[x]}, persons: ${parseInt(classPriceState.persons[x])}, total: ${parseInt(classPriceState.total[x])} , specifications: "${classPriceState.specifications[x]}"},`;
+      dataQueryPayments += `{payment_period_id: ${
+        classPriceState.payment_period[x]
+      }, persons: ${parseInt(classPriceState.persons[x])}, total: ${parseInt(
+        classPriceState.total[x]
+      )} , specifications: "${classPriceState.specifications[x]}"},`;
     }
 
     setClassPriceDetails(dataQueryDetails);
@@ -236,7 +243,7 @@ export default function NewClassPrice() {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "An error occurred",
+        snackBarText: "Ha ocurrido un error",
         snackbarColor: "#d32f2f"
       });
       setDisabledButton(false);
@@ -255,7 +262,7 @@ export default function NewClassPrice() {
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
-      snackBarText: "Class price added",
+      snackBarText: "Precio de clase o paquete agregado",
       snackbarColor: "#43a047"
     });
 
@@ -264,20 +271,14 @@ export default function NewClassPrice() {
 
   const addClassPrice = async () => {
     setDisabledButton(true);
-    const {
-      clasess_id,
-      payment_period,
-      persons,
-      total
-    } = classPriceState;
+    const { clasess_id, payment_period, persons, total } = classPriceState;
 
     for (let x = 0; x < clasess_id.length; x++) {
       if (parseInt(clasess_id[x]) === 0) {
         setSnackbarState({
           ...snackbarState,
           openSnackbar: true,
-          snackBarText:
-            "Select a class in the field class " + (x + 1),
+          snackBarText: "Selecciona una clase en el campo clase " + (x + 1),
           snackbarColor: "#d32f2f"
         });
         setDisabledButton(false);
@@ -286,17 +287,17 @@ export default function NewClassPrice() {
     }
 
     let validationClasses = 0;
-    for(let x = 0; x < clasess_id.length; x++) {
+    for (let x = 0; x < clasess_id.length; x++) {
       validationClasses = 0;
-      for(let y = (x+1); y <= clasess_id.length - 1; y++ ){
-        if(clasess_id[x] === clasess_id[y]) {
+      for (let y = x + 1; y <= clasess_id.length - 1; y++) {
+        if (clasess_id[x] === clasess_id[y]) {
           validationClasses++;
         }
-        if(validationClasses > 0) {
+        if (validationClasses > 0) {
           setSnackbarState({
             ...snackbarState,
             openSnackbar: true,
-            snackBarText:"No selecciones la misma clase dos veces",
+            snackBarText: "No selecciones la misma clase dos veces",
             snackbarColor: "#d32f2f"
           });
           setDisabledButton(false);
@@ -311,20 +312,25 @@ export default function NewClassPrice() {
           ...snackbarState,
           openSnackbar: true,
           snackBarText:
-            "Select a payment period in the field payment period " +
+            "Selecciona un período de pago en el campo período de pago " +
             (x + 1),
           snackbarColor: "#d32f2f"
         });
         setDisabledButton(false);
         return;
       }
-      if (persons[x].trim() === "" || persons[x].trim() === "0" || persons[x].trim() === "00") {
+      if (
+        persons[x].trim() === "" ||
+        persons[x].trim() === "0" ||
+        persons[x].trim() === "00"
+      ) {
         setSnackbarState({
           ...snackbarState,
           openSnackbar: true,
           snackBarText:
-            "Put the numbers of persons in the field persons " +
-            (x + 1) + " (must be greater than 0)",
+            "Ingresa el número de personas en el campo personas " +
+            (x + 1) +
+            " (debe de ser mayor a 0)",
           snackbarColor: "#d32f2f"
         });
         setDisabledButton(false);
@@ -334,7 +340,7 @@ export default function NewClassPrice() {
         setSnackbarState({
           ...snackbarState,
           openSnackbar: true,
-          snackBarText: "Put the total in the field total " + (x + 1),
+          snackBarText: "Ingresa el total en el campo total " + (x + 1),
           snackbarColor: "#d32f2f"
         });
         setDisabledButton(false);
@@ -343,7 +349,7 @@ export default function NewClassPrice() {
     }
     await addClassPriceDetailsAndPaymentsData();
     runMutationClassPrice();
-  }
+  };
 
   const handleClose = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
@@ -353,10 +359,12 @@ export default function NewClassPrice() {
     <Card>
       <Toolbar>
         <Typography variant="h6">
-          Add class price
-          <Link to="/classesPrice">
-            <ArrowBackIcon />
-          </Link>
+          Agregar precio de clase o paquete
+          <Tooltip title="Regresar">
+            <Link to="/classesPrice">
+              <ArrowBackIcon />
+            </Link>
+          </Tooltip>
         </Typography>
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
@@ -364,7 +372,7 @@ export default function NewClassPrice() {
           <TextField
             className={classes.textFields}
             id="name"
-            label="Name"
+            label="Nombre"
             margin="normal"
             value={classPriceState.name}
             inputProps={{
@@ -395,8 +403,8 @@ export default function NewClassPrice() {
                 id="clasess_id"
                 label={
                   classPriceState.clasess_id.length === 1
-                    ? `Class`
-                    : `Class ${index + 1}`
+                    ? `Clase`
+                    : `Clase ${index + 1}`
                 }
                 margin="normal"
                 value={classPriceState.clasess_id[index]}
@@ -409,34 +417,36 @@ export default function NewClassPrice() {
                   });
                 }}
               >
-                <option value="0">Select a class</option>
+                <option value="0">Selecciona una clase</option>
                 {getClasses()}
               </TextField>
             </Grid>
             <Grid item md={2} xs={2}>
               {index !== 0 ? (
-                <IconButton
-                  title="Remove class"
+                <Tooltip title="Quitar clase">
+                  <IconButton
                   onClick={() => {
                     deleteClassInput(index);
                   }}
                 >
                   <RemoveIcon style={{ color: "#D32F2F" }} />
                 </IconButton>
+                </Tooltip>
               ) : null}
             </Grid>
           </Grid>
         ))}
         <Grid item md={8} xs={10}>
+          <Tooltip title="Agregar clase">
           <IconButton
             style={{ float: "right" }}
-            title="Add class"
             onClick={() => {
               addClassInput();
             }}
           >
             <AddIcon style={{ color: "#43a047" }} />
           </IconButton>
+          </Tooltip>
         </Grid>
         {classPriceState.payment_period.map((input, index) => (
           <Grid container justify="center" alignItems="flex-end" key={index}>
@@ -451,8 +461,8 @@ export default function NewClassPrice() {
                 id="payment_period"
                 label={
                   classPriceState.payment_period.length === 1
-                    ? `Payment period`
-                    : `Payment period ${index + 1}`
+                    ? `Período de pago`
+                    : `Período de pago ${index + 1}`
                 }
                 margin="normal"
                 value={classPriceState.payment_period[index]}
@@ -465,7 +475,7 @@ export default function NewClassPrice() {
                   });
                 }}
               >
-                <option value="0">Select a payment period</option>
+                <option value="0">Selecciona un período de pago</option>
                 {getPaymentPeriods()}
               </TextField>
             </Grid>
@@ -475,7 +485,7 @@ export default function NewClassPrice() {
                 className={classes.textFields}
                 required
                 id="persons"
-                label="Persons"
+                label="Personas"
                 margin="normal"
                 value={classPriceState.persons[index]}
                 inputProps={{
@@ -526,7 +536,7 @@ export default function NewClassPrice() {
               <TextField
                 className={classes.textFields}
                 id="specifications"
-                label="Specifications"
+                label="Especificaciones"
                 margin="normal"
                 value={classPriceState.specifications[index]}
                 inputProps={{
@@ -548,40 +558,42 @@ export default function NewClassPrice() {
             </Grid>
             <Grid item md={1} xs={2}>
               {index !== 0 ? (
-                <IconButton
-                  title="Remove payment period"
+                <Tooltip title="Quitar período de pago">
+                  <IconButton
                   onClick={() => {
                     deletePaymentInput(index);
                   }}
                 >
                   <RemoveIcon style={{ color: "#D32F2F" }} />
                 </IconButton>
+                </Tooltip>
               ) : null}
             </Grid>
             <Grid item md={1}></Grid>
           </Grid>
         ))}
         <Grid item md={8} xs={10}>
+          <Tooltip title="Agregar período de pago">
           <IconButton
             style={{ float: "right" }}
-            title="Add payment period"
             onClick={() => {
               addPaymentInput();
             }}
           >
             <AddIcon style={{ color: "#43a047" }} />
           </IconButton>
+          </Tooltip>
         </Grid>
         <Grid item xs={10} md={11}>
           <Button
             variant="contained"
             disabled={disabledButton}
             className={classes.button}
-            onClick={ () => {
+            onClick={() => {
               addClassPrice();
             }}
           >
-            Save
+            Guardar
           </Button>
         </Grid>
       </Grid>

@@ -28,7 +28,8 @@ import {
   HourglassEmpty as HourglassEmptyIcon,
   SportsKabaddi as SportsKabaddiIcon,
   MonetizationOn as MonetizationOnIcon,
-  Https as HttpsIcon
+  Https as HttpsIcon,
+  Equalizer as EqualizerIcon
 } from "@material-ui/icons";
 import TFWLogo from "../../assets/images/logo.png";
 import Login from "../login/login";
@@ -37,7 +38,6 @@ import Users from "../users/users";
 import NewUser from "../users/newUser";
 import UserTypes from "../userTypes/userTypes";
 import Lessons from "../lessons/lessons";
-import Products from "../products/products";
 import User from "../users/user";
 import Assists from "../assists/assists";
 import NewUserType from "../userTypes/newUserType";
@@ -56,6 +56,7 @@ import ClassesClassPrice from "../classesPrice/classesClassPrice";
 import PaymentsClassPrice from "../classesPrice/paymentsClassPrice";
 import Lockers from "../lockers/lockers";
 import SelectUserToLocker from "../lockers/selectUserToLocker";
+import Reports from "../reports/reports";
 import {
   Button,
   CircularProgress,
@@ -298,6 +299,20 @@ export default function Header() {
             <ListItemText primary="Casilleros" />
           </ListItem>
         </NavLink>
+        <NavLink
+          to="/reports"
+          className={classes.navLink}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
+        >
+          <ListItem button>
+            <ListItemIcon>
+              <EqualizerIcon className={classes.icons} />
+            </ListItemIcon>
+            <ListItemText primary="Reportes" />
+          </ListItem>
+        </NavLink>
       </List>
       {!movilWith ? (
         <center>
@@ -450,7 +465,6 @@ export default function Header() {
           <Route exact path="/newLesson" component={NewLesson} />
           <Route exact path="/lesson/:classId" component={Lesson} />
           <Route exact path="/assists/:userId" component={Assists} />
-          <Route exact path="/products" component={Products} />
           <Route exact path="/classesPrice">
             <ClassesPrice setUserAuth={setUserAuth} />
           </Route>
@@ -472,6 +486,11 @@ export default function Header() {
             exact
             path="/selectUserToLocker/:lockerId"
             component={SelectUserToLocker}
+          />
+          <Route
+            exact
+            path="/reports"
+            component={Reports}
           />
           <Route exact path="*" component={NotFound}></Route>
         </Switch>

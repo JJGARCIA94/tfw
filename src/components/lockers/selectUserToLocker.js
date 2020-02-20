@@ -30,7 +30,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  TextField
+  TextField,
+  Tooltip
 } from "@material-ui/core";
 import {
   ArrowBack as ArrowBackIcon,
@@ -113,7 +114,7 @@ export default function SelectUserToLocker(props) {
     error: activeUsersError
   } = useSubscription(GET_ACTIVE_USERS, {
     variables: {
-      search: "%"+searchState+"%"
+      search: "%" + searchState + "%"
     }
   });
   const [
@@ -342,23 +343,26 @@ export default function SelectUserToLocker(props) {
         style={{ background: "white", width: "100%", marginBottom: "10px" }}
       >
         <Typography variant="h6">Asignar casillero a usuario</Typography>
-        <Link to="/lockers">
-          <ArrowBackIcon />
-        </Link>
+        <Tooltip title="Regresar">
+          <Link to="/lockers">
+            <ArrowBackIcon />
+          </Link>
+        </Tooltip>
       </Toolbar>
       {lockerDetailData.lockers_details.length !== 0 ? (
         <Grid container style={{ marginTop: "10px" }}>
           <Grid item xs={12}>
             <Typography variant="h6">
               Usuario actual
-              <IconButton
-                title="Quitar usuario actual"
-                onClick={() => {
-                  handleOpenDialog();
-                }}
-              >
-                <ClearIcon className={classes.deleteIcon} />
-              </IconButton>
+              <Tooltip title="Quitar usuario actual">
+                <IconButton
+                  onClick={() => {
+                    handleOpenDialog();
+                  }}
+                >
+                  <ClearIcon className={classes.deleteIcon} />
+                </IconButton>
+              </Tooltip>
             </Typography>
             <Divider />
           </Grid>

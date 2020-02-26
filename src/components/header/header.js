@@ -490,8 +490,9 @@ export default function Header() {
           <Route
             exact
             path="/reports"
-            component={Reports}
-          />
+          >
+            <Reports setUserAuth={setUserAuth} />
+          </Route>
           <Route exact path="*" component={NotFound}></Route>
         </Switch>
       </main>

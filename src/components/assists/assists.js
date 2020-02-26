@@ -16,6 +16,7 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
 } from "@material-ui/pickers";
+import es from "date-fns/locale/es";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useQuery } from "@apollo/react-hooks";
 import { GET_ASSISTS_BY_USER } from "../../database/queries";
@@ -105,7 +106,7 @@ export default function Assists(props) {
       </Toolbar>
       <Grid container justify="center" className={classes.root}>
         <Grid item xs={12}>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={es}>
             <KeyboardDatePicker
               format="dd/MM/yyyy"
               margin="normal"
@@ -121,6 +122,10 @@ export default function Assists(props) {
         </Grid>
         <Grid item xs={12}>
           <FullCalendar
+          buttonText= {{
+            today: "Hoy"
+          }}
+          locale={es}
             ref={calendarComponentRef}
             defaultView="dayGridMonth"
             plugins={[dayGridPlugin]}

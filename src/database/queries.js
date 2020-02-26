@@ -26,7 +26,10 @@ export const GET_USERS_PAYMENTS_EXPIRED = gql`
 `;
 
 export const GER_USER_PAYMENTS_ALMOST_EXPIRED = gql`
-  subscription get_user_payments_almost_expired($now: date!, $twoDaysMore: date!) {
+  subscription get_user_payments_almost_expired(
+    $now: date!
+    $twoDaysMore: date!
+  ) {
     users_payments(
       where: {
         status: { _eq: 1 }
@@ -684,6 +687,14 @@ export const GET_ACTIVE_USERS = gql`
   }
 `;
 
+export const GET_LOCKER_PRICE = gql`
+  subscription get_locker_price {
+    lockers_settings {
+      price
+    }
+  }
+`;
+
 export const GET_LOCKER_DETAIL_BY_LOCKER_ID = gql`
   subscription get_locker_details_by_locker_id($lockerId: Int!) {
     lockers_details(
@@ -692,6 +703,8 @@ export const GET_LOCKER_DETAIL_BY_LOCKER_ID = gql`
       locker_detail_id: id
       locker_id
       user_id
+      cost
+      payment_type
       R_users_data {
         first_name
         last_name
@@ -772,6 +785,90 @@ export const GET_USER_PAYMENTS_BY_USER_ID = gql`
               name
             }
           }
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_USER_PAYMENTS_COUNTED_BY_DATE = gql`
+  subscription get_all_user_payments_counted_by_date(
+    $startDate: date!
+    $endDate: date!
+  ) {
+    users_payments_aggregate(
+      where: {
+        payment_type: { _eq: 0 }
+        payment_start: { _gte: $startDate }
+        _and: { payment_start: { _lte: $endDate } }
+      }
+    ) {
+      aggregate {
+        sum {
+          total
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_USER_PAYMENTS_CREDIT_BY_DATE = gql`
+  subscription get_all_user_payments_credit_by_date(
+    $startDate: date!
+    $endDate: date!
+  ) {
+    users_payments_aggregate(
+      where: {
+        payment_type: { _eq: 1 }
+        payment_start: { _gte: $startDate }
+        _and: { payment_start: { _lte: $endDate } }
+      }
+    ) {
+      aggregate {
+        sum {
+          total
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_LOCKER_PAYMENTS_COUNTED_BY_DATE = gql`
+  subscription get_all_lockers_payments_counted_by_date(
+    $startDate: date!
+    $endDate: date!
+  ) {
+    lockers_details_aggregate(
+      where: {
+        payment_type: { _eq: 0 }
+        payment_start: { _gte: $startDate }
+        _and: { payment_start: { _lte: $endDate } }
+      }
+    ) {
+      aggregate {
+        sum {
+          cost
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_LOCKER_PAYMENTS_CREDIT_BY_DATE = gql`
+  subscription get_all_lockers_payments_credit_by_date(
+    $startDate: date!
+    $endDate: date!
+  ) {
+    lockers_details_aggregate(
+      where: {
+        payment_type: { _eq: 1 }
+        payment_start: { _gte: $startDate }
+        _and: { payment_start: { _lte: $endDate } }
+      }
+    ) {
+      aggregate {
+        sum {
+          cost
         }
       }
     }

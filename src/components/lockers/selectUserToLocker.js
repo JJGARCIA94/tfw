@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_LOCKER_DETAIL_BY_LOCKER_ID,
   GET_LOCKER_IF_EXIST_BY_ID,
-  GET_ACTIVE_USERS
+  GET_ACTIVE_USERS,
+  GET_LOCKER_PRICE
 } from "../../database/queries";
 import {
   ADD_LOCKER_DETAIL,
@@ -37,6 +38,7 @@ import {
   ArrowBack as ArrowBackIcon,
   Clear as ClearIcon
 } from "@material-ui/icons";
+import moment from "moment";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -57,14 +59,26 @@ const useStyles = makeStyles(theme => ({
   },
   deleteIcon: {
     color: "#D32F2F"
+  },
+  textFields: {
+    width: "100%"
   }
 }));
+
+const formatDate = date => {
+  let correctMont =
+    date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  return `${date.getFullYear()}-${correctMont}-${correctDay}`;
+};
 
 export default function SelectUserToLocker(props) {
   const classes = useStyles();
   const lockerId = props.match.params.lockerId;
   const [selectedUser, setSelectedUser] = useState(-1);
   const [searchState, setSearchState] = useState("");
+  const [paymentType, setPaymentType] = useState("0");
+  const paymentStart = new Date(moment());
   const [infoSelectedUserState, setInfoSelectedUserState] = useState({
     id: 0,
     locker_id: lockerId,
@@ -117,6 +131,11 @@ export default function SelectUserToLocker(props) {
       search: "%" + searchState + "%"
     }
   });
+  const {
+    data: lockerPriceData,
+    loading: lockerPriceLoading,
+    error: lockerPriceError
+  } = useSubscription(GET_LOCKER_PRICE);
   const [
     addLockerDetailMutation,
     {
@@ -139,13 +158,28 @@ export default function SelectUserToLocker(props) {
     }
   ] = useMutation(UPDATE_LOCKER_DETAIL_STATUS);
 
-  if (lockerDetailLoading || activeUsersLoading || lockerIfExistLoading) {
+  useEffect(() => {
+    setSelectedUser(-1);
+    setInfoSelectedUserState({
+      id: 0,
+      locker_id: lockerId,
+      user_id: 0
+    });
+  }, [searchState, lockerId]);
+
+  if (
+    lockerDetailLoading ||
+    activeUsersLoading ||
+    lockerIfExistLoading ||
+    lockerPriceLoading
+  ) {
     return <CircularProgress />;
   }
   if (
     lockerDetailError ||
     activeUsersError ||
     lockerIfExistError ||
+    lockerPriceError ||
     lockerIfExistData.lockers.length === 0
   ) {
     return <NotFound />;
@@ -228,11 +262,15 @@ export default function SelectUserToLocker(props) {
       return;
     } else {
       const { id, locker_id, user_id } = infoSelectedUserState;
+      const lockerPrice = lockerPriceData.lockers_settings[0].price;
       if (id === 0) {
         addLockerDetailMutation({
           variables: {
             lockerId: locker_id,
-            userId: user_id
+            userId: user_id,
+            paymentType: paymentType,
+            paymentStart: formatDate(paymentStart),
+            lockerPrice: lockerPrice
           }
         });
         if (addLockerDetailMutationLoading) return <CircularProgress />;
@@ -256,7 +294,10 @@ export default function SelectUserToLocker(props) {
           variables: {
             lockerDetailId: id,
             lockerId: locker_id,
-            userId: user_id
+            userId: user_id,
+            paymentType: paymentType,
+            paymentStart: formatDate(paymentStart),
+            lockerPrice: lockerPrice
           }
         });
         if (addAndUpdateLockerDetailMutationLoading)
@@ -396,15 +437,26 @@ export default function SelectUserToLocker(props) {
                         .R_user_type.name
                     }
                   </Typography>
+                  <Typography>
+                    <strong>Pago:</strong>
+                    {lockerDetailData.lockers_details[0].cost}
+                  </Typography>
+                  <Typography>
+                    <strong>Tipo de pago:</strong>
+                    {lockerDetailData.lockers_details[0].payment_type === 0
+                      ? "Efectivo"
+                      : "Tarjeta de crédito"}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
         </Grid>
       ) : null}
-      <Grid container>
-        <Grid item xs={12}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3}>
           <TextField
+            className={classes.textFields}
             label="Buscar usuario"
             margin="normal"
             autoFocus
@@ -413,6 +465,25 @@ export default function SelectUserToLocker(props) {
               setSearchState(e.target.value);
             }}
           />
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <TextField
+            className={classes.textFields}
+            select
+            SelectProps={{
+              native: true
+            }}
+            id="tipo_pago"
+            label="Tipo de pago"
+            margin="normal"
+            value={paymentType}
+            onChange={e => {
+              setPaymentType(e.target.value);
+            }}
+          >
+            <option value={0}>Efectivo</option>
+            <option value={1}>Tarjeta de crédito</option>
+          </TextField>
         </Grid>
       </Grid>
       <Grid container style={{ marginTop: "10px" }}>

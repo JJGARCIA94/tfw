@@ -406,42 +406,49 @@ export default function Home(props) {
     });
   };
 
-  const optionsChartBar = {
-    chart: {
-      id: "basic-bar"
-    },
-    plotOptions: {
-      bar: {
-        barHeight: "100%",
-        distributed: true,
-        dataLabels: {
-          position: "bottom"
+  const state = {
+    series: [
+      {
+        name: "Número de miembros",
+        data: dataMembersClasesMembers
+      }
+    ],
+    options: {
+      chart: {
+        height: 350,
+        type: "bar"
+      },
+      plotOptions: {
+        bar: {
+          columnWidth: "45%",
+          distributed: true
         }
-      }
-    },
-    colors: ["#f44336", "#2196f3", "#4caf50"],
-    xaxis: {
-      categories: dataMembersClasesName,
-      labels: {
+      },
+      dataLabels: {
+        enabled: false
+      },
+      legend: {
         show: false
-      }
-    },
-    title: {
-      text: "3 clases con mas miembros",
-      align: "center",
-      margin: 20,
-      style: {
-        fontSize: "25px"
+      },
+      colors: ["#f44336", "#2196f3", "#4caf50"],
+      xaxis: {
+        categories: dataMembersClasesName,
+        labels: {
+          style: {
+            fontSize: "12px"
+          }
+        }
+      },
+      title: {
+        text: "3 clases con más miembros",
+        align: "center",
+        margin: 20,
+        style: {
+          fontSize: "25px"
+        }
       }
     }
   };
-
-  const seriesChartBar = [
-    {
-      name: "Miembros",
-      data: dataMembersClasesMembers
-    }
-  ];
 
   const optionsChartRadar = {
     chart: {
@@ -510,8 +517,8 @@ export default function Home(props) {
   ];
 
   return userAuth ? (
-    <Grid container justify="center">
-      <Grid item xs={12} md={12} lg={7} className={classes.items}>
+    <Grid container justify="center" spacing={3}>
+      <Grid item xs={12} md={12} lg={6} className={classes.items}>
         <TableContainer component={Card} className={classes.table}>
           <Toolbar className={classes.tableTittle}>
             <strong>Clientes con pago vencido</strong>
@@ -573,18 +580,7 @@ export default function Home(props) {
           </Table>
         </TableContainer>
       </Grid>
-      <Grid item md={1} />
-      <Grid item xs={12} md={12} lg={4} className={classes.items}>
-        <Card className={classes.cards} style={{ height: "350px" }}>
-          <Chart
-            options={optionsChartRadar}
-            series={seriesChartRadar}
-            type="area"
-            height="300"
-          />
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={12} lg={7} className={classes.items}>
+      <Grid item xs={12} md={12} lg={6} className={classes.items}>
         <TableContainer component={Card} className={classes.table}>
           <Toolbar className={classes.tableTittle}>
             <strong>Clientes con pago casi vencido</strong>
@@ -643,7 +639,16 @@ export default function Home(props) {
           </Table>
         </TableContainer>
       </Grid>
-      <Grid item md={1} />
+      <Grid item xs={12} md={12} lg={4} className={classes.items}>
+        <Card className={classes.cards} style={{ height: "350px" }}>
+          <Chart
+            options={optionsChartRadar}
+            series={seriesChartRadar}
+            type="area"
+            height="300"
+          />
+        </Card>
+      </Grid>
       <Grid item xs={12} md={12} lg={4} className={classes.items}>
         <Card className={classes.cards} style={{ height: "350px" }}>
           <Chart
@@ -654,11 +659,11 @@ export default function Home(props) {
           />
         </Card>
       </Grid>
-      <Grid item xs={12} md={12} lg={7} className={classes.items}>
+      <Grid item xs={8} md={6} lg={4} className={classes.items}>
         <Card className={classes.cards} style={{ height: "350px" }}>
           <Chart
-            options={optionsChartBar}
-            series={seriesChartBar}
+            options={state.options}
+            series={state.series}
             type="bar"
             height="300"
           />

@@ -441,9 +441,21 @@ export const UPDATE_LOCKER = gql`
 `;
 
 export const ADD_LOCKER_DETAIL = gql`
-  mutation add_locker_detail($lockerId: Int!, $userId: Int!) {
+  mutation add_locker_detail(
+    $lockerId: Int!
+    $userId: Int!
+    $paymentType: Int!
+    $paymentStart: date!
+    $lockerPrice: numeric!
+  ) {
     insert_lockers_details(
-      objects: { locker_id: $lockerId, user_id: $userId }
+      objects: {
+        locker_id: $lockerId
+        user_id: $userId
+        payment_type: $paymentType
+        payment_start: $paymentStart
+        cost: $lockerPrice
+      }
     ) {
       affected_rows
     }
@@ -455,6 +467,9 @@ export const ADD_AND_UPDATE_LOCKER_DETAIL = gql`
     $lockerDetailId: bigint!
     $lockerId: Int!
     $userId: Int!
+    $paymentType: Int!
+    $paymentStart: date!
+    $lockerPrice: numeric!
   ) {
     update_lockers_details(
       where: { id: { _eq: $lockerDetailId } }
@@ -463,7 +478,13 @@ export const ADD_AND_UPDATE_LOCKER_DETAIL = gql`
       affected_rows
     }
     insert_lockers_details(
-      objects: { locker_id: $lockerId, user_id: $userId }
+      objects: {
+        locker_id: $lockerId
+        user_id: $userId
+        payment_type: $paymentType
+        payment_start: $paymentStart
+        cost: $lockerPrice
+      }
     ) {
       affected_rows
     }

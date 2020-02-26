@@ -135,15 +135,15 @@ export default function Step3(props) {
           label="Tipo de pago"
           margin="normal"
           value={userPaymentState.payment_type}
-          onChange={(e) => {
+          onChange={e => {
             setUserPaymentState({
               ...userPaymentState,
               payment_type: e.target.value
             });
           }}
         >
-          <option value={0}>Contado</option>
-          <option value={1}>Crédito</option>
+          <option value={0}>Efectivo</option>
+          <option value={1}>Tarjeta de crédito</option>
         </TextField>
       </Grid>
     </Grid>

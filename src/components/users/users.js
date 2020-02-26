@@ -177,7 +177,7 @@ export default function Users(props) {
   const [orderBy, setOrderBy] = useState("id");
   const [page, setPage] = useState(0);
   const [handlePage, setHandlePage] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [userType, setUserType] = useState("0");
   const [dialog, setDialog] = useState({
@@ -402,8 +402,6 @@ export default function Users(props) {
       snackbarColor: ""
     });
   };
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   return ( userAuth ?
     <div className={classes.root}>
@@ -543,19 +541,15 @@ export default function Users(props) {
                     </TableRow>
                   );
                 })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10, 25, 50]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
+          labelRowsPerPage="Filas por página"
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}

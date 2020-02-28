@@ -369,7 +369,7 @@ export default function Header() {
                 <MenuIcon />
               </IconButton>
               <Grid container justify="center">
-                <Grid item xs={11} md={10}>
+                <Grid item xs={11} md={10} style={{alignSelf: "center"}}>
                   <Typography variant="h6" noWrap>
                     TFW Mazatlan Combat Club
                   </Typography>

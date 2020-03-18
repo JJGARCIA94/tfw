@@ -91,8 +91,8 @@ export default function Reports(props) {
     error: lockersPaymentsCountedError
   } = useSubscription(GET_ALL_LOCKER_PAYMENTS_COUNTED_BY_DATE, {
     variables: {
-      startDate: formatStartDate(startDate),
-      endDate: formatEndDate(endDate)
+      startDate: formatStartDate(startDateLockers),
+      endDate: formatEndDate(endDateLockers)
     }
   });
 
@@ -102,8 +102,8 @@ export default function Reports(props) {
     error: lockersPaymentsCreditError
   } = useSubscription(GET_ALL_LOCKER_PAYMENTS_CREDIT_BY_DATE, {
     variables: {
-      startDate: formatStartDate(startDate),
-      endDate: formatEndDate(endDate)
+      startDate: formatStartDate(startDateLockers),
+      endDate: formatEndDate(endDateLockers)
     }
   });
 
@@ -164,6 +164,8 @@ export default function Reports(props) {
   const creditLockers =
     lockersPaymentsCreditData.lockers_details_aggregate.aggregate.sum.cost;
 
+  const totalMoneyClasses = counted + credit;
+
   const state = {
     series: [
       {
@@ -196,9 +198,19 @@ export default function Reports(props) {
             fontSize: "12px"
           }
         }
+      },
+      title: {
+        text: "Total "+totalMoneyClasses,
+        align: "center",
+        margin: 20,
+        style: {
+          fontSize: "16px"
+        }
       }
     }
   };
+
+  const totalMoneyLockers = countedLockers + creditLockers;
 
   const stateLockers = {
     series: [
@@ -234,6 +246,14 @@ export default function Reports(props) {
           style: {
             fontSize: "12px"
           }
+        }
+      },
+      title: {
+        text: "Total : " + totalMoneyLockers,
+        align: "center",
+        margin: 20,
+        style: {
+          fontSize: "16px"
         }
       }
     }
@@ -277,7 +297,7 @@ export default function Reports(props) {
             />
           </Grid>
           <Grid item xs={12} sm={12} md={5}>
-            {counted !== null && credit !== null ? (
+            {counted !== null || credit !== null ? (
               <Chart
                 options={state.options}
                 series={state.series}
@@ -336,7 +356,7 @@ export default function Reports(props) {
             />
           </Grid>
           <Grid item xs={12} sm={12} md={5}>
-            {counted !== null && credit !== null ? (
+            {countedLockers !== null || creditLockers !== null ? (
               <Chart
                 options={stateLockers.options}
                 series={stateLockers.series}

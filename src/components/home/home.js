@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
     overflowY: "auto"
   },
   tableTittle: {
-    fontSize: "25px",
+    fontSize: "16px",
     color: "#373d3f",
     textAlign: "center",
     fontFamily: "Helvetica, Arial, sans-serif",
@@ -444,7 +444,7 @@ export default function Home(props) {
         align: "center",
         margin: 20,
         style: {
-          fontSize: "25px"
+          fontSize: "16px"
         }
       }
     }
@@ -475,7 +475,7 @@ export default function Home(props) {
       align: "center",
       margin: 20,
       style: {
-        fontSize: "25px"
+        fontSize: "16px"
       }
     }
   };
@@ -504,7 +504,7 @@ export default function Home(props) {
       align: "center",
       margin: 20,
       style: {
-        fontSize: "25px"
+        fontSize: "16px"
       }
     }
   };

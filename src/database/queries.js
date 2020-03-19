@@ -121,7 +121,7 @@ export const GET_USER = gql`
       where: {
         user: { _eq: $user }
         status: { _eq: 1 }
-        R_users_data: { user_type: { _eq: 1 } }
+        R_users_data: { user_type: { _eq: 8 } }
       }
     ) {
       id
@@ -212,7 +212,7 @@ export const GET_USER_BY_ID_AUTH = gql`
       where: {
         id: { _eq: $id }
         status: { _eq: 1 }
-        R_users_data: { user_type: { _eq: 1 } }
+        R_users_data: { user_type: { _eq: 8 } }
       }
     ) {
       id
@@ -425,7 +425,7 @@ export const GET_CLASSES = gql`
 
 export const GET_COACHES = gql`
   subscription get_coaches {
-    users_data(where: { user_type: { _eq: 3 }, _and: { status: { _eq: 1 } } }) {
+    users_data(where: { user_type: { _eq: 10 }, _and: { status: { _eq: 1 } } }) {
       id
       first_name
       last_name

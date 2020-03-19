@@ -175,6 +175,7 @@ export default function Login(props) {
       setDisabledButton(false);
       return;
     } else {
+      setDisabledButton(false);
       userQuery();
       if (userLoading) {
         return <CircularProgress />;

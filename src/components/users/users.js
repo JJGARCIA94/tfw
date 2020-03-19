@@ -519,7 +519,7 @@ export default function Users(props) {
                           )}
                         </IconButton>
                         </Tooltip>
-                        {row.user_type_id === 2 ? (
+                        {row.user_type_id === 9 ? (
                           <Tooltip title="Ver asistencias">
                             <Link to={"/assists/" + row.id}>
                             <IconButton >
@@ -528,7 +528,7 @@ export default function Users(props) {
                           </Link>
                           </Tooltip>
                         ) : null}
-                        {row.user_type_id === 2 ? (
+                        {row.user_type_id === 9 ? (
                           <Tooltip title="Ver pagos">
                             <Link to={"/userPayments/" + row.id}>
                             <IconButton >

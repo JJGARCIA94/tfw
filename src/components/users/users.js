@@ -408,7 +408,7 @@ export default function Users(props) {
       <Paper className={classes.paper}>
         <Toolbar>
           <Grid container spacing={3}>
-            <Grid item md={6} xs={6} style={{alignSelf: "center"}}>
+            <Grid item md={4} xs={12} style={{alignSelf: "center"}}>
               <Typography
                 className={classes.toolbartitle}
                 variant="h6"
@@ -422,7 +422,7 @@ export default function Users(props) {
                 </Tooltip>
               </Typography>
             </Grid>
-            <Grid item md={3} xs={6}>
+            <Grid item md={4} xs={12}>
               <SearchInput
                 setSearch={setSearch}
                 search={search}
@@ -430,7 +430,7 @@ export default function Users(props) {
                 label="Buscar por cualquier campo"
               />
             </Grid>
-            <Grid item md={3} xs={12}>
+            <Grid item md={4} xs={12}>
               <TextField
                 className={classes.textFields}
                 required
@@ -550,6 +550,9 @@ export default function Users(props) {
           count={rows.length}
           rowsPerPage={rowsPerPage}
           labelRowsPerPage="Filas por página"
+          labelDisplayedRows={e => {
+            return `${e.from}-${e.to} de ${e.count}`;
+          }}
           page={page}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}

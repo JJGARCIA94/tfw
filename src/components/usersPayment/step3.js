@@ -5,6 +5,7 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
 } from "@material-ui/pickers";
+import es from "date-fns/locale/es";
 import DateFnsUtils from "@date-io/date-fns";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
@@ -85,7 +86,7 @@ export default function Step3(props) {
         />
       </Grid>
       <Grid item md={5} xs={10}>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={es}>
           <KeyboardDatePicker
             className={classes.textFields}
             disabled
@@ -102,7 +103,7 @@ export default function Step3(props) {
       </Grid>
       <Grid item md={1} />
       <Grid item md={5} xs={10}>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils} locale={es}>
           <KeyboardDatePicker
             className={classes.textFields}
             format="dd/MM/yyyy"

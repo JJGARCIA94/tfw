@@ -46,7 +46,9 @@ export default function Assists(props) {
   const classes = useStyles();
   const now = new Date(Date.now());
   const [dateState, setDateState] = useState(formatDate(now));
-  const [datePickerState, setDatePickerState] = useState(now.toLocaleDateString("en-US"));
+  const [datePickerState, setDatePickerState] = useState(
+    now.toLocaleDateString("en-US")
+  );
   const {
     data: userAssistsData,
     loading: userAssistsLoading,
@@ -95,9 +97,9 @@ export default function Assists(props) {
             ? `Asistencias de ${userAssistsData.users_data[0].first_name} ${userAssistsData.users_data[0].last_name}`
             : ""}
           <Tooltip title="Regresar">
-          <Link to="/users">
-            <ArrowBackIcon />
-          </Link>
+            <Link to="/users">
+              <ArrowBackIcon />
+            </Link>
           </Tooltip>
         </Typography>
         <Typography variant="h6">
@@ -122,10 +124,10 @@ export default function Assists(props) {
         </Grid>
         <Grid item xs={12}>
           <FullCalendar
-          buttonText= {{
-            today: "Hoy"
-          }}
-          locale={es}
+            buttonText={{
+              today: "Hoy"
+            }}
+            locale={es}
             ref={calendarComponentRef}
             defaultView="dayGridMonth"
             plugins={[dayGridPlugin]}

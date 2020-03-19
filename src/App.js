@@ -6,7 +6,7 @@ import { HttpLink } from "apollo-link-http";
 import { WebSocketLink } from "apollo-link-ws";
 import { split } from "apollo-link";
 import { ApolloProvider } from "react-apollo";
-import { BrowserRouter as Router } from "react-router-dom";
+import { /* BrowserRouter as Router, */ HashRouter } from "react-router-dom";
 import { getMainDefinition } from "apollo-utilities";
 
 const httpLink = new HttpLink({
@@ -48,11 +48,11 @@ const client = new ApolloClient({
 function App() {
   return (
     <ApolloProvider client={client}>
-      <Router>
+      <HashRouter>
         <div className="App">
           <Header />
         </div>
-      </Router>
+      </HashRouter>
     </ApolloProvider>
   );
 }

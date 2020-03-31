@@ -121,7 +121,7 @@ export const GET_USER = gql`
       where: {
         user: { _eq: $user }
         status: { _eq: 1 }
-        R_users_data: { user_type: { _eq: 8 } }
+        R_users_data: { user_type: { _eq: 1 } }
       }
     ) {
       id
@@ -212,7 +212,7 @@ export const GET_USER_BY_ID_AUTH = gql`
       where: {
         id: { _eq: $id }
         status: { _eq: 1 }
-        R_users_data: { user_type: { _eq: 8 } }
+        R_users_data: { user_type: { _eq: 1 } }
       }
     ) {
       id
@@ -314,6 +314,17 @@ export const GET_CLASSES_PRICE_PAYMENT_PERIOD_BY_CLASSES_PRICE_ID = gql`
       persons
       total
       specifications
+    }
+  }
+`;
+
+export const GET_CLASSES_DETAILS_BY_USER_PAYMENTS_ID = gql`
+  subscription get_classes_details_by_user_payments_id(
+    $userPaymentId: bigint!
+  ) {
+    classes_details(where: { user_payment_id: { _eq: $userPaymentId } }) {
+      class_id
+      user_id
     }
   }
 `;
@@ -423,9 +434,23 @@ export const GET_CLASSES = gql`
   }
 `;
 
+export const GET_CLASSES_PRICE_BY_CLASS_ID = gql`
+  subscription get_classes_price_by_class_id($classId: Int!) {
+    classes_price_details(
+      where: {
+        classes_id: { _eq: $classId }
+        status: { _eq: 1 }
+        R_classes_price: { status: { _eq: 1 } }
+      }
+    ) {
+      id
+    }
+  }
+`;
+
 export const GET_COACHES = gql`
   subscription get_coaches {
-    users_data(where: { user_type: { _eq: 10 }, _and: { status: { _eq: 1 } } }) {
+    users_data(where: { user_type: { _eq: 3 }, _and: { status: { _eq: 1 } } }) {
       id
       first_name
       last_name
@@ -511,6 +536,7 @@ export const GET_CLASSES_PRICE = gql`
         updated_at
         R_classes {
           name
+          status
         }
       }
       R_classes_price_payment_periods(where: { status: { _eq: 1 } }) {
@@ -705,6 +731,8 @@ export const GET_LOCKER_DETAIL_BY_LOCKER_ID = gql`
       user_id
       cost
       payment_type
+      payment_start
+      payment_end
       R_users_data {
         first_name
         last_name
@@ -770,11 +798,13 @@ export const GET_USER_PAYMENTS_BY_USER_ID = gql`
       status
       payment_start
       payment_end
+      payment_type
       R_classes_price_payment_period {
         id
         payment_period_id
         R_payment_period {
           period
+          days
         }
         R_classes_price {
           id

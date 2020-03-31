@@ -68,7 +68,7 @@ export default function Assists(props) {
   if (!userAssistsData.users_data.length) {
     return <NotFound />;
   }
-  if (userAssistsData.users_data[0].user_type !== 9) {
+  if (userAssistsData.users_data[0].user_type !== 2) {
     return <NotFound />;
   }
 

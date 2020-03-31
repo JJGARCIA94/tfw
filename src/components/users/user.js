@@ -88,7 +88,7 @@ export default function User(props) {
   if (userLoading || userTypesLoading) {
     return <CircularProgress />;
   }
-  if (userError || !userData.users_data.length || userTypesError) {
+  if (userError || !userData.users_data.length || userTypesError || userId === "1") {
     return <NotFound />;
   }
 
@@ -113,11 +113,11 @@ export default function User(props) {
 
   const getUserTypes = () => {
     return userTypesData.users_type.map(userType => {
-      return (
+      return userType.id !== 1 ? (
         <option key={userType.id} value={userType.id}>
           {userType.name}
         </option>
-      );
+      ) : null;
     });
   };
 

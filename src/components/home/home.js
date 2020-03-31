@@ -659,7 +659,7 @@ export default function Home(props) {
           />
         </Card>
       </Grid>
-      <Grid item xs={8} md={6} lg={4} className={classes.items}>
+      <Grid item xs={12} md={12} lg={4} className={classes.items}>
         <Card className={classes.cards} style={{ height: "350px" }}>
           <Chart
             options={state.options}

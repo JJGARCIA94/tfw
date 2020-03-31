@@ -43,7 +43,7 @@ export default function NotFound() {
             </Typography>
           </Grid>
           <Grid item xs={12} className={classes.items}>
-            <Link to="/">
+            <Link to="/" style={{textDecoration: "none"}}>
               <Button variant="contained" color="primary" className={classes.button}>
                 Ir a Home
               </Button>

@@ -115,6 +115,9 @@ export default function Step3(props) {
               "aria-label": "change date"
             }}
             onChange={handleDateChange}
+            onKeyDown={(e) => {
+              e.preventDefault();
+            }}
             onAnimationEnd={() => {
               setUserPaymentState({
                 ...userPaymentState,

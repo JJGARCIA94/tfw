@@ -35,7 +35,8 @@ import {
   GET_CLASSES,
   GET_MEMBERS_BY_CLASS,
   GET_MEMBERS_BY_CLASS_HISTORY,
-  GET_USER_BY_ID_AUTH
+  GET_USER_BY_ID_AUTH,
+  GET_CLASSES_PRICE_BY_CLASS_ID
 } from "../../database/queries";
 import { CANCEL_CLASS, RESTORE_CLASS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
@@ -118,6 +119,8 @@ export default function Lessons(props) {
     snackbarColor
   } = snackbarState;
   const [idClassState, setIdClassState] = useState(0);
+  const [currentClassId, setCurrentClassId] = useState(0);
+  const [existClass, setExistClass] = useState(0);
   const [activeUsersState, setActiveUsersState] = useState([]);
   const [
     updateClassStatusMutation,
@@ -137,6 +140,15 @@ export default function Lessons(props) {
       classId: idClassState
     }
   });
+  const {
+    data: classesPriceData,
+    loading: classesPriceLoading,
+    error: classesPriceError
+  } = useSubscription(GET_CLASSES_PRICE_BY_CLASS_ID, {
+    variables: {
+      classId: currentClassId
+    }
+  });
   const setUserAuthHeader = props.setUserAuth;
   const [userAuth, setUserAuth] = useState(true);
   const [userIdAuth, setUserIdAuth] = useState(0);
@@ -154,6 +166,12 @@ export default function Lessons(props) {
       }
     }
   });
+
+  useEffect(() => {
+    if(classesPriceData) {
+      setExistClass(classesPriceData.classes_price_details.length);
+    }
+  }, [classesPriceData]);
 
   useEffect(() => {
     if (idClassState !== 0 && membersData) {
@@ -188,10 +206,10 @@ export default function Lessons(props) {
     isUserAuth();
   });
 
-  if (classesLoading || membersLoading) {
+  if (classesLoading || membersLoading || classesPriceLoading) {
     return <CircularProgress />;
   }
-  if (classesError || membersError || userAuthError) {
+  if (classesError || membersError || userAuthError || classesPriceError) {
     return <NotFound />;
   }
 
@@ -212,6 +230,7 @@ export default function Lessons(props) {
                 <Tooltip title={lesson.status === 1 ? "Cancelar" : "Restaurar"}>
                 <IconButton
                   onClick={() => {
+                    setCurrentClassId(lesson.id);
                     const newStatus = lesson.status === 1 ? 0 : 1;
                     handleOpenClassDialog(lesson.id, newStatus);
                   }}
@@ -324,28 +343,39 @@ export default function Lessons(props) {
 
   const handleCloseClassDialog = agree => {
     if (agree) {
-      updateClassStatusMutation({
-        variables: {
-          classId: idClassDialog
-        }
-      });
-      if (updateClassStatusLoading) return <CircularProgress />;
-      if (updateClassStatusError) {
+      if(existClass > 0 && statusClassDialog === 0) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "Ha ocurrido un error",
+          snackbarText: "No puedes eliminar esta clase porque pertenece a un precio de clase o paquete activo",
           snackbarColor: "#d32f2f"
         });
         return;
       }
-      setSnackbarState({
-        ...snackbarState,
-        openSnackBar: true,
-        snackbarText:
-          statusClassDialog === 1 ? "Clase restaurada" : "Clase cancelada",
-        snackbarColor: "#43a047"
-      });
+      else {
+        updateClassStatusMutation({
+          variables: {
+            classId: idClassDialog
+          }
+        });
+        if (updateClassStatusLoading) return <CircularProgress />;
+        if (updateClassStatusError) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "Ha ocurrido un error",
+            snackbarColor: "#d32f2f"
+          });
+          return;
+        }
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText:
+            statusClassDialog === 1 ? "Clase restaurada" : "Clase cancelada",
+          snackbarColor: "#43a047"
+        });
+      }
     }
     setDialogClassState({
       openClassDialog: false,

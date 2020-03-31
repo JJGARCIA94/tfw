@@ -79,7 +79,7 @@ export default function UserType(props) {
   if (userTypeLoading) {
     return <CircularProgress />;
   }
-  if (userTypeError || userTypeData.users_type.length === 0 || userTypeId === "1") {
+  if (userTypeError || userTypeData.users_type.length === 0 || userTypeId === "1" || userTypeId === "2" || userTypeId === "3") {
     return <NotFound />;
   }
 

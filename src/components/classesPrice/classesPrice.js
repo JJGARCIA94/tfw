@@ -119,6 +119,8 @@ export default function ClassesPrice(props) {
     snackbarText,
     snackbarColor
   } = snackbarState;
+  const [idClassPrice, setIdClassPrice] = useState(0);
+  const [cancelClass, setCancelClass] = useState(false);
   const {
     data: classesPriceData,
     loading: classesPriceLoading,
@@ -157,6 +159,23 @@ export default function ClassesPrice(props) {
   });
 
   useEffect(() => {
+    setCancelClass(false);
+    if(classesPriceData && idClassPrice !== 0) {
+      for(let x=0 ; x<classesPriceData.classes_price.length ; x++) {
+        if(classesPriceData.classes_price[x].id === idClassPrice) {
+          for(let y=0 ; y<classesPriceData.classes_price[x].R_classes_price_details.length ; y++) {
+            if(classesPriceData.classes_price[x].R_classes_price_details[y].R_classes.status === 0) {
+              setCancelClass(true);
+              break;
+            }
+          }
+          break;
+        }
+      }
+    }
+  }, [classesPriceData, idClassPrice]);
+
+  useEffect(() => {
     function isUserAuth() {
       try {
         if (localStorage.getItem("token")) {
@@ -187,6 +206,7 @@ export default function ClassesPrice(props) {
   }
 
   const handleOpenClassPriceDialog = (classPriceId, newStatus) => {
+    setIdClassPrice(classPriceId);
     setDialogClassPriceState({
       openClassPriceDialog: true,
       tittleClassPriceDialog:
@@ -204,31 +224,42 @@ export default function ClassesPrice(props) {
 
   const handleCloseClassPriceDialog = agree => {
     if (agree) {
-      updateClassesPriceStatusMutation({
-        variables: {
-          id: idClassPriceDialog,
-          newStatus: statusClassPriceDialog
-        }
-      });
-      if (updateClassesPriceStatusLoading) return <CircularProgress />;
-      if (updateClassesPriceStatusError) {
+      if(cancelClass && statusClassPriceDialog === 1) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "Ha ocurrido un error",
+          snackbarText: "No se puede restaurar este precio de clase o paquete porque no todas las clases que lo conforman están activas",
           snackbarColor: "#d32f2f"
         });
         return;
       }
-      setSnackbarState({
-        ...snackbarState,
-        openSnackBar: true,
-        snackbarText:
-          statusClassPriceDialog === 1
-            ? "Precio de clase o paquete restaurado"
-            : "Precio de clase o paquete eliminado",
-        snackbarColor: "#43a047"
-      });
+      else {
+        updateClassesPriceStatusMutation({
+          variables: {
+            id: idClassPriceDialog,
+            newStatus: statusClassPriceDialog
+          }
+        });
+        if (updateClassesPriceStatusLoading) return <CircularProgress />;
+        if (updateClassesPriceStatusError) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "Ha ocurrido un error",
+            snackbarColor: "#d32f2f"
+          });
+          return;
+        }
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText:
+            statusClassPriceDialog === 1
+              ? "Precio de clase o paquete restaurado"
+              : "Precio de clase o paquete eliminado",
+          snackbarColor: "#43a047"
+        });
+      }
     }
     setDialogClassPriceState({
       openClassPriceDialog: false,

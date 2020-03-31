@@ -12,11 +12,11 @@ import {
   CircularProgress
 } from "@material-ui/core";
 import TFWLogo from "../../assets/images/logo.png";
-import { useQuery, useLazyQuery } from "@apollo/react-hooks";
-import { GET_USER_BY_ID_AUTH, GET_USER } from "../../database/queries";
+import { useLazyQuery, useQuery } from "@apollo/react-hooks";
+import { GET_USER, GET_USER_BY_ID_AUTH } from "../../database/queries";
 import NotFound from "../notFound/notFound";
 import { comparePassword } from "../../auth/methods";
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -34,21 +34,14 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Login(props) {
+export default function Login2(props) {
   const classes = useStyles();
   const setUserAuthHeader = props.setUserAuth;
-  const [clickValidationState, setClickValidationState] = useState(false);
   const [userAuth, setUserAuth] = useState(false);
   const [userIdAuth, setUserIdAuth] = useState(0);
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
   const [disabledButton, setDisabledButton] = useState(false);
-  const [userState, setUserState] = useState({
-    user: "",
-    password: ""
-  });
-  const [temporalUserState, setTemporalUserState] = useState({
-    user: "",
-    password: ""
-  });
   const [snackbarState, setSnackbarState] = useState({
     openSnackbar: false,
     vertical: "bottom",
@@ -63,6 +56,10 @@ export default function Login(props) {
     snackBarText,
     snackbarColor
   } = snackbarState;
+  const [
+    userQuery,
+    { data: userData, loading: userLoading, error: userError }
+  ] = useLazyQuery(GET_USER);
   const {
     data: userAuthData,
     loading: userAuthLoading,
@@ -83,61 +80,6 @@ export default function Login(props) {
     }
   });
 
-  const [
-    userQuery,
-    { data: userData, loading: userLoading, error: userError }
-  ] = useLazyQuery(GET_USER, {
-    variables: {
-      user: userState.user
-    },
-    onCompleted: () => {
-      if (clickValidationState) {
-        if (userData.users.length === 0) {
-          setSnackbarState({
-            vertical: "bottom",
-            horizontal: "right",
-            openSnackbar: true,
-            snackBarText: "Usuario y/o contraseña incorrecta",
-            snackbarColor: "#d32f2f"
-          });
-        } else {
-          if (comparePassword(userState.password, userData.users[0].password)) {
-            setSnackbarState({
-              vertical: "bottom",
-              horizontal: "right",
-              openSnackbar: true,
-              snackBarText: "Bienvenido",
-              snackbarColor: "#d32f2f"
-            });
-            const token = jwt.sign(
-              { id: userData.users[0].id },
-              "mysecretpassword",
-              {
-                expiresIn: 60 * 60 * 24
-              }
-            );
-            localStorage.setItem("token", token);
-          } else {
-            setSnackbarState({
-              vertical: "bottom",
-              horizontal: "right",
-              openSnackbar: true,
-              snackBarText: "Usuario y/o contraseña incorrecta",
-              snackbarColor: "#d32f2f"
-            });
-          }
-        }
-      }
-
-      setUserState({
-        user: "",
-        password: ""
-      });
-      setClickValidationState(false);
-      setDisabledButton(false);
-    }
-  });
-
   useEffect(() => {
     function userAuth() {
       try {
@@ -155,16 +97,65 @@ export default function Login(props) {
     userAuth();
   });
 
-  if (userAuthLoading) {
+  useEffect(() => {
+    function login() {
+      if (userData) {
+        if (userData.users.length > 0) {
+          if (comparePassword(password, userData.users[0].password)) {
+            setSnackbarState({
+              vertical: "bottom",
+              horizontal: "right",
+              openSnackbar: true,
+              snackBarText: "Bienvenido",
+              snackbarColor: "#d32f2f"
+            });
+            setDisabledButton(false);
+            const token = jwt.sign(
+                  { id: userData.users[0].id },
+                  "mysecretpassword",
+                  {
+                    expiresIn: 60 * 60 * 24
+                  }
+                );
+                localStorage.setItem("token", token);
+          } else {
+            setSnackbarState({
+              vertical: "bottom",
+              horizontal: "right",
+              openSnackbar: true,
+              snackBarText: "Usuario y/o contraseña incorrecta",
+              snackbarColor: "#d32f2f"
+            });
+            setDisabledButton(false);
+          }
+        } else {
+          setSnackbarState({
+            vertical: "bottom",
+            horizontal: "right",
+            openSnackbar: true,
+            snackBarText: "Usuario y/o contraseña incorrecta",
+            snackbarColor: "#d32f2f"
+          });
+          setDisabledButton(false);
+        }
+      }
+    }
+
+    if(disabledButton) {
+        login();
+    }
+
+  }, [userData, password, disabledButton]);
+
+  if (userLoading || userAuthLoading) {
     return <CircularProgress />;
   }
 
-  if (userAuthError) {
+  if (userError || userAuthError) {
     return <NotFound />;
   }
 
   const login = () => {
-    const { user, password } = temporalUserState;
     if (user.trim() === "" || password.trim() === "") {
       setSnackbarState({
         ...snackbarState,
@@ -172,17 +163,13 @@ export default function Login(props) {
         snackBarText: "Ingresa el usuario y la contraseña",
         snackbarColor: "#d32f2f"
       });
-      setDisabledButton(false);
-      return;
     } else {
-      setDisabledButton(false);
-      userQuery();
-      if (userLoading) {
-        return <CircularProgress />;
-      }
-      if (userError) {
-        return <NotFound />;
-      }
+      setDisabledButton(true);
+      userQuery({
+        variables: {
+          user: user.trim()
+        }
+      });
     }
   };
 
@@ -194,7 +181,7 @@ export default function Login(props) {
     <Redirect to="/" />
   ) : (
     <Grid container justify="center" className={classes.container}>
-      <Grid item md={3}>
+      <Grid item xs={10} sm={6} md={3}>
         <Card className={classes.root}>
           <center>
             <img src={TFWLogo} alt="TFW logo" className={classes.logo} />
@@ -206,14 +193,12 @@ export default function Login(props) {
               id="user"
               label="Usuario"
               margin="normal"
+              value={user}
               inputProps={{
                 maxLength: 20
               }}
               onChange={e => {
-                setTemporalUserState({
-                  ...temporalUserState,
-                  user: e.target.value
-                });
+                setUser(e.target.value);
               }}
             />
             <TextField
@@ -222,28 +207,19 @@ export default function Login(props) {
               id="password"
               label="Contraseña"
               margin="normal"
-              value={temporalUserState.password}
+              value={password}
               inputProps={{
                 maxLength: 20,
                 type: "password"
               }}
-              onChange={e => {
-                setTemporalUserState({
-                  ...temporalUserState,
-                  password: e.target.value
-                });
-              }}
               onKeyPress={e => {
                 const pressKey = e.keyCode ? e.keyCode : e.which;
                 if (pressKey === 13) {
-                  setDisabledButton(true);
-                  setUserState({
-                    user: temporalUserState.user,
-                    password: temporalUserState.password
-                  });
-                  setClickValidationState(true);
                   login();
                 }
+              }}
+              onChange={e => {
+                setPassword(e.target.value);
               }}
             />
           </CardContent>
@@ -254,12 +230,6 @@ export default function Login(props) {
                 color="primary"
                 disabled={disabledButton}
                 onClick={() => {
-                  setDisabledButton(true);
-                  setUserState({
-                    user: temporalUserState.user,
-                    password: temporalUserState.password
-                  });
-                  setClickValidationState(true);
                   login();
                 }}
               >

@@ -93,11 +93,11 @@ export default function NewUser() {
 
   const getUserTypes = () => {
     return userTypesData.users_type.map(userType => {
-      return (
+      return userType.id !== 1 ? (
         <option key={userType.id} value={userType.id}>
           {userType.name}
         </option>
-      );
+      ) : null;
     });
   };
 

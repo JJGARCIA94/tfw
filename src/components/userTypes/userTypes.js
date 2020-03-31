@@ -103,20 +103,21 @@ export default function UserTypes(props) {
   const setUserAuthHeader = props.setUserAuth;
   const [userAuth, setUserAuth] = useState(true);
   const [userIdAuth, setUserIdAuth] = useState(0);
-  const {
-    data: userAuthData, error: userAuthError
-  } = useQuery(GET_USER_BY_ID_AUTH, {
-    variables: {
-      id: userIdAuth
-    },
-    onCompleted: () => {
-      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
-        localStorage.removeItem("token");
-        setUserAuth(false);
-        setUserAuthHeader(false);
+  const { data: userAuthData, error: userAuthError } = useQuery(
+    GET_USER_BY_ID_AUTH,
+    {
+      variables: {
+        id: userIdAuth
+      },
+      onCompleted: () => {
+        if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+          localStorage.removeItem("token");
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
       }
     }
-  });
+  );
 
   useEffect(() => {
     function isUserAuth() {
@@ -199,7 +200,9 @@ export default function UserTypes(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText:
-            statusDialog === 1 ? "Tipo de usuario restaurado" : "Tipo de usuario eliminado",
+            statusDialog === 1
+              ? "Tipo de usuario restaurado"
+              : "Tipo de usuario eliminado",
           snackbarColor: "#43a047"
         });
       }
@@ -222,7 +225,7 @@ export default function UserTypes(props) {
     });
   };
 
-  return ( userAuth ?
+  return userAuth ? (
     <TableContainer component={Paper} className={classes.root}>
       <Toolbar>
         <Grid container>
@@ -230,9 +233,9 @@ export default function UserTypes(props) {
             <Typography variant="h6" id="tableTitle">
               Tipos de usuario
               <Tooltip title="Agregar tipo de usuario">
-              <Link to="/newUserType">
-                <AddCircleIcon />
-              </Link>
+                <Link to="/newUserType">
+                  <AddCircleIcon />
+                </Link>
               </Tooltip>
             </Typography>
           </Grid>
@@ -246,42 +249,61 @@ export default function UserTypes(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {userTypesData.users_type.map(row =>
-            row.id !== 1 ? (
-              <TableRow key={row.id}>
-                <TableCell component="th" scope="row">
-                  {row.name}
-                </TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Ver información">
-                  <Link to={"/userType/" + row.id}>
-                    <IconButton>
-                      <VisibilityIcon className={classes.icons} />
-                    </IconButton>
-                  </Link>
-                  </Tooltip>
-                  <Tooltip title={
-                      row.status === 1
+          {userTypesData.users_type.map(row => (
+            <TableRow key={row.id}>
+              <TableCell component="th" scope="row">
+                {row.name}
+              </TableCell>
+              <TableCell align="right">
+                <Tooltip
+                  title={
+                    row.id !== 1 && row.id !== 2 && row.id !== 3
+                      ? "Ver información"
+                      : "No se puede ver la información de este tipo de usuario"
+                  }
+                >
+                  <span>
+                    {row.id !== 1 && row.id !== 2 && row.id !== 3 ? (
+                      <Link to={"/userType/" + row.id} disabled>
+                        <IconButton>
+                          <VisibilityIcon className={classes.icons} />
+                        </IconButton>
+                      </Link>
+                    ) : (
+                      <IconButton disabled>
+                        <VisibilityIcon />
+                      </IconButton>
+                    )}
+                  </span>
+                </Tooltip>
+                <Tooltip
+                  title={
+                    row.id !== 1 && row.id !== 2 && row.id !== 3
+                      ? row.status === 1
                         ? "Eliminar tipo de usuario"
                         : "Restaurar tipo de usuario"
-                    }>
-                  <IconButton
-                    onClick={() => {
-                      const newStatus = row.status === 1 ? 0 : 1;
-                      handleOpenDialog(row.id, newStatus);
-                    }}
-                  >
-                    {row.status === 1 ? (
-                      <DeleteIcon className={classes.icons} />
-                    ) : (
-                      <RestoreFromTrashIcon className={classes.icons} />
-                    )}
-                  </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ) : null
-          )}
+                      : "Este tipo de usario no se puede eliminar"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      disabled={row.id === 1 || row.id === 2 || row.id === 3}
+                      onClick={() => {
+                        const newStatus = row.status === 1 ? 0 : 1;
+                        handleOpenDialog(row.id, newStatus);
+                      }}
+                    >
+                      {row.status === 1 ? (
+                        <DeleteIcon style={{color: row.id !== 1 && row.id !== 2 && row.id !== 3 ? "black" : ""}} />
+                      ) : (
+                        <RestoreFromTrashIcon style={{color: row.id !== 1 && row.id !== 2 && row.id !== 3 ? "black" : ""}} />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
       <Dialog
@@ -329,6 +351,8 @@ export default function UserTypes(props) {
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </TableContainer> : <Redirect to="/login" />
+    </TableContainer>
+  ) : (
+    <Redirect to="/login" />
   );
 }

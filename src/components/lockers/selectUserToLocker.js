@@ -35,9 +35,17 @@ import {
   Tooltip
 } from "@material-ui/core";
 import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker
+} from "@material-ui/pickers";
+import es from "date-fns/locale/es";
+import DateFnsUtils from "@date-io/date-fns";
+import {
   ArrowBack as ArrowBackIcon,
-  Clear as ClearIcon
+  Clear as ClearIcon,
+  Update as UpdateIcon
 } from "@material-ui/icons";
+import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import moment from "moment";
 
 const useStyles = makeStyles(theme => ({
@@ -72,6 +80,24 @@ const formatDate = date => {
   return `${date.getFullYear()}-${correctMont}-${correctDay}`;
 };
 
+const formatDateUser = date => {
+  date = new Date(date);
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+  let correctMont =
+    date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  return `${correctDay}/${correctMont}/${date.getFullYear()}`;
+};
+
+const formatDatePaymentEnd = date => {
+  date = new Date(date);
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+  let correctMont =
+    date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  let correctDay = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  return `${date.getFullYear()}-${correctMont}-${correctDay}`;
+};
+
 export default function SelectUserToLocker(props) {
   const classes = useStyles();
   const lockerId = props.match.params.lockerId;
@@ -79,6 +105,10 @@ export default function SelectUserToLocker(props) {
   const [searchState, setSearchState] = useState("");
   const [paymentType, setPaymentType] = useState("0");
   const paymentStart = new Date(moment());
+  const now = new Date(moment());
+  const oneMonthMore = now.setDate(now.getDate() + 30);
+  const [paymentEnd, setPaymentEnd] = useState(oneMonthMore);
+  const [lockerPriceDefault, setLockerPriceDefault] = useState(0);
   const [infoSelectedUserState, setInfoSelectedUserState] = useState({
     id: 0,
     locker_id: lockerId,
@@ -89,7 +119,17 @@ export default function SelectUserToLocker(props) {
     tittleDialog: "",
     textDialog: ""
   });
+  const [dialogStateRenovate, setDialogStateRenovate] = useState({
+    openDialogRenovate: false,
+    tittleDialogRenovate: "",
+    textDialogRenovate: ""
+  });
   const { openDialog, tittleDialog, textDialog } = dialogState;
+  const {
+    openDialogRenovate,
+    tittleDialogRenovate,
+    textDialogRenovate
+  } = dialogStateRenovate;
   const [snackbarState, setSnackbarState] = useState({
     openSnackBar: false,
     vertical: "bottom",
@@ -104,6 +144,7 @@ export default function SelectUserToLocker(props) {
     snackbarText,
     snackbarColor
   } = snackbarState;
+  const [lockerDetails, setLockerDetails] = useState([]);
   const {
     data: lockerDetailData,
     loading: lockerDetailLoading,
@@ -166,6 +207,20 @@ export default function SelectUserToLocker(props) {
       user_id: 0
     });
   }, [searchState, lockerId]);
+
+  useEffect(() => {
+    if (lockerDetailData) {
+      if (lockerDetailData.lockers_details.length) {
+        setLockerDetails(lockerDetailData.lockers_details[0]);
+      }
+    }
+  }, [lockerDetailData]);
+
+  useEffect(() => {
+    if (lockerPriceData) {
+      setLockerPriceDefault(lockerPriceData.lockers_settings[0].price);
+    }
+  }, [lockerPriceData]);
 
   if (
     lockerDetailLoading ||
@@ -261,70 +316,81 @@ export default function SelectUserToLocker(props) {
       });
       return;
     } else {
-      const { id, locker_id, user_id } = infoSelectedUserState;
-      const lockerPrice = lockerPriceData.lockers_settings[0].price;
-      if (id === 0) {
-        addLockerDetailMutation({
-          variables: {
-            lockerId: locker_id,
-            userId: user_id,
-            paymentType: paymentType,
-            paymentStart: formatDate(paymentStart),
-            lockerPrice: lockerPrice
-          }
-        });
-        if (addLockerDetailMutationLoading) return <CircularProgress />;
-        if (addLockerDetailMutationError) {
-          setSnackbarState({
-            ...snackbarState,
-            openSnackBar: true,
-            snackbarText: "Ha ocurrido un error",
-            snackbarColor: "#d32f2f"
-          });
-          return;
-        }
+      if (lockerPriceDefault === "") {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "Casillero asignado",
-          snackbarColor: "#43a047"
+          snackbarText: "Ingresa un precio",
+          snackbarColor: "#d32f2f"
         });
       } else {
-        addAndUpdateLockerDetailMutation({
-          variables: {
-            lockerDetailId: id,
-            lockerId: locker_id,
-            userId: user_id,
-            paymentType: paymentType,
-            paymentStart: formatDate(paymentStart),
-            lockerPrice: lockerPrice
+        const { id, locker_id, user_id } = infoSelectedUserState;
+        //const lockerPrice = lockerPriceData.lockers_settings[0].price;
+        if (id === 0) {
+          addLockerDetailMutation({
+            variables: {
+              lockerId: locker_id,
+              userId: user_id,
+              paymentType: paymentType,
+              paymentStart: formatDate(paymentStart),
+              paymentEnd: formatDatePaymentEnd(paymentEnd),
+              lockerPrice: lockerPriceDefault
+            }
+          });
+          if (addLockerDetailMutationLoading) return <CircularProgress />;
+          if (addLockerDetailMutationError) {
+            setSnackbarState({
+              ...snackbarState,
+              openSnackBar: true,
+              snackbarText: "Ha ocurrido un error",
+              snackbarColor: "#d32f2f"
+            });
+            return;
           }
-        });
-        if (addAndUpdateLockerDetailMutationLoading)
-          return <CircularProgress />;
-        if (addAndUpdateLockerDetailMutationError) {
           setSnackbarState({
             ...snackbarState,
             openSnackBar: true,
-            snackbarText: "Ha ocurrido un error",
-            snackbarColor: "#d32f2f"
+            snackbarText: "Casillero asignado",
+            snackbarColor: "#43a047"
           });
-          return;
+        } else {
+          addAndUpdateLockerDetailMutation({
+            variables: {
+              lockerDetailId: id,
+              lockerId: locker_id,
+              userId: user_id,
+              paymentType: paymentType,
+              paymentStart: formatDate(paymentStart),
+              paymentEnd: formatDatePaymentEnd(paymentEnd),
+              lockerPrice: lockerPriceDefault
+            }
+          });
+          if (addAndUpdateLockerDetailMutationLoading)
+            return <CircularProgress />;
+          if (addAndUpdateLockerDetailMutationError) {
+            setSnackbarState({
+              ...snackbarState,
+              openSnackBar: true,
+              snackbarText: "Ha ocurrido un error",
+              snackbarColor: "#d32f2f"
+            });
+            return;
+          }
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "Casillero asignado a otro usuario",
+            snackbarColor: "#43a047"
+          });
         }
-        setSnackbarState({
-          ...snackbarState,
-          openSnackBar: true,
-          snackbarText: "Casillero asignado a otro usuario",
-          snackbarColor: "#43a047"
+        setSearchState("");
+        setSelectedUser(-1);
+        setInfoSelectedUserState({
+          ...infoSelectedUserState,
+          id: 0,
+          user_id: 0
         });
       }
-      setSearchState("");
-      setSelectedUser(-1);
-      setInfoSelectedUserState({
-        ...infoSelectedUserState,
-        id: 0,
-        user_id: 0
-      });
     }
   };
 
@@ -334,6 +400,15 @@ export default function SelectUserToLocker(props) {
       tittleDialog: "¿Quieres quitar este usuario del casillero?",
       textDialog:
         "Al quitar el usuario el casillero estará disponible para cualquier otro usuario."
+    });
+  };
+
+  const handleOpenDialogRenovate = () => {
+    setDialogStateRenovate({
+      openDialogRenovate: true,
+      tittleDialogRenovate: "¿Quieres renovar el pago del casillero?",
+      textDialogRenovate:
+        "Al renovar el pago de este casillero se cambiará la fecha de vencimiento del pago a la que se haya elegido."
     });
   };
 
@@ -369,6 +444,53 @@ export default function SelectUserToLocker(props) {
     });
   };
 
+  const handleCloseDialogRenovate = agree => {
+    if (agree) {
+      if (lockerPriceDefault === "") {
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText: "Ingresa un precio",
+          snackbarColor: "#d32f2f"
+        });
+      } else {
+        const { locker_detail_id, locker_id, user_id } = lockerDetails;
+        addAndUpdateLockerDetailMutation({
+          variables: {
+            lockerDetailId: locker_detail_id,
+            lockerId: locker_id,
+            userId: user_id,
+            paymentType: paymentType,
+            paymentStart: formatDate(paymentStart),
+            paymentEnd: formatDatePaymentEnd(paymentEnd),
+            lockerPrice: lockerPriceDefault
+          }
+        });
+        if (addAndUpdateLockerDetailMutationLoading)
+          return <CircularProgress />;
+        if (addAndUpdateLockerDetailMutationError) {
+          setSnackbarState({
+            ...snackbarState,
+            openSnackBar: true,
+            snackbarText: "Ha ocurrido un error",
+            snackbarColor: "#d32f2f"
+          });
+          return;
+        }
+        setSnackbarState({
+          ...snackbarState,
+          openSnackBar: true,
+          snackbarText: "Pago de casillero renovado",
+          snackbarColor: "#43a047"
+        });
+      }
+    }
+    setDialogStateRenovate({
+      openDialogRenovate: false,
+      tittleDialogRenovate: ""
+    });
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbarState({
       ...snackbarState,
@@ -376,6 +498,10 @@ export default function SelectUserToLocker(props) {
       snackbarText: "",
       snackbarColor: ""
     });
+  };
+
+  const handleDateChange = date => {
+    setPaymentEnd(date.toLocaleDateString("en-US"));
   };
 
   return (
@@ -402,6 +528,15 @@ export default function SelectUserToLocker(props) {
                   }}
                 >
                   <ClearIcon className={classes.deleteIcon} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Renovar pago">
+                <IconButton
+                  onClick={() => {
+                    handleOpenDialogRenovate();
+                  }}
+                >
+                  <UpdateIcon style={{ color: "black" }} />
                 </IconButton>
               </Tooltip>
             </Typography>
@@ -447,6 +582,18 @@ export default function SelectUserToLocker(props) {
                       ? "Efectivo"
                       : "Tarjeta de crédito"}
                   </Typography>
+                  <Typography>
+                    <strong>Inicio de pago:</strong>
+                    {formatDateUser(
+                      lockerDetailData.lockers_details[0].payment_start
+                    )}
+                  </Typography>
+                  <Typography>
+                    <strong>Vencimiento de pago:</strong>
+                    {formatDateUser(
+                      lockerDetailData.lockers_details[0].payment_end
+                    )}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -484,6 +631,44 @@ export default function SelectUserToLocker(props) {
             <option value={0}>Efectivo</option>
             <option value={1}>Tarjeta de crédito</option>
           </TextField>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <MuiPickersUtilsProvider utils={DateFnsUtils} locale={es}>
+            <KeyboardDatePicker
+              className={classes.textFields}
+              format="dd/MM/yyyy"
+              margin="normal"
+              id="payment_end"
+              label="Próximo pago"
+              value={paymentEnd}
+              KeyboardButtonProps={{
+                "aria-label": "change date"
+              }}
+              onChange={handleDateChange}
+              onKeyDown={(e) => {
+                e.preventDefault();
+              }}
+            />
+          </MuiPickersUtilsProvider>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <TextField
+            className={classes.textFields}
+            id="precioCasillero"
+            label="Precio"
+            margin="normal"
+            value={lockerPriceDefault}
+            inputProps={{
+              maxLength: 10
+            }}
+            onKeyPress={e => {
+              keyValidation(e, 2);
+            }}
+            onChange={e => {
+              pasteValidation(e, 2);
+              setLockerPriceDefault(e.target.value);
+            }}
+          />
         </Grid>
       </Grid>
       <Grid container style={{ marginTop: "10px" }}>
@@ -541,7 +726,43 @@ export default function SelectUserToLocker(props) {
             color="primary"
             autoFocus
           >
-            Si
+            Sí
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openDialogRenovate}
+        onClose={() => {
+          handleCloseDialogRenovate(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {tittleDialogRenovate}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {textDialogRenovate}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              handleCloseDialogRenovate(false);
+            }}
+            color="primary"
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              handleCloseDialogRenovate(true);
+            }}
+            color="primary"
+            autoFocus
+          >
+            Sí
           </Button>
         </DialogActions>
       </Dialog>

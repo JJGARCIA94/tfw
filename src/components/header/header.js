@@ -163,7 +163,12 @@ export default function Header() {
             localStorage.getItem("token"),
             "mysecretpassword"
           );
-          setUserIdAuth(decodedToken.id);
+          if(decodedToken.id) {
+            setUserIdAuth(decodedToken.id);
+          }
+          else {
+            localStorage.removeItem("token");
+          }
         } else {
           setUserAuth(false);
         }

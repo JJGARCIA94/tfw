@@ -289,7 +289,7 @@ export default function Users(props) {
       setPage(0);
     }
     usersData.users_data.map((user, index) => {
-      return rows.push({
+      return user.id !== 1 ? rows.push({
         id: user.id,
         name: `${user.first_name} ${user.last_name}`,
         address: user.address,
@@ -298,17 +298,17 @@ export default function Users(props) {
         user_type: user.R_user_type.name,
         user_type_id: user.R_user_type.id,
         status: user.status
-      });
+      }) : null;
     });
   }
 
   const getUserTypes = () => {
     return userTypesData.users_type.map(userType => {
-      return (
+      return userType.id !== 1 ? (
         <option key={userType.id} value={userType.id}>
           {userType.name}
         </option>
-      );
+      ) : null;
     });
   };
 
@@ -519,7 +519,7 @@ export default function Users(props) {
                           )}
                         </IconButton>
                         </Tooltip>
-                        {row.user_type_id === 9 ? (
+                        {row.user_type_id === 2 ? (
                           <Tooltip title="Ver asistencias">
                             <Link to={"/assists/" + row.id}>
                             <IconButton >
@@ -528,7 +528,7 @@ export default function Users(props) {
                           </Link>
                           </Tooltip>
                         ) : null}
-                        {row.user_type_id === 9 ? (
+                        {row.user_type_id === 2 ? (
                           <Tooltip title="Ver pagos">
                             <Link to={"/userPayments/" + row.id}>
                             <IconButton >
@@ -579,7 +579,7 @@ export default function Users(props) {
             }}
             color="primary"
           >
-            Disagree
+            No
           </Button>
           <Button
             onClick={() => {
@@ -588,7 +588,7 @@ export default function Users(props) {
             color="primary"
             autoFocus
           >
-            Agree
+            Sí
           </Button>
         </DialogActions>
       </Dialog>

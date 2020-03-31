@@ -308,6 +308,12 @@ export const UPDATE_CLASSES_PRICE_STATUS = gql`
     }
   }
 `;
+/* update_classes_price_details(
+  where: { classes_price_id: { _eq: $id } }
+  _set: { status: $newStatus }
+) {
+  affected_rows
+} */
 
 export const UPDATE_CLASSES_PRICE_NAME = gql`
   mutation update_classes_price_name($classesPriceId: Int!, $name: String!) {
@@ -446,6 +452,7 @@ export const ADD_LOCKER_DETAIL = gql`
     $userId: Int!
     $paymentType: Int!
     $paymentStart: date!
+    $paymentEnd: date!
     $lockerPrice: numeric!
   ) {
     insert_lockers_details(
@@ -454,6 +461,7 @@ export const ADD_LOCKER_DETAIL = gql`
         user_id: $userId
         payment_type: $paymentType
         payment_start: $paymentStart
+        payment_end: $paymentEnd
         cost: $lockerPrice
       }
     ) {
@@ -469,6 +477,7 @@ export const ADD_AND_UPDATE_LOCKER_DETAIL = gql`
     $userId: Int!
     $paymentType: Int!
     $paymentStart: date!
+    $paymentEnd: date!
     $lockerPrice: numeric!
   ) {
     update_lockers_details(
@@ -483,6 +492,7 @@ export const ADD_AND_UPDATE_LOCKER_DETAIL = gql`
         user_id: $userId
         payment_type: $paymentType
         payment_start: $paymentStart
+        payment_end: $paymentEnd
         cost: $lockerPrice
       }
     ) {

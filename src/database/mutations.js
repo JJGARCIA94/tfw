@@ -101,6 +101,12 @@ export const UPDATE_USER_STATUS = gql`
     ) {
       affected_rows
     }
+    update_users_payments(
+      where: { user_id: { _eq: $id } }
+      _set: { status: 0 }
+    ) {
+      affected_rows
+    }
   }
 `;
 

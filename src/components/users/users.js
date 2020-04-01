@@ -337,7 +337,7 @@ export default function Users(props) {
           : "¿Quieres restaurar este usuario?",
       textDialog:
         newStatus === 0
-          ? "Una vez eliminado, este usuario no podrá ingresar a la plataforma."
+          ? "Una vez eliminado, este usuario no podrá ingresar a la plataforma y se cancelarán todos sus pagos de clases y casilleros."
           : "Una vez restaurado, este usuario podrá ingresar a la plataforma.",
       idDialog: idUsuario,
       idUserTypeDialog: idTipoUsuario,

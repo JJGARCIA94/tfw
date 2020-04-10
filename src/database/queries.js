@@ -132,7 +132,7 @@ export const GET_USER = gql`
 
 export const GET_USER_TYPES = gql`
   subscription get_user_types {
-    users_type(where: { status: { _eq: 1 } }) {
+    users_type(where: { status: { _eq: 1 }}) {
       id
       name
     }
@@ -140,6 +140,25 @@ export const GET_USER_TYPES = gql`
 `;
 
 export const GET_USERS_BY_NAME = gql`
+  subscription get_users($userType: Int) {
+    users_data(where: { user_type: { _eq: $userType } }) {
+      id
+      first_name
+      last_name
+      email
+      address
+      user_type
+      phone_number
+      R_user_type {
+        id
+        name
+      }
+      status
+    }
+  }
+`;
+
+/* export const GET_USERS_BY_NAME = gql`
   subscription get_users($search: String, $userType: Int) {
     users_data(
       where: {
@@ -167,7 +186,7 @@ export const GET_USERS_BY_NAME = gql`
       status
     }
   }
-`;
+`; */
 
 export const GET_USERS = gql`
   query get_users($search: String) {

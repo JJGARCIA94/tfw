@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,7 +10,7 @@ import {
   Button,
   CircularProgress,
   Snackbar,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -19,24 +19,24 @@ import { UPDATE_USER_TYPE } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import NotFound from "../notFound/notFound";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
   },
   root: {
-    padding: theme.spacing(3, 2)
+    padding: theme.spacing(3, 2),
   },
   textFields: {
-    width: "100%"
+    width: "100%",
   },
   button: {
     float: "right",
     margin: theme.spacing(2, 0),
     backgroundColor: "#ffc605",
     "&:hover": {
-      backgroundColor: "#ffff00"
-    }
-  }
+      backgroundColor: "#ffff00",
+    },
+  },
 }));
 
 export default function UserType(props) {
@@ -45,7 +45,7 @@ export default function UserType(props) {
   const [userTypeState, setUserTypeState] = useState({
     name: "",
     created_at: "",
-    updated_at: ""
+    updated_at: "",
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -53,37 +53,55 @@ export default function UserType(props) {
     vertical: "bottom",
     horizontal: "right",
     snackBarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     vertical,
     horizontal,
     openSnackbar,
     snackBarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
   const [
     updateUserTypeMutation,
-    { loading: userTypeMutationLoading, error: userTypeMutationError }
+    { loading: userTypeMutationLoading, error: userTypeMutationError },
   ] = useMutation(UPDATE_USER_TYPE);
   const {
     data: userTypeData,
     loading: userTypeLoading,
-    error: userTypeError
+    error: userTypeError,
   } = useSubscription(GET_USER_TYPE_BY_ID, {
     variables: {
-      userTypeId: userTypeId
-    }
+      userTypeId: userTypeId,
+    },
   });
+
+  useEffect(() => {
+    if (userTypeData && userTypeData.users_type.length) {
+      const createAt = new Date(userTypeData.users_type[0].created_at);
+      const updated_at = new Date(userTypeData.users_type[0].updated_at);
+      setUserTypeState({
+        name: userTypeData.users_type[0].name,
+        created_at: createAt.toLocaleString(),
+        updated_at: updated_at.toLocaleString(),
+      });
+    }
+  }, [userTypeData]);
 
   if (userTypeLoading) {
     return <CircularProgress />;
   }
-  if (userTypeError || userTypeData.users_type.length === 0 || userTypeId === "1" || userTypeId === "2" || userTypeId === "3") {
+  if (
+    userTypeError ||
+    userTypeData.users_type.length === 0 ||
+    userTypeId === "1" ||
+    userTypeId === "2" ||
+    userTypeId === "3"
+  ) {
     return <NotFound />;
   }
 
-  const getData = userTypeData => {
+  /* const getData = userTypeData => {
     const createAt = new Date(userTypeData.created_at);
     const updated_at = new Date(userTypeData.updated_at);
     setUserTypeState({
@@ -91,7 +109,7 @@ export default function UserType(props) {
       created_at: createAt.toLocaleString(),
       updated_at: updated_at.toLocaleString()
     });
-  };
+  }; */
 
   const updateUserType = async () => {
     setDisabledButton(true);
@@ -102,17 +120,17 @@ export default function UserType(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Todos los campos son requeridos",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const resultUpdateUserType = await updateUserTypeMutation({
+    await updateUserTypeMutation({
       variables: {
         userTypeId: userTypeId,
-        name: name.trim()
-      }
+        name: name.trim(),
+      },
     });
 
     if (userTypeMutationLoading) return <CircularProgress />;
@@ -121,20 +139,20 @@ export default function UserType(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Ha ocurrido un error",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const newUserTypeData = resultUpdateUserType.data.update_users_type.returning[0];
-    getData(newUserTypeData);
+    /* const newUserTypeData = resultUpdateUserType.data.update_users_type.returning[0];
+    getData(newUserTypeData); */
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
       snackBarText: "Tipo de usuario actualizado",
-      snackbarColor: "#43a047"
+      snackbarColor: "#43a047",
     });
     setDisabledButton(false);
   };
@@ -149,9 +167,9 @@ export default function UserType(props) {
         <Typography variant="h6">
           Información de tipo de usuario
           <Tooltip title="Regresar">
-          <Link to="/userTypes">
-            <ArrowBackIcon />
-          </Link>
+            <Link to="/userTypes">
+              <ArrowBackIcon />
+            </Link>
           </Tooltip>
         </Typography>
       </Toolbar>
@@ -186,21 +204,21 @@ export default function UserType(props) {
             margin="normal"
             value={userTypeState.name}
             inputProps={{
-              maxLength: 50
+              maxLength: 50,
             }}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               keyValidation(e, 5);
             }}
-            onChange={e => {
+            onChange={(e) => {
               pasteValidation(e, 5);
               setUserTypeState({
                 ...userTypeState,
-                name: e.target.value
+                name: e.target.value,
               });
             }}
-            onAnimationEnd={() => {
+            /* onAnimationEnd={() => {
               getData(userTypeData.users_type[0]);
-            }}
+            }} */
           />
         </Grid>
         <Grid item xs={10} md={11}>
@@ -223,7 +241,7 @@ export default function UserType(props) {
         onClose={handleClose}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackBarText}</span>}
       />

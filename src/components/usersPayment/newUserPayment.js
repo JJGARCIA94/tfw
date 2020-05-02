@@ -67,7 +67,8 @@ export default function NewUserPayment(props) {
     classes: "",
     specifications: "",
     payment_period: "",
-    amount: 0
+    amount: 0,
+    persons: 0
   });
   const [selectedClassesState, setSelectedClassesState] = useState({
     ids: []
@@ -242,7 +243,7 @@ export default function NewUserPayment(props) {
         userId: userId,
         classesPricePaymentPeriodId: paymentPeriodState.id,
         discountPercent: parseInt(userPaymentState.discount_percent),
-        total: userPaymentState.total,
+        total: userPaymentState.total / selectedInformationState.persons,
         paymentStart: userPaymentState.payment_start,
         paymentEnd: userPaymentState.payment_end,
         paymentType: userPaymentState.payment_type

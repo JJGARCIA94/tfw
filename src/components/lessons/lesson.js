@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,7 +10,7 @@ import {
   Button,
   CircularProgress,
   Snackbar,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -19,24 +19,24 @@ import { UPDATE_CLASS } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
   },
   root: {
-    padding: theme.spacing(3, 2)
+    padding: theme.spacing(3, 2),
   },
   textFields: {
-    width: "100%"
+    width: "100%",
   },
   button: {
     float: "right",
     margin: theme.spacing(2, 0),
     backgroundColor: "#ffc605",
     "&:hover": {
-      backgroundColor: "#ffff00"
-    }
-  }
+      backgroundColor: "#ffff00",
+    },
+  },
 }));
 
 export default function Lesson(props) {
@@ -47,7 +47,7 @@ export default function Lesson(props) {
     description: "",
     coach: 0,
     created_at: "",
-    updated_at: ""
+    updated_at: "",
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -55,33 +55,52 @@ export default function Lesson(props) {
     vertical: "bottom",
     horizontal: "right",
     snackBarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     vertical,
     horizontal,
     openSnackbar,
     snackBarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
   const [
     updateClassMutation,
-    { loading: classMutationLoading, error: classMutationError }
+    { loading: classMutationLoading, error: classMutationError },
   ] = useMutation(UPDATE_CLASS);
   const {
     data: classData,
     loading: classLoading,
-    error: classError
+    error: classError,
   } = useSubscription(GET_CLASS, {
     variables: {
-      classId: classId
-    }
+      classId: classId,
+    },
   });
   const {
     data: coachesData,
     loading: coachesLoading,
-    error: coachesError
+    error: coachesError,
   } = useSubscription(GET_COACHES);
+
+  useEffect(() => {
+    if (classData && classData.classes.length) {
+      console.log(classData);
+      const createAt = new Date(classData.classes[0].created_at);
+      const updated_at = new Date(classData.classes[0].updated_at);
+      setClassState({
+        name: classData.classes[0].name,
+        description: classData.classes[0].description,
+        coach:
+          classData.classes[0].R_users_data.status !== 0
+            ? classData.classes[0].R_users_data.id
+            : "0",
+        created_at: createAt.toLocaleString(),
+        updated_at: updated_at.toLocaleString(),
+      });
+    }
+  }, [classData]);
+
   if (classLoading || coachesLoading) {
     return <CircularProgress />;
   }
@@ -89,7 +108,7 @@ export default function Lesson(props) {
     return <NotFound />;
   }
 
-  const getData = classData => {
+  /* const getData = classData => {
     const createAt = new Date(classData.created_at);
     const updated_at = new Date(classData.updated_at);
     setClassState({
@@ -99,10 +118,10 @@ export default function Lesson(props) {
       created_at: createAt.toLocaleString(),
       updated_at: updated_at.toLocaleString()
     });
-  };
+  }; */
 
   const getCoaches = () => {
-    return coachesData.users_data.map(coach => {
+    return coachesData.users_data.map((coach) => {
       return (
         <option
           key={coach.id}
@@ -116,24 +135,24 @@ export default function Lesson(props) {
     setDisabledButton(true);
     const { name, description, coach } = classState;
 
-    if (name.trim() === "" || description.trim() === "" || coach === 0) {
+    if (name.trim() === "" || description.trim() === "" || coach === "0") {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Todos los campos son obligatorios",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const resultUpdateClass = await updateClassMutation({
+    await updateClassMutation({
       variables: {
         classId: classId,
         name: name.trim(),
         description: description.trim(),
-        idCoach: coach
-      }
+        idCoach: coach,
+      },
     });
 
     if (classMutationLoading) return <CircularProgress />;
@@ -142,20 +161,20 @@ export default function Lesson(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Ha ocurrido un error",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const newClassData = resultUpdateClass.data.update_classes.returning[0];
-    getData(newClassData);
+    /* const newClassData = resultUpdateClass.data.update_classes.returning[0];
+    getData(newClassData); */
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
       snackBarText: "Clase actualizada",
-      snackbarColor: "#43a047"
+      snackbarColor: "#43a047",
     });
     setDisabledButton(false);
   };
@@ -169,9 +188,9 @@ export default function Lesson(props) {
         <Typography variant="h6">
           Información de la clase
           <Tooltip title="Regresar">
-          <Link to="/lessons">
-            <ArrowBackIcon />
-          </Link>
+            <Link to="/lessons">
+              <ArrowBackIcon />
+            </Link>
           </Tooltip>
         </Typography>
       </Toolbar>
@@ -206,16 +225,16 @@ export default function Lesson(props) {
             margin="normal"
             value={classState.name}
             inputProps={{
-              maxLength: 50
+              maxLength: 50,
             }}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               keyValidation(e, 6);
             }}
-            onChange={e => {
+            onChange={(e) => {
               pasteValidation(e, 6);
               setClassState({
                 ...classState,
-                name: e.target.value
+                name: e.target.value,
               });
             }}
           />
@@ -230,16 +249,16 @@ export default function Lesson(props) {
             margin="normal"
             value={classState.description}
             inputProps={{
-              maxLength: 200
+              maxLength: 200,
             }}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               keyValidation(e, 6);
             }}
-            onChange={e => {
+            onChange={(e) => {
               pasteValidation(e, 6);
               setClassState({
                 ...classState,
-                description: e.target.value
+                description: e.target.value,
               });
             }}
           />
@@ -250,19 +269,19 @@ export default function Lesson(props) {
             required
             select
             SelectProps={{
-              native: true
+              native: true,
             }}
             id="coach"
             label="Coach"
             margin="normal"
             value={classState.coach}
-            onAnimationEnd={() => {
+            /* onAnimationEnd={() => {
               getData(classData.classes[0]);
-            }}
-            onChange={e => {
+            }} */
+            onChange={(e) => {
               setClassState({
                 ...classState,
-                coach: e.target.value
+                coach: e.target.value,
               });
             }}
           >
@@ -290,7 +309,7 @@ export default function Lesson(props) {
         onClose={handleClose}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackBarText}</span>}
       />

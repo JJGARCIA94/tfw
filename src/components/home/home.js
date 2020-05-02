@@ -165,7 +165,7 @@ export default function Home(props) {
         id: userIdAuth
       },
       onCompleted: () => {
-        if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+        if (userIdAuth !== 0 && userAuthData.users.length === 0) {
           localStorage.removeItem("token");
           setUserAuth(false);
           setUserAuthHeader(false);

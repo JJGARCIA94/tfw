@@ -504,7 +504,6 @@ export default function Users(props) {
             <Grid item md={4} xs={12}>
               <TextField
                 className={classes.textFields}
-                required
                 select
                 SelectProps={{
                   native: true,

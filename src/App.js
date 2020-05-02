@@ -10,14 +10,14 @@ import { /* BrowserRouter as Router, */ HashRouter } from "react-router-dom";
 import { getMainDefinition } from "apollo-utilities";
 
 const httpLink = new HttpLink({
-  uri: "https://tfw-mazatlan.herokuapp.com/v1/graphql",
+  uri: "https://api.mazatlancombatclub.com/v1/graphql",
   headers: {
     "x-hasura-admin-secret": "twfmazatlan"
   }
 });
 
 const wsLink = new WebSocketLink({
-  uri: "wss://tfw-mazatlan.herokuapp.com/v1/graphql",
+  uri: "wss://api.mazatlancombatclub.com/v1/graphql",
   options: {
     reconnect: true,
     connectionParams: {

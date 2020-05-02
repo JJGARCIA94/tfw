@@ -91,7 +91,8 @@ export default function Step2(props) {
                       ? payment_period.specifications
                       : "",
                   payment_period: payment_period.R_payment_period.period,
-                  amount: payment_period.total
+                  amount: payment_period.total,
+                  persons: payment_period.persons
                 });
               }}
             >
@@ -127,6 +128,12 @@ export default function Step2(props) {
                     className={classes.cardContent}
                   >
                     <strong>Monto: </strong>${payment_period.total}
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    className={classes.cardContent}
+                  >
+                    <strong>Número de personas: </strong>{payment_period.persons}
                   </Typography>
                 </CardContent>
               </Card>

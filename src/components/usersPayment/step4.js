@@ -77,7 +77,7 @@ export default function Step4(props) {
               <strong>Descuento: </strong>{parseInt(userPaymentState.discount_percent)}%
             </Typography>
             <Typography variant="subtitle1" className={classes.cardContent}>
-              <strong>Total: </strong>${userPaymentState.total}
+              <strong>Total: </strong>${userPaymentState.total} {selectedInformationState.persons > 1 ? `(Pago por persona: $${userPaymentState.total / selectedInformationState.persons})` : ''}
             </Typography>
             <Typography variant="subtitle1" className={classes.cardContent}>
               <strong>Fecha de pago: </strong>{formatDate(userPaymentState.payment_start)}

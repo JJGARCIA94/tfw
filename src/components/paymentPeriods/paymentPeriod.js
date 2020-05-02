@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,7 +10,7 @@ import {
   Button,
   CircularProgress,
   Snackbar,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
@@ -19,24 +19,24 @@ import { UPDATE_PAYMENT_PERIOD } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import NotFound from "../notFound/notFound";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
   },
   root: {
-    padding: theme.spacing(3, 2)
+    padding: theme.spacing(3, 2),
   },
   textFields: {
-    width: "100%"
+    width: "100%",
   },
   button: {
     float: "right",
     margin: theme.spacing(2, 0),
     backgroundColor: "#ffc605",
     "&:hover": {
-      backgroundColor: "#ffff00"
-    }
-  }
+      backgroundColor: "#ffff00",
+    },
+  },
 }));
 
 export default function PaymentPeriod(props) {
@@ -46,7 +46,7 @@ export default function PaymentPeriod(props) {
     period: "",
     days: "",
     created_at: "",
-    updated_at: ""
+    updated_at: "",
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -54,47 +54,64 @@ export default function PaymentPeriod(props) {
     vertical: "bottom",
     horizontal: "right",
     snackBarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     vertical,
     horizontal,
     openSnackbar,
     snackBarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
   const {
     data: paymentPeriodData,
     loading: paymentPeriodLoading,
-    error: paymentPeriodError
+    error: paymentPeriodError,
   } = useSubscription(GET_PAYMENT_PERIOD_BY_ID, {
     variables: {
-      paymentPeriodId: paymentPeriodId
-    }
+      paymentPeriodId: paymentPeriodId,
+    },
   });
   const [
     updatePaymentPeriodMutation,
-    { loading: paymentPeriodUpdateLoading, error: paymentPeriodUpdateError }
+    { loading: paymentPeriodUpdateLoading, error: paymentPeriodUpdateError },
   ] = useMutation(UPDATE_PAYMENT_PERIOD);
+
+  useEffect(() => {
+    if (paymentPeriodData && paymentPeriodData.payment_periods.length) {
+      const createAt = new Date(
+        paymentPeriodData.payment_periods[0].created_at
+      );
+      const updated_at = new Date(
+        paymentPeriodData.payment_periods[0].updated_at
+      );
+      setPaymentPeriodState({
+        period: paymentPeriodData.payment_periods[0].period,
+        days: paymentPeriodData.payment_periods[0].days,
+        created_at: createAt.toLocaleString(),
+        updated_at: updated_at.toLocaleString(),
+      });
+    }
+  }, [paymentPeriodData]);
 
   if (paymentPeriodLoading) {
     return <CircularProgress />;
   }
 
-  if (paymentPeriodError) {
+  if (paymentPeriodError || paymentPeriodData.payment_periods.length === 0) {
     return <NotFound />;
   }
 
-  const getData = paymentPeriodData => {
+  /* const getData = (paymentPeriodData) => {
     const createAt = new Date(paymentPeriodData.created_at);
     const updated_at = new Date(paymentPeriodData.updated_at);
     setPaymentPeriodState({
       period: paymentPeriodData.period,
       days: paymentPeriodData.days,
       created_at: createAt.toLocaleString(),
-      updated_at: updated_at.toLocaleString()
+      updated_at: updated_at.toLocaleString(),
     });
-  };
+  }; */
 
   const updatePaymentPeriod = async () => {
     setDisabledButton(true);
@@ -104,19 +121,20 @@ export default function PaymentPeriod(props) {
       setSnackbarState({
         ...snackbarState,
         openSnackbar: true,
-        snackBarText: "Todos los campos son requeridos (el campo días debe ser mayor a 0)",
-        snackbarColor: "#d32f2f"
+        snackBarText:
+          "Todos los campos son requeridos (el campo días debe ser mayor a 0)",
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const resultUpdatePaymentPeriod = await updatePaymentPeriodMutation({
+    await updatePaymentPeriodMutation({
       variables: {
         paymentPeriodId: paymentPeriodId,
         period: period.trim(),
-        days: parseInt(days)
-      }
+        days: parseInt(days),
+      },
     });
 
     if (paymentPeriodUpdateLoading) return <CircularProgress />;
@@ -125,21 +143,21 @@ export default function PaymentPeriod(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Ha ocurrido un error",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const newPaymentPeriod =
+    /* const newPaymentPeriod =
       resultUpdatePaymentPeriod.data.update_payment_periods.returning[0];
-    getData(newPaymentPeriod);
+    getData(newPaymentPeriod); */
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
       snackBarText: "Período de pago actualizado",
-      snackbarColor: "#43a047"
+      snackbarColor: "#43a047",
     });
     setDisabledButton(false);
   };
@@ -154,9 +172,9 @@ export default function PaymentPeriod(props) {
         <Typography variant="h6">
           Información de período de pago
           <Tooltip title="Regresar">
-          <Link to="/paymentPeriods">
-            <ArrowBackIcon />
-          </Link>
+            <Link to="/paymentPeriods">
+              <ArrowBackIcon />
+            </Link>
           </Tooltip>
         </Typography>
       </Toolbar>
@@ -191,16 +209,16 @@ export default function PaymentPeriod(props) {
             margin="normal"
             value={paymentPeriodState.period}
             inputProps={{
-              maxLength: 50
+              maxLength: 50,
             }}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               keyValidation(e, 5);
             }}
-            onChange={e => {
+            onChange={(e) => {
               pasteValidation(e, 5);
               setPaymentPeriodState({
                 ...paymentPeriodState,
-                period: e.target.value
+                period: e.target.value,
               });
             }}
           />
@@ -215,21 +233,21 @@ export default function PaymentPeriod(props) {
             margin="normal"
             value={paymentPeriodState.days}
             inputProps={{
-              maxLength: 3
+              maxLength: 3,
             }}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               keyValidation(e, 2);
             }}
-            onChange={e => {
+            onChange={(e) => {
               pasteValidation(e, 2);
               setPaymentPeriodState({
                 ...paymentPeriodState,
-                days: e.target.value
+                days: e.target.value,
               });
             }}
-            onAnimationEnd={() => {
+            /* onAnimationEnd={() => {
               getData(paymentPeriodData.payment_periods[0]);
-            }}
+            }} */
           />
         </Grid>
         <Grid item xs={10} md={11}>
@@ -252,7 +270,7 @@ export default function PaymentPeriod(props) {
         onClose={handleClose}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackBarText}</span>}
       />

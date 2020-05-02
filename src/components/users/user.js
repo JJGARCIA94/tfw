@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,7 +10,7 @@ import {
   Card,
   Toolbar,
   Snackbar,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 import { useMutation, useSubscription } from "@apollo/react-hooks";
@@ -19,24 +19,24 @@ import { UPDATE_USER } from "../../database/mutations";
 import NotFound from "../notFound/notFound";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
   },
   root: {
-    padding: theme.spacing(3, 2)
+    padding: theme.spacing(3, 2),
   },
   textFields: {
-    width: "100%"
+    width: "100%",
   },
   button: {
     float: "right",
     margin: theme.spacing(2, 0),
     backgroundColor: "#ffc605",
     "&:hover": {
-      backgroundColor: "#ffff00"
-    }
-  }
+      backgroundColor: "#ffff00",
+    },
+  },
 }));
 
 export default function User(props) {
@@ -50,7 +50,7 @@ export default function User(props) {
     email: "",
     user_type: 0,
     created_at: "",
-    updated_at: ""
+    updated_at: "",
   });
   const [disabledButton, setDisabledButton] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
@@ -58,41 +58,65 @@ export default function User(props) {
     vertical: "bottom",
     horizontal: "right",
     snackBarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     vertical,
     horizontal,
     openSnackbar,
     snackBarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
-  const { loading: userLoading, data: userData, error: userError } = useSubscription(
-    GET_USER_BY_ID,
-    {
-      variables: {
-        id: userId
-      }
-    }
-  );
+  const {
+    loading: userLoading,
+    data: userData,
+    error: userError,
+  } = useSubscription(GET_USER_BY_ID, {
+    variables: {
+      id: userId,
+    },
+  });
   const {
     loading: userTypesLoading,
     data: userTypesData,
-    error: userTypesError
+    error: userTypesError,
   } = useSubscription(GET_USER_TYPES);
   const [
     updateUserMutation,
-    { loading: updateUserMutationLoading, error: updateUserMutationError }
+    { loading: updateUserMutationLoading, error: updateUserMutationError },
   ] = useMutation(UPDATE_USER);
+
+  useEffect(() => {
+    if (userData && userData.users_data.length) {
+      console.log(userData);
+      const createAt = new Date(userData.users_data[0].created_at);
+      const updated_at = new Date(userData.users_data[0].updated_at);
+      setUserState({
+        first_name: userData.users_data[0].first_name,
+        last_name: userData.users_data[0].last_name,
+        address: userData.users_data[0].address,
+        phone_number: userData.users_data[0].phone_number,
+        email: userData.users_data[0].email,
+        user_type: userData.users_data[0].R_user_type.id,
+        created_at: createAt.toLocaleString(),
+        updated_at: updated_at.toLocaleString(),
+      });
+    }
+  }, [userData]);
 
   if (userLoading || userTypesLoading) {
     return <CircularProgress />;
   }
-  if (userError || !userData.users_data.length || userTypesError || userId === "1") {
+  if (
+    userError ||
+    !userData.users_data.length ||
+    userTypesError ||
+    userId === "1"
+  ) {
     return <NotFound />;
   }
 
-  const getData = userData => {
+  /* const getData = (userData) => {
     const createAt = new Date(userData.created_at);
     const updated_at = new Date(userData.updated_at);
     setUserState({
@@ -103,16 +127,16 @@ export default function User(props) {
       email: userData.email,
       user_type: userData.R_user_type.id,
       created_at: createAt.toLocaleString(),
-      updated_at: updated_at.toLocaleString()
+      updated_at: updated_at.toLocaleString(),
     });
-  };
+  }; */
 
   const handleClose = () => {
     setSnackbarState({ ...snackbarState, openSnackbar: false });
   };
 
   const getUserTypes = () => {
-    return userTypesData.users_type.map(userType => {
+    return userTypesData.users_type.map((userType) => {
       return userType.id !== 1 ? (
         <option key={userType.id} value={userType.id}>
           {userType.name}
@@ -129,7 +153,7 @@ export default function User(props) {
       address,
       phone_number,
       email,
-      user_type
+      user_type,
     } = userState;
     if (
       first_name.trim() === "" ||
@@ -143,13 +167,13 @@ export default function User(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Todos los campos son requeridos",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const resultUpdatedUser = await updateUserMutation({
+    await updateUserMutation({
       variables: {
         id: userId,
         first_name: first_name.trim(),
@@ -157,8 +181,8 @@ export default function User(props) {
         address: address.trim(),
         phone_number: phone_number.trim(),
         email: email.trim(),
-        user_type: user_type
-      }
+        user_type: user_type,
+      },
     });
 
     if (updateUserMutationLoading) return <CircularProgress />;
@@ -167,20 +191,20 @@ export default function User(props) {
         ...snackbarState,
         openSnackbar: true,
         snackBarText: "Ha ocurrido un error",
-        snackbarColor: "#d32f2f"
+        snackbarColor: "#d32f2f",
       });
       setDisabledButton(false);
       return;
     }
 
-    const newUserData = resultUpdatedUser.data.update_users_data.returning[0];
-    getData(newUserData);
+    /* const newUserData = resultUpdatedUser.data.update_users_data.returning[0];
+    getData(newUserData); */
 
     setSnackbarState({
       ...snackbarState,
       openSnackbar: true,
       snackBarText: "Usuario actualizado",
-      snackbarColor: "#43a047"
+      snackbarColor: "#43a047",
     });
 
     setDisabledButton(false);
@@ -193,9 +217,9 @@ export default function User(props) {
           <Typography variant="h6">
             Información de usuario
             <Tooltip title="Regresar">
-            <Link to="/users">
-              <ArrowBackIcon />
-            </Link>
+              <Link to="/users">
+                <ArrowBackIcon />
+              </Link>
             </Tooltip>
           </Typography>
         </Toolbar>
@@ -230,16 +254,16 @@ export default function User(props) {
               margin="normal"
               value={userState.first_name}
               inputProps={{
-                maxLength: 30
+                maxLength: 30,
               }}
-              onKeyPress={e => {
+              onKeyPress={(e) => {
                 keyValidation(e, 1);
               }}
-              onChange={e => {
+              onChange={(e) => {
                 pasteValidation(e, 1);
                 setUserState({
                   ...userState,
-                  first_name: e.target.value
+                  first_name: e.target.value,
                 });
               }}
             />
@@ -254,16 +278,16 @@ export default function User(props) {
               margin="normal"
               value={userState.last_name}
               inputProps={{
-                maxLength: 30
+                maxLength: 30,
               }}
-              onKeyPress={e => {
+              onKeyPress={(e) => {
                 keyValidation(e, 1);
               }}
-              onChange={e => {
+              onChange={(e) => {
                 pasteValidation(e, 1);
                 setUserState({
                   ...userState,
-                  last_name: e.target.value
+                  last_name: e.target.value,
                 });
               }}
             />
@@ -277,16 +301,16 @@ export default function User(props) {
               margin="normal"
               value={userState.address}
               inputProps={{
-                maxLength: 50
+                maxLength: 50,
               }}
-              onKeyPress={e => {
+              onKeyPress={(e) => {
                 keyValidation(e, 3);
               }}
-              onChange={e => {
+              onChange={(e) => {
                 pasteValidation(e, 3);
                 setUserState({
                   ...userState,
-                  address: e.target.value
+                  address: e.target.value,
                 });
               }}
             />
@@ -301,16 +325,16 @@ export default function User(props) {
               margin="normal"
               value={userState.phone_number}
               inputProps={{
-                maxLength: 15
+                maxLength: 15,
               }}
-              onKeyPress={e => {
+              onKeyPress={(e) => {
                 keyValidation(e, 2);
               }}
-              onChange={e => {
+              onChange={(e) => {
                 pasteValidation(e, 2);
                 setUserState({
                   ...userState,
-                  phone_number: e.target.value
+                  phone_number: e.target.value,
                 });
               }}
             />
@@ -324,16 +348,16 @@ export default function User(props) {
               margin="normal"
               value={userState.email}
               inputProps={{
-                maxLength: 50
+                maxLength: 50,
               }}
-              onKeyPress={e => {
+              onKeyPress={(e) => {
                 keyValidation(e, 4);
               }}
-              onChange={e => {
+              onChange={(e) => {
                 pasteValidation(e, 4);
                 setUserState({
                   ...userState,
-                  email: e.target.value
+                  email: e.target.value,
                 });
               }}
             />
@@ -345,18 +369,19 @@ export default function User(props) {
               id="user_type"
               label="Tipo de usuario"
               className={classes.textFields}
+              disabled
               SelectProps={{
-                native: true
+                native: true,
               }}
               margin="normal"
               value={userState.user_type}
-              onAnimationEnd={() => {
+              /* onAnimationEnd={() => {
                 getData(userData.users_data[0]);
-              }}
-              onChange={e => {
+              }} */
+              onChange={(e) => {
                 setUserState({
                   ...userState,
-                  user_type: e.target.value
+                  user_type: e.target.value,
                 });
               }}
             >
@@ -384,7 +409,7 @@ export default function User(props) {
         onClose={handleClose}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackBarText}</span>}
       />

@@ -17,7 +17,7 @@ import {
   Button,
   TextField,
   Divider,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import {
   AddCircleOutline as AddCircleOutlineIcon,
@@ -25,53 +25,53 @@ import {
   Close as CloseIcon,
   Restore as RestoreIcon,
   SportsKabaddi as SportsKabaddiIcon,
-  MonetizationOn as MonetizationOnIcon
+  MonetizationOn as MonetizationOnIcon,
 } from "@material-ui/icons";
 import { useQuery, useSubscription, useMutation } from "@apollo/react-hooks";
 import { GET_CLASSES_PRICE, GET_USER_BY_ID_AUTH } from "../../database/queries";
 import {
   UPDATE_CLASSES_PRICE_STATUS,
-  UPDATE_CLASSES_PRICE_NAME
+  UPDATE_CLASSES_PRICE_NAME,
 } from "../../database/mutations";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import NotFound from "../notFound/notFound";
 const jwt = require("jsonwebtoken");
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   cards: {
     margin: "10px",
     height: "250px",
     overflowY: "auto",
-    overflowX: "auto"
+    overflowX: "auto",
   },
   cardAdd: {
     padding: theme.spacing(5, 1),
     margin: "10px",
     textAlign: "center",
-    height: "250px"
+    height: "250px",
   },
   cardTittle: {
-    textAlign: "left"
+    textAlign: "left",
   },
   cardContent: {
-    textAlign: "justify"
+    textAlign: "justify",
   },
   addIcon: {
     color: "#1976D2",
-    fontSize: 100
+    fontSize: 100,
   },
   editIcon: {
-    color: "#FFC605"
+    color: "#FFC605",
   },
   cancelIcon: {
-    color: "#D32F2F"
+    color: "#D32F2F",
   },
   restoreIcon: {
-    color: "#43A047"
+    color: "#43A047",
   },
   textFields: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 }));
 
 export default function ClassesPrice(props) {
@@ -81,90 +81,99 @@ export default function ClassesPrice(props) {
     tittleClassPriceDialog: "",
     textClassPriceDialog: "",
     idClassPriceDialog: 0,
-    statusClassPriceDialog: 0
+    statusClassPriceDialog: 0,
   });
   const [
     dialogClassPriceInformationState,
-    setDialogClassPriceInformationState
+    setDialogClassPriceInformationState,
   ] = useState({
     openClassPriceInformationDialog: false,
     tittleClassPriceInformationDialog: "",
     idClassPriceInformationDialog: 0,
-    nameClassPriceInformationDialog: ""
+    nameClassPriceInformationDialog: "",
   });
   const [snackbarState, setSnackbarState] = useState({
     openSnackBar: false,
     vertical: "bottom",
     horizontal: "right",
     snackbarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     openClassPriceDialog,
     tittleClassPriceDialog,
     textClassPriceDialog,
     idClassPriceDialog,
-    statusClassPriceDialog
+    statusClassPriceDialog,
   } = dialogClassPriceState;
   const {
     openClassPriceInformationDialog,
     tittleClassPriceInformationDialog,
     idClassPriceInformationDialog,
-    nameClassPriceInformationDialog
+    nameClassPriceInformationDialog,
   } = dialogClassPriceInformationState;
   const {
     vertical,
     horizontal,
     openSnackBar,
     snackbarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
   const [idClassPrice, setIdClassPrice] = useState(0);
   const [cancelClass, setCancelClass] = useState(false);
   const {
     data: classesPriceData,
     loading: classesPriceLoading,
-    error: classesPriceError
+    error: classesPriceError,
   } = useSubscription(GET_CLASSES_PRICE);
   const [
     updateClassesPriceStatusMutation,
     {
       loading: updateClassesPriceStatusLoading,
-      error: updateClassesPriceStatusError
-    }
+      error: updateClassesPriceStatusError,
+    },
   ] = useMutation(UPDATE_CLASSES_PRICE_STATUS);
   const [
     updateClassesPriceNameMutation,
     {
       loading: updateClassesPriceNameLoading,
-      error: updateClassesPriceNameError
-    }
+      error: updateClassesPriceNameError,
+    },
   ] = useMutation(UPDATE_CLASSES_PRICE_NAME);
   const setUserAuthHeader = props.setUserAuth;
   const [userAuth, setUserAuth] = useState(true);
   const [userIdAuth, setUserIdAuth] = useState(0);
-  const {
-    data: userAuthData, error: userAuthError
-  } = useQuery(GET_USER_BY_ID_AUTH, {
-    variables: {
-      id: userIdAuth
-    },
-    onCompleted: () => {
-      if (userAuthData.users.length === 0 && userIdAuth !== 0) {
-        localStorage.removeItem("token");
-        setUserAuth(false);
-        setUserAuthHeader(false);
-      }
+  const { data: userAuthData, error: userAuthError } = useQuery(
+    GET_USER_BY_ID_AUTH,
+    {
+      variables: {
+        id: userIdAuth,
+      },
+      onCompleted: () => {
+        if (userAuthData.users.length === 0 && userIdAuth !== 0) {
+          localStorage.removeItem("token");
+          setUserAuth(false);
+          setUserAuthHeader(false);
+        }
+      },
     }
-  });
+  );
 
   useEffect(() => {
     setCancelClass(false);
-    if(classesPriceData && idClassPrice !== 0) {
-      for(let x=0 ; x<classesPriceData.classes_price.length ; x++) {
-        if(classesPriceData.classes_price[x].id === idClassPrice) {
-          for(let y=0 ; y<classesPriceData.classes_price[x].R_classes_price_details.length ; y++) {
-            if(classesPriceData.classes_price[x].R_classes_price_details[y].R_classes.status === 0) {
+    if (classesPriceData && idClassPrice !== 0) {
+      for (let x = 0; x < classesPriceData.classes_price.length; x++) {
+        if (classesPriceData.classes_price[x].id === idClassPrice) {
+          for (
+            let y = 0;
+            y <
+            classesPriceData.classes_price[x].R_classes_price_details.length;
+            y++
+          ) {
+            if (
+              classesPriceData.classes_price[x].R_classes_price_details[y]
+                .R_classes.status === 0
+            ) {
               setCancelClass(true);
               break;
             }
@@ -218,27 +227,27 @@ export default function ClassesPrice(props) {
           ? "Una vez eliminado no estará disponible cuando los usuarios elijan las clases o paquetes."
           : "Una vez restaurado estará disponible cuando los usuarios elijan las clases o paquetes.",
       idClassPriceDialog: classPriceId,
-      statusClassPriceDialog: newStatus
+      statusClassPriceDialog: newStatus,
     });
   };
 
-  const handleCloseClassPriceDialog = agree => {
+  const handleCloseClassPriceDialog = (agree) => {
     if (agree) {
-      if(cancelClass && statusClassPriceDialog === 1) {
+      if (cancelClass && statusClassPriceDialog === 1) {
         setSnackbarState({
           ...snackbarState,
           openSnackBar: true,
-          snackbarText: "No se puede restaurar este precio de clase o paquete porque no todas las clases que lo conforman están activas",
-          snackbarColor: "#d32f2f"
+          snackbarText:
+            "No se puede restaurar este precio de clase o paquete porque no todas las clases que lo conforman están activas",
+          snackbarColor: "#d32f2f",
         });
         return;
-      }
-      else {
+      } else {
         updateClassesPriceStatusMutation({
           variables: {
             id: idClassPriceDialog,
-            newStatus: statusClassPriceDialog
-          }
+            newStatus: statusClassPriceDialog,
+          },
         });
         if (updateClassesPriceStatusLoading) return <CircularProgress />;
         if (updateClassesPriceStatusError) {
@@ -246,7 +255,7 @@ export default function ClassesPrice(props) {
             ...snackbarState,
             openSnackBar: true,
             snackbarText: "Ha ocurrido un error",
-            snackbarColor: "#d32f2f"
+            snackbarColor: "#d32f2f",
           });
           return;
         }
@@ -257,7 +266,7 @@ export default function ClassesPrice(props) {
             statusClassPriceDialog === 1
               ? "Precio de clase o paquete restaurado"
               : "Precio de clase o paquete eliminado",
-          snackbarColor: "#43a047"
+          snackbarColor: "#43a047",
         });
       }
     }
@@ -266,17 +275,17 @@ export default function ClassesPrice(props) {
       tittleClassPriceDialog: "",
       textClassPriceDialog: "",
       idClassPriceDialog: 0,
-      statusClassPriceDialog: 0
+      statusClassPriceDialog: 0,
     });
   };
 
-  const handleCloseClassPriceInformationDialog = agree => {
+  const handleCloseClassPriceInformationDialog = (agree) => {
     if (agree) {
       updateClassesPriceNameMutation({
         variables: {
           classesPriceId: idClassPriceInformationDialog,
-          name: nameClassPriceInformationDialog
-        }
+          name: nameClassPriceInformationDialog,
+        },
       });
       if (updateClassesPriceNameLoading) return <CircularProgress />;
       if (updateClassesPriceNameError) {
@@ -284,7 +293,7 @@ export default function ClassesPrice(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText: "Ha ocurrido un error",
-          snackbarColor: "#d32f2f"
+          snackbarColor: "#d32f2f",
         });
         return;
       }
@@ -292,14 +301,14 @@ export default function ClassesPrice(props) {
         ...snackbarState,
         openSnackBar: true,
         snackbarText: "Nombre de la clase o paquete actualizado",
-        snackbarColor: "#43a047"
+        snackbarColor: "#43a047",
       });
     }
     setDialogClassPriceInformationState({
       openClassPriceInformationDialog: false,
       tittleClassPriceInformationDialog: "",
       idClassPriceInformationDialog: 0,
-      nameClassPriceInformationDialog: ""
+      nameClassPriceInformationDialog: "",
     });
   };
 
@@ -308,12 +317,12 @@ export default function ClassesPrice(props) {
       ...snackbarState,
       openSnackBar: false,
       snackbarText: "",
-      snackbarColor: ""
+      snackbarColor: "",
     });
   };
 
   const getClassesPrice = () => {
-    return classesPriceData.classes_price.map(class_price => {
+    return classesPriceData.classes_price.map((class_price) => {
       return (
         <Grid item xs={12} md={6} lg={4} key={class_price.id}>
           <Card className={classes.cards}>
@@ -322,55 +331,57 @@ export default function ClassesPrice(props) {
                 style={{
                   background: "#ebebeb",
                   marginBottom: "10px",
-                  textAlign: "end"
+                  textAlign: "end",
                 }}
               >
                 <Tooltip title="Ver información">
-                <IconButton
-                  onClick={() => {
-                    setDialogClassPriceInformationState({
-                      openClassPriceInformationDialog: true,
-                      tittleClassPriceInformationDialog:
-                        "Información de la clase o paquete",
-                      idClassPriceInformationDialog: class_price.id,
-                      nameClassPriceInformationDialog: class_price.name
-                    });
-                  }}
-                >
-                  <EditIcon style={{ color: "#FFC605" }} />
-                </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      setDialogClassPriceInformationState({
+                        openClassPriceInformationDialog: true,
+                        tittleClassPriceInformationDialog:
+                          "Información de la clase o paquete",
+                        idClassPriceInformationDialog: class_price.id,
+                        nameClassPriceInformationDialog: class_price.name,
+                      });
+                    }}
+                  >
+                    <EditIcon style={{ color: "#FFC605" }} />
+                  </IconButton>
                 </Tooltip>
                 <Tooltip title="Ver clases">
-                <Link to={`/classesClassPrice/${class_price.id}`}>
-                  <IconButton>
-                    <SportsKabaddiIcon style={{ color: "black" }} />
-                  </IconButton>
-                </Link>
+                  <Link to={`/classesClassPrice/${class_price.id}`}>
+                    <IconButton>
+                      <SportsKabaddiIcon style={{ color: "black" }} />
+                    </IconButton>
+                  </Link>
                 </Tooltip>
                 <Tooltip title="Ver métodos de pago">
-                <Link to={`/paymentsClassPrice/${class_price.id}`}>
-                  <IconButton>
-                    <MonetizationOnIcon style={{ color: "#43A047" }} />
-                  </IconButton>
-                </Link>
+                  <Link to={`/paymentsClassPrice/${class_price.id}`}>
+                    <IconButton>
+                      <MonetizationOnIcon style={{ color: "#43A047" }} />
+                    </IconButton>
+                  </Link>
                 </Tooltip>
-                <Tooltip title={
+                <Tooltip
+                  title={
                     class_price.status === 1
                       ? "Eliminar precio"
                       : "Restaurar precio"
-                  }>
-                <IconButton
-                  onClick={() => {
-                    const newStatus = class_price.status === 1 ? 0 : 1;
-                    handleOpenClassPriceDialog(class_price.id, newStatus);
-                  }}
+                  }
                 >
-                  {class_price.status === 1 ? (
-                    <CloseIcon style={{ color: "#D32F2F" }} />
-                  ) : (
-                    <RestoreIcon style={{ color: "#673AB7" }} />
-                  )}
-                </IconButton>
+                  <IconButton
+                    onClick={() => {
+                      const newStatus = class_price.status === 1 ? 0 : 1;
+                      handleOpenClassPriceDialog(class_price.id, newStatus);
+                    }}
+                  >
+                    {class_price.status === 1 ? (
+                      <CloseIcon style={{ color: "#D32F2F" }} />
+                    ) : (
+                      <RestoreIcon style={{ color: "#673AB7" }} />
+                    )}
+                  </IconButton>
                 </Tooltip>
               </Typography>
               <Typography variant="subtitle1" className={classes.cardContent}>
@@ -384,7 +395,9 @@ export default function ClassesPrice(props) {
               <Typography variant="subtitle1" className={classes.cardContent}>
                 <strong>Clase(s): </strong>
                 {class_price.R_classes_price_details.map((aClass, index) => (
-                  <span key={index}>{`${aClass.R_classes.name}${
+                  <span key={index}>{`${aClass.R_classes.name} (${
+                    aClass.R_classes.R_users_data.first_name
+                  } ${aClass.R_classes.R_users_data.last_name})${
                     class_price.R_classes_price_details.length !== index + 1
                       ? ","
                       : "."
@@ -422,7 +435,7 @@ export default function ClassesPrice(props) {
     });
   };
 
-  return ( userAuth ?
+  return userAuth ? (
     <Grid container>
       <Grid item xs={12}>
         <Typography variant="h6">Precio de clases y paquetes</Typography>
@@ -432,11 +445,11 @@ export default function ClassesPrice(props) {
         <Card className={classes.cardAdd}>
           <CardContent>
             <Tooltip title="Agregar precio a clase o paquete">
-            <Link to="/newClassPrice">
-              <IconButton>
-                <AddCircleOutlineIcon className={classes.addIcon} />
-              </IconButton>
-            </Link>
+              <Link to="/newClassPrice">
+                <IconButton>
+                  <AddCircleOutlineIcon className={classes.addIcon} />
+                </IconButton>
+              </Link>
             </Tooltip>
           </CardContent>
         </Card>
@@ -499,16 +512,16 @@ export default function ClassesPrice(props) {
                 margin="normal"
                 value={nameClassPriceInformationDialog}
                 inputProps={{
-                  maxLength: 50
+                  maxLength: 50,
                 }}
-                onKeyPress={e => {
+                onKeyPress={(e) => {
                   keyValidation(e, 6);
                 }}
-                onChange={e => {
+                onChange={(e) => {
                   pasteValidation(e, 6);
                   setDialogClassPriceInformationState({
                     ...dialogClassPriceInformationState,
-                    nameClassPriceInformationDialog: e.target.value
+                    nameClassPriceInformationDialog: e.target.value,
                   });
                 }}
               />
@@ -542,10 +555,12 @@ export default function ClassesPrice(props) {
         onClose={handleCloseSnackbar}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />
-    </Grid> : <Redirect to="/login" />
+    </Grid>
+  ) : (
+    <Redirect to="/login" />
   );
 }

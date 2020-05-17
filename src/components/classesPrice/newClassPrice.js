@@ -127,7 +127,7 @@ export default function NewClassPrice() {
     return classesData.classes.map(aClass => {
       return (
         <option key={aClass.id} value={aClass.id}>
-          {aClass.name}
+          {`${aClass.name} (${aClass.R_users_data.first_name} ${aClass.R_users_data.last_name})`}
         </option>
       );
     });

@@ -5,37 +5,37 @@ import {
   Card,
   CardContent,
   CardActionArea,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSubscription } from "@apollo/react-hooks";
 import { GET_CLASSES_PRICE_BY_STATUS } from "../../database/queries";
 import NotFound from "../notFound/notFound";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    marginTop: theme.spacing(3)
+    marginTop: theme.spacing(3),
   },
   root: {
     padding: theme.spacing(3, 2),
-    width: "100%"
+    width: "100%",
   },
   cards: {
     margin: "10px",
     height: "250px",
     overflowY: "auto",
-    overflowX: "auto"
+    overflowX: "auto",
   },
   cardContent: {
-    textAlign: "justify"
+    textAlign: "justify",
   },
   backButton: {
-    marginRight: theme.spacing(1)
+    marginRight: theme.spacing(1),
   },
   instructions: {
     marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1)
-  }
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 export default function Step1(props) {
@@ -49,7 +49,7 @@ export default function Step1(props) {
   const {
     data: classesPriceData,
     loading: classesPriceLoading,
-    error: classesPriceError
+    error: classesPriceError,
   } = useSubscription(GET_CLASSES_PRICE_BY_STATUS);
 
   if (classesPriceLoading) {
@@ -80,14 +80,14 @@ export default function Step1(props) {
                         ? ","
                         : "."
                     } `
-                )
+                ),
               });
               let classesId = [];
-              class_price.R_classes_price_details.map(aClass =>
+              class_price.R_classes_price_details.map((aClass) =>
                 classesId.push(aClass.classes_id)
               );
               setSelectedClassesState({
-                ids: classesId
+                ids: classesId,
               });
             }}
           >
@@ -95,7 +95,7 @@ export default function Step1(props) {
               className={classes.cards}
               style={{
                 background: selected === index ? "#eeeeee" : "white",
-                border: selected === index ? "1px solid black" : ""
+                border: selected === index ? "1px solid black" : "",
               }}
             >
               <CardContent>
@@ -103,7 +103,7 @@ export default function Step1(props) {
                   style={{
                     background: "#ebebeb",
                     marginBottom: "10px",
-                    textAlign: "end"
+                    textAlign: "end",
                   }}
                 ></Typography>
                 <Typography variant="subtitle1" className={classes.cardContent}>
@@ -118,7 +118,9 @@ export default function Step1(props) {
                 <Typography variant="subtitle1" className={classes.cardContent}>
                   <strong>Clase(s): </strong>
                   {class_price.R_classes_price_details.map((aClass, index) => (
-                    <span key={index}>{`${aClass.R_classes.name}${
+                    <span key={index}>{`${aClass.R_classes.name} (${
+                      aClass.R_classes.R_users_data.first_name
+                    } ${aClass.R_classes.R_users_data.last_name})${
                       class_price.R_classes_price_details.length !== index + 1
                         ? ","
                         : "."

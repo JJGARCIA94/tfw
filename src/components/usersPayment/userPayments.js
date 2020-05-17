@@ -17,11 +17,11 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-  TextField
+  TextField,
 } from "@material-ui/core";
 import {
   MuiPickersUtilsProvider,
-  KeyboardDatePicker
+  KeyboardDatePicker,
 } from "@material-ui/pickers";
 import es from "date-fns/locale/es";
 import DateFnsUtils from "@date-io/date-fns";
@@ -29,39 +29,39 @@ import {
   ArrowBack as ArrowBackIcon,
   AddCircle as AddCircleIcon,
   Update as UpdateIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
 } from "@material-ui/icons";
 import { useSubscription, useMutation } from "@apollo/react-hooks";
 import {
   GET_USER_PAYMENTS_BY_USER_ID,
-  GET_CLASSES_DETAILS_BY_USER_PAYMENTS_ID
+  GET_CLASSES_DETAILS_BY_USER_PAYMENTS_ID,
 } from "../../database/queries";
 import NotFound from "../notFound/notFound";
 import { keyValidation, pasteValidation } from "../../helpers/helpers";
 import moment from "moment";
 import gql from "graphql-tag";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   cards: {
     margin: "10px",
     height: "250px",
     overflowY: "auto",
-    overflowX: "auto"
+    overflowX: "auto",
   },
   cardContent: {
-    textAlign: "justify"
+    textAlign: "justify",
   },
   typografyActions: {
     background: "#ebebeb",
     marginBottom: "10px",
-    textAlign: "end"
+    textAlign: "end",
   },
   textFields: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 }));
 
-const formatDate = date => {
+const formatDate = (date) => {
   date = new Date(date);
   date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
   let correctMont =
@@ -70,12 +70,12 @@ const formatDate = date => {
   return `${correctDay}/${correctMont}/${date.getFullYear()}`;
 };
 
-const formatDateWhitoutMinutes = date => {
+const formatDateWhitoutMinutes = (date) => {
   date = new Date(date);
   return date;
 };
 
-const formatDateComparation = date => {
+const formatDateComparation = (date) => {
   date = new Date(date);
   date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
   return date;
@@ -89,29 +89,29 @@ export default function UserPayments(props) {
     vertical: "bottom",
     horizontal: "right",
     snackbarText: "",
-    snackbarColor: ""
+    snackbarColor: "",
   });
   const {
     vertical,
     horizontal,
     openSnackBar,
     snackbarText,
-    snackbarColor
+    snackbarColor,
   } = snackbarState;
   const [dialogStateRenovate, setDialogStateRenovate] = useState({
     openDialogRenovate: false,
-    tittleDialogRenovate: ""
+    tittleDialogRenovate: "",
   });
   const [dialogStateCancel, setDialogStateCancel] = useState({
     openDialogCancel: false,
     tittleDialogCancel: "",
-    textDialogCancel: ""
+    textDialogCancel: "",
   });
   const { openDialogRenovate, tittleDialogRenovate } = dialogStateRenovate;
   const {
     openDialogCancel,
     tittleDialogCancel,
-    textDialogCancel
+    textDialogCancel,
   } = dialogStateCancel;
   const now = new Date(moment());
   const [userPaymentState, setUserPaymentState] = useState({
@@ -119,7 +119,7 @@ export default function UserPayments(props) {
     total: 0,
     payment_start: now.toLocaleDateString("en-US"),
     payment_end: now.toLocaleDateString("en-US"),
-    payment_type: 0
+    payment_type: 0,
   });
   const [totalOriginal, setTotalOriginal] = useState(0);
   const [userPaymentId, setUserPaymentId] = useState(0);
@@ -186,33 +186,33 @@ export default function UserPayments(props) {
     addUserPaymentMutation,
     {
       loading: addUserPaymentMutationLoading,
-      error: addUserPaymentMutationError
-    }
+      error: addUserPaymentMutationError,
+    },
   ] = useMutation(ADD_USER_PAYMENT);
   const [
     cancelUserPaymentMutation,
     {
       loading: cancelUserPaymentMutationLoading,
-      error: cancelUserPaymentMutationError
-    }
+      error: cancelUserPaymentMutationError,
+    },
   ] = useMutation(CANCEL_USER_PAYMENT);
   const {
     data: userPaymentsData,
     loading: userPaymentsLoading,
-    error: userPaymentsError
+    error: userPaymentsError,
   } = useSubscription(GET_USER_PAYMENTS_BY_USER_ID, {
     variables: {
-      userId: userId
-    }
+      userId: userId,
+    },
   });
   const {
     data: classesDetailData,
     loading: classesDetailLoading,
-    error: classesDetailError
+    error: classesDetailError,
   } = useSubscription(GET_CLASSES_DETAILS_BY_USER_PAYMENTS_ID, {
     variables: {
-      userPaymentId: userPaymentId
-    }
+      userPaymentId: userPaymentId,
+    },
   });
 
   useEffect(() => {
@@ -235,11 +235,11 @@ export default function UserPayments(props) {
   const handleOpenDialogRenovate = () => {
     setDialogStateRenovate({
       openDialogRenovate: true,
-      tittleDialogRenovate: "Renovación de pago de clase o paquete"
+      tittleDialogRenovate: "Renovación de pago de clase o paquete",
     });
   };
 
-  const handleCloseDialogRenovate = agree => {
+  const handleCloseDialogRenovate = (agree) => {
     if (agree) {
       addUserPaymentMutation({
         variables: {
@@ -250,8 +250,8 @@ export default function UserPayments(props) {
           paymentStart: userPaymentState.payment_start,
           paymentEnd: userPaymentState.payment_end,
           paymentType: userPaymentState.payment_type,
-          userPaymentId: userPaymentId
-        }
+          userPaymentId: userPaymentId,
+        },
       });
 
       if (addUserPaymentMutationLoading) return <CircularProgress />;
@@ -260,7 +260,7 @@ export default function UserPayments(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText: "Ha ocurrido un error",
-          snackbarColor: "#d32f2f"
+          snackbarColor: "#d32f2f",
         });
         return;
       }
@@ -269,12 +269,12 @@ export default function UserPayments(props) {
         ...snackbarState,
         openSnackBar: true,
         snackbarText: "Pago de usuario renovado",
-        snackbarColor: "#43a047"
+        snackbarColor: "#43a047",
       });
     }
     setDialogStateRenovate({
       openDialogRenovate: false,
-      tittleDialogRenovate: ""
+      tittleDialogRenovate: "",
     });
   };
 
@@ -283,16 +283,16 @@ export default function UserPayments(props) {
       openDialogCancel: true,
       tittleDialogCancel: "¿Está seguro de cancelar el pago?",
       textDialogCancel:
-        "Al cancelar el pago se quitará de la(s) clase(s) al cliente."
+        "Al cancelar el pago se quitará de la(s) clase(s) al cliente.",
     });
   };
 
-  const handleCloseDialogCancel = agree => {
+  const handleCloseDialogCancel = (agree) => {
     if (agree) {
       cancelUserPaymentMutation({
         variables: {
-          userPaymentId: userPaymentId
-        }
+          userPaymentId: userPaymentId,
+        },
       });
 
       if (cancelUserPaymentMutationLoading) return <CircularProgress />;
@@ -301,7 +301,7 @@ export default function UserPayments(props) {
           ...snackbarState,
           openSnackBar: true,
           snackbarText: "Ha ocurrido un error",
-          snackbarColor: "#d32f2f"
+          snackbarColor: "#d32f2f",
         });
         return;
       }
@@ -310,19 +310,19 @@ export default function UserPayments(props) {
         ...snackbarState,
         openSnackBar: true,
         snackbarText: "Pago de usuario cancelado",
-        snackbarColor: "#43a047"
+        snackbarColor: "#43a047",
       });
     }
     setDialogStateCancel({
       openDialogCancel: false,
       tittleDialogCancel: "",
-      textDialogCancel: ""
+      textDialogCancel: "",
     });
   };
 
   const getUserPayments = () => {
     return userPaymentsData.users_payments.length > 0 ? (
-      userPaymentsData.users_payments.map(usersPayment => {
+      userPaymentsData.users_payments.map((usersPayment) => {
         const paymentEnd = formatDateComparation(usersPayment.payment_end);
         const now = formatDateWhitoutMinutes(Date.now());
         const nowIn7Days = formatDateWhitoutMinutes(Date.now());
@@ -337,7 +337,7 @@ export default function UserPayments(props) {
                     ? "#d32f2f solid 1px"
                     : paymentEnd <= nowIn7Days
                     ? "#FF9800 solid 1px"
-                    : "#43a047 solid 1px"
+                    : "#43a047 solid 1px",
               }}
             >
               <CardContent>
@@ -347,7 +347,7 @@ export default function UserPayments(props) {
                     style={{
                       color: "#d32f2f",
                       textAlign: "center",
-                      marginBottom: "10px"
+                      marginBottom: "10px",
                     }}
                   >
                     Pago vencido
@@ -358,7 +358,7 @@ export default function UserPayments(props) {
                     style={{
                       color: "#FF9800",
                       textAlign: "center",
-                      marginBottom: "10px"
+                      marginBottom: "10px",
                     }}
                   >
                     Pago próximo a vencer
@@ -369,7 +369,7 @@ export default function UserPayments(props) {
                     style={{
                       color: "#43a047",
                       textAlign: "center",
-                      marginBottom: "10px"
+                      marginBottom: "10px",
                     }}
                   >
                     Pago activo
@@ -394,7 +394,7 @@ export default function UserPayments(props) {
                           total: usersPayment.total,
                           discount_percent: usersPayment.discount_percent,
                           payment_type: usersPayment.payment_type,
-                          payment_end: paymentEnd.toLocaleDateString("en-US")
+                          payment_end: paymentEnd.toLocaleDateString("en-US"),
                         });
                         setTotalOriginal(usersPayment.total);
                         setPaymentPeriodId(
@@ -422,7 +422,9 @@ export default function UserPayments(props) {
                   <strong>Clase(s): </strong>
                   {usersPayment.R_classes_price_payment_period.R_classes_price.R_classes_price_details.map(
                     (classDetail, index) => (
-                      <span key={index}>{`${classDetail.R_classes.name}${
+                      <span key={index}>{`${classDetail.R_classes.name} (${
+                        classDetail.R_classes.R_users_data.first_name
+                      } ${classDetail.R_classes.R_users_data.last_name})${
                         usersPayment.R_classes_price_payment_period
                           .R_classes_price.R_classes_price_details.length !==
                         index + 1
@@ -462,7 +464,10 @@ export default function UserPayments(props) {
     ) : (
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="h6" style={{ textAlign: "center", marginTop: "15px" }}>
+          <Typography
+            variant="h6"
+            style={{ textAlign: "center", marginTop: "15px" }}
+          >
             No hay pagos aún
           </Typography>
         </Grid>
@@ -475,14 +480,14 @@ export default function UserPayments(props) {
       ...snackbarState,
       openSnackBar: false,
       snackbarText: "",
-      snackbarColor: ""
+      snackbarColor: "",
     });
   };
 
-  const handleDateChange = date => {
+  const handleDateChange = (date) => {
     setUserPaymentState({
       ...userPaymentState,
-      payment_end: date.toLocaleDateString("en-US")
+      payment_end: date.toLocaleDateString("en-US"),
     });
   };
 
@@ -526,13 +531,13 @@ export default function UserPayments(props) {
                 label="% de descuento"
                 margin="normal"
                 inputProps={{
-                  maxLength: 3
+                  maxLength: 3,
                 }}
                 value={userPaymentState.discount_percent}
-                onKeyPress={e => {
+                onKeyPress={(e) => {
                   keyValidation(e, 2);
                 }}
-                onChange={e => {
+                onChange={(e) => {
                   pasteValidation(e, 2);
                   if (parseInt(e.target.value) > 100) {
                     e.target.value = 100;
@@ -542,7 +547,7 @@ export default function UserPayments(props) {
                   setUserPaymentState({
                     ...userPaymentState,
                     discount_percent: e.target.value,
-                    total: total
+                    total: total,
                   });
                 }}
               />
@@ -555,10 +560,10 @@ export default function UserPayments(props) {
                 label="Total"
                 margin="normal"
                 inputProps={{
-                  maxLength: 50
+                  maxLength: 50,
                 }}
                 value={userPaymentState.total}
-                onKeyPress={e => {
+                onKeyPress={(e) => {
                   keyValidation(e, 5);
                 }}
               />
@@ -568,17 +573,17 @@ export default function UserPayments(props) {
                 className={classes.textFields}
                 select
                 SelectProps={{
-                  native: true
+                  native: true,
                 }}
                 required
                 id="tipo_pago"
                 label="Tipo de pago"
                 margin="normal"
                 value={userPaymentState.payment_type}
-                onChange={e => {
+                onChange={(e) => {
                   setUserPaymentState({
                     ...userPaymentState,
-                    payment_type: e.target.value
+                    payment_type: e.target.value,
                   });
                 }}
               >
@@ -597,7 +602,7 @@ export default function UserPayments(props) {
                   label="Fecha de pago"
                   value={userPaymentState.payment_start}
                   KeyboardButtonProps={{
-                    "aria-label": "change date"
+                    "aria-label": "change date",
                   }}
                 />
               </MuiPickersUtilsProvider>
@@ -612,10 +617,10 @@ export default function UserPayments(props) {
                   label="Próximo pago"
                   value={userPaymentState.payment_end}
                   KeyboardButtonProps={{
-                    "aria-label": "change date"
+                    "aria-label": "change date",
                   }}
                   onChange={handleDateChange}
-                  onKeyDown={e => {
+                  onKeyDown={(e) => {
                     e.preventDefault();
                   }}
                 />
@@ -684,7 +689,7 @@ export default function UserPayments(props) {
         onClose={handleCloseSnackbar}
         ContentProps={{
           "aria-describedby": "message-id",
-          style: { background: snackbarColor }
+          style: { background: snackbarColor },
         }}
         message={<span id="message-id">{snackbarText}</span>}
       />

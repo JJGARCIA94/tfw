@@ -294,7 +294,7 @@ export default function Lessons(props) {
                 </Tooltip>
               </Typography>
               <Typography variant="subtitle1" className={classes.cardContent}>
-                <strong>Description: </strong>
+                <strong>Descripción: </strong>
                 {lesson.description}
               </Typography>
             </CardContent>

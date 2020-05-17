@@ -132,7 +132,7 @@ export const GET_USER = gql`
 
 export const GET_USER_TYPES = gql`
   subscription get_user_types {
-    users_type(where: { status: { _eq: 1 }}) {
+    users_type(where: { status: { _eq: 1 } }) {
       id
       name
     }
@@ -298,6 +298,10 @@ export const GET_CLASSES_PRICE_BY_STATUS = gql`
         updated_at
         R_classes {
           name
+          R_users_data {
+            first_name
+            last_name
+          }
         }
       }
       R_classes_price_payment_periods(where: { status: { _eq: 1 } }) {
@@ -556,6 +560,10 @@ export const GET_CLASSES_PRICE = gql`
         R_classes {
           name
           status
+          R_users_data {
+            first_name
+            last_name
+          }
         }
       }
       R_classes_price_payment_periods(where: { status: { _eq: 1 } }) {
@@ -586,6 +594,10 @@ export const GET_CLASSES_ALL = gql`
     classes(where: { status: { _eq: 1 } }) {
       id
       name
+      R_users_data {
+        first_name
+        last_name
+      }
     }
   }
 `;
@@ -628,6 +640,10 @@ export const GET_CLASSES_NOT_IN_BY_CLASS_ID = gql`
     classes(where: { id: { _nin: $idClasses }, _and: { status: { _eq: 1 } } }) {
       id
       name
+      R_users_data {
+        first_name
+        last_name
+      }
     }
   }
 `;
@@ -832,6 +848,10 @@ export const GET_USER_PAYMENTS_BY_USER_ID = gql`
             classes_id
             R_classes {
               name
+              R_users_data {
+                first_name
+                last_name
+              }
             }
           }
         }
